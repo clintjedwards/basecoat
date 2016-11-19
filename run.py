@@ -4,4 +4,4 @@ from app import app
 
 
 if __name__ == '__main__':
-    app.run(port=app.config['WEB_PORT'], use_reloader=False)
+    app.run(port=80, use_reloader=False)

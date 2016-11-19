@@ -1,6 +1,26 @@
+import datetime
+
 from app import db
 
-class Formula(db.Model):
-    __tablename__ = "Formula"
+class Formulas(db.Model):
+    __tablename__ = "Formulas"
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.Binary)
+    color_name = db.Column(db.String(64))
+    color_number = db.Column(db.String(64))
+    customer_name = db.Column(db.String(64))
+    created_date = db.Column(db.Date, default=datetime.datetime.utcnow)
+    last_modified = db.Column(db.Date, onupdate=datetime.datetime.utcnow)
+
+class Colorants(db.Model):
+    __tablename__ = "Colorants"
+    id = db.Column(db.Integer, primary_key=True)
+    formula_id = db.Column(db.Integer, db.ForeignKey("Formulas.id"), nullable=False)
+    colorant_name = db.Column(db.String(64))
+    amount = db.Column(db.Integer)
+
+class Bases(db.Model):
+    __tablename__ = "Bases"
+    id = db.Column(db.Integer, primary_key=True)
+    formula_id = db.Column(db.Integer, db.ForeignKey("Formulas.id"), nullable=False)
+    base_name = db.Column(db.String(64))
+    product_name = db.Column(db.String(64))

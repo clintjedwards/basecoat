@@ -13,6 +13,5 @@ class Formula(object):
         return str(self.__dict__)
 
 
-
 exampleform = Formula()
 print exampleform

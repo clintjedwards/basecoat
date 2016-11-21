@@ -6,6 +6,8 @@ Rename this file to config.py before use
 #Flask
 DEBUG = True
 APPLICATION_DIRECTORY = "/Users/autoturret/Documents/basecoat"
+SECRET_KEY = "longrandomstringhere"
+
 
 #Database
 SQLALCHEMY_DATABASE_URI = 'sqlite:////' +  APPLICATION_DIRECTORY + '/database/basecoat.db'

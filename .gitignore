@@ -3,9 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# virtualenv
+#VirtualEnv
 .venv/
 venv/
 ENV/
 
-config/main.py
+#Configuration files
+config/config.py

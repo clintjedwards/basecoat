@@ -1,7 +1,9 @@
-"""empty message
+"""Initial Migration
+
+Create the initial database
 
 Revision ID: 38698b33e615
-Revises: 
+Revises:
 Create Date: 2016-11-21 02:20:29.958905
 
 """

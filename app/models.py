@@ -10,6 +10,8 @@ class Formula(db.Model):
     color_name = db.Column(db.String(64))
     color_number = db.Column(db.String(64))
     customer_name = db.Column(db.String(64))
+    summary = db.Column(db.String(64))
+    notes = db.Column(db.Text())
     created_date = db.Column(db.Date, default=datetime.datetime.utcnow)
     last_modified = db.Column(db.Date, onupdate=datetime.datetime.utcnow)
 

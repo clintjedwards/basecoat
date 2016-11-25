@@ -10,3 +10,5 @@ ENV/
 
 #Configuration files
 config/config.py
+
+*.db

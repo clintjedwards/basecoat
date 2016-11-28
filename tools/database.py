@@ -7,7 +7,9 @@ def populate_db():
 
     dev_formula = models.Formula(color_name='flaky magenta',
                                  color_number='FM-4563',
-                                 customer_name='Edwards Inc.')
+                                 customer_name='Edwards Inc.',
+                                 summary='A Flaky summer color with a tinge of orange',
+                                 notes='The Red 52 is broken use the Red 51')
 
     dev_colorant = models.Colorant(formula_id=1,
                                    colorant_name='sunset orange',
@@ -20,16 +22,20 @@ def populate_db():
     try:
         db.session.add_all([dev_formula, dev_colorant, dev_base])
         db.session.commit()
+        print 'Populated database'
     except:
         db.session.rollback()
         raise
+
 
 
 @MigrateCommand.command
 def empty_db():
     """Clears all information from database"""
     meta = db.metadata
+
     for table in reversed(meta.sorted_tables):
         print 'Cleared table: {}'.format(table)
         db.session.execute(table.delete())
+
     db.session.commit()

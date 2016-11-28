@@ -15,6 +15,18 @@ class Formula(db.Model):
     created_date = db.Column(db.Date, default=datetime.datetime.utcnow)
     last_modified = db.Column(db.Date, onupdate=datetime.datetime.utcnow)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'color_name': self.color_name,
+            'color_number': self.color_number,
+            'customer_name': self.customer_name,
+            'summary': self.summary,
+            'notes': self.notes,
+            'created_date': self.created_date,
+            'last_modified': self.last_modified,
+        }
+
 
 class Colorant(db.Model):
     __tablename__ = "Colorants"

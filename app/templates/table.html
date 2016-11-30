@@ -1,0 +1,19 @@
+<table class="table table-hover">
+    <tbody>
+        {% for formula in formula_list -%}
+        <tr class="">
+            <td>
+                <div class="">
+                    <h4 class="">{{formula.color_name}}: <span class="text-muted">{{formula.color_number}}</span></h4>
+                    <p class="">{{formula.summary}}</p>
+                </div>
+            </td>
+            <td>
+                <div class="">
+                    <button class="btn btn-default btn-info" type="submit">Edit</button>
+                </div>
+            </td>
+        </tr>
+        {%- endfor %}
+    </tbody>
+</table>

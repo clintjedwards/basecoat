@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href= "{{ url_for('static',filename='css/swagcity.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/swagcity.css') }}">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
@@ -14,8 +14,9 @@
 <body>
     <div class="container">
         <div class="page-header text-center">
+            <img class="icon" src="{{ url_for('static',filename='images/paintbrush.svg') }}" />
             <h1>BaseCoat: Formula Search <br />
-                <small>An application to help you find the correct forumla. No more index cards.</small>
+                <small>An application to help you find the correct formula. No more index cards.</small>
             </h1>
         </div>
     </div>
@@ -31,36 +32,8 @@
     </div>
     <br /><br />
     <div class="containter">
-        <table class="table table-hover">
-            <tbody>
-                <tr>
-            		<td>
-                        <div class="">
-                            <h4 class="">Color Name: <span class="text-muted">Color Number</span></h4>
-                            <p class="">Lorem ipsum dolor sit amet, eget tristique, id metus, tortor a sit commodo, tincidunt integer metus velit in. </p>
-            			</div>
-            		</td>
-                    <td>
-                        <div class="">
-                            <button class="btn btn-default btn-info" type="submit">Edit</button>
-            			</div>
-            		</td>
-            	</tr>
-                <tr>
-            		<td>
-                        <div class="">
-                            <h4 class="">Color Name: <span class="text-muted">Color Number</span></h4>
-                            <p class="">Lorem ipsum dolor sit amet, eget tristique. </p>
-            			</div>
-                        <td>
-                            <div class="">
-                                <button class="btn btn-default btn-info" type="submit">Edit</button>
-                			</div>
-                		</td>
-            		</td>
-            	</tr>
-            </tbody>
-        </table>
+        <!-- generate table -->
+        {% include "table.html" %}
     </div>
 </body>
 </html>

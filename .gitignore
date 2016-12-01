@@ -11,4 +11,8 @@ ENV/
 #Configuration files
 config/config.py
 
+#Database files
 *.db
+
+#Mac files
+.DS_Store

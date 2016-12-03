@@ -10,8 +10,16 @@
 //Clicking the plus symbol should open up a modal allowing you to input a new formula
 
 
+function filterTable(search_string){
+    console.log(search_string);
+}
+
 
 $( document ).ready(function() {
 
+    //Wait for user input on the search bar and then filter table
+    $('#search_bar').bindWithDelay("keyup", function() {
+        filterTable($(this).val());
+    }, 625);
 
 });

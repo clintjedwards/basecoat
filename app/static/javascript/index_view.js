@@ -1,4 +1,3 @@
-//As user types we need to fuzzy search for all formulas that match
 
 //When the edit button is clicked we need to open a modal with all the information
 //of the row clicked
@@ -11,6 +10,16 @@
 
 
 function filterTable(search_string){
+
+    // Overwrite contain selector so we can search case insensitively
+    jQuery.expr[':'].contains = function(a, i, m) {
+     return jQuery(a).text().toUpperCase()
+         .indexOf(m[3].toUpperCase()) >= 0;
+    };
+
+    $(".formula").hide();
+    $(".formula:contains('" + search_string + "')").show();
+
     console.log(search_string);
 }
 

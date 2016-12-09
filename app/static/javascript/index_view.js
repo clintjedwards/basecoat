@@ -13,8 +13,7 @@ function filterTable(search_string){
 
     // Overwrite contain selector so we can search case insensitively
     jQuery.expr[':'].contains = function(a, i, m) {
-     return jQuery(a).text().toUpperCase()
-         .indexOf(m[3].toUpperCase()) >= 0;
+     return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
     };
 
     $(".formula").hide();

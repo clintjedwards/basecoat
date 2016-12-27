@@ -1,55 +1,62 @@
 from flask_migrate import MigrateCommand
+from elizabeth import Text, Business
 from app import db, models
+import random
+
+text = Text('en')
+business = Business('en')
 
 @MigrateCommand.command
-def populate_db():
+def populate_db(number_of_entries):
     "Populates database with fake data. Useful for developement"
 
-    dev_formula1 = models.Formula(color_name='Soft Red',
-                                  color_number='SR-EC644B',
-                                  customer_name='Edwards Inc.',
-                                  summary='Etiam iaculis nulla ac ex euismod tempor. Sed suscipit lorem id urna porttitor ullamcorper.',
-                                  notes='In egestas magna eu turpis condimentum venenatis.')
-    dev_formula2 = models.Formula(color_name='Ripe Lemon',
-                                  color_number='RL-F7CA18',
-                                  customer_name='Edwards Inc.',
-                                  summary='Curabitur facilisis diam a pharetra scelerisque. In quam mi, dapibus at ligula et, blandit ultricies dolor.',
-                                  notes='Aliquam eget urna euismod, consectetur tellus et, auctor metus.')
-    dev_formula3 = models.Formula(color_name='Light Wisteria',
-                                  color_number='LW-BE90D4',
-                                  customer_name='Edwards Inc.',
-                                  summary='',
-                                  notes='')
-    dev_formula4 = models.Formula(color_name='Testcolorlongname',
-                                  color_number='TC-BE90D4-BE90D4-BE90D4',
-                                  customer_name='Edwards Inc.',
-                                  summary='Curabitur facilisis diam a pharetra scelerisque. In quam mi, dapibus at ligula et, blandit ultricies dolor.' +
-                                          'Curabitur facilisis diam a pharetra scelerisque. In quam mi, dapibus at ligula et, blandit ultricies dolor.' +
-                                          'Curabitur facilisis diam a pharetra scelerisque. In quam mi, dapibus at ligula et, blandit ultricies dolor.',
-                                  notes='')
+    number_of_entries = int(number_of_entries)
 
-    dev_formula5 = models.Formula(color_name='Tcs',
-                                  color_number='TC',
-                                  customer_name='Edwards Inc.',
-                                  summary='',
-                                  notes='')
+    for entry in range(0, number_of_entries):
+        dev_formula = models.Formula(color_name=text.color() + " " + text.color(),
+                                     color_number=text.hex_color(),
+                                     customer_name=business.company(),
+                                     summary=text.sentence(),
+                                     notes=text.text(quantity=5))
 
-    dev_colorant = models.Colorant(formula_id=1,
-                                   colorant_name='sunset orange',
-                                   amount='3')
+        try:
+            db.session.add_all([dev_formula])
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
 
-    dev_base = models.Base(formula_id=1,
-                           base_name='simple white',
-                           product_name='benjamin moore & co')
+    print('Populated formulas')
 
-    try:
-        db.session.add_all([dev_formula1, dev_formula2, dev_formula3, dev_formula4, dev_formula5, dev_colorant, dev_base])
-        db.session.commit()
-        print 'Populated database'
-    except:
-        db.session.rollback()
-        raise
+    for entry in range(0, number_of_entries):
 
+        dev_colorant = models.Colorant(formula_id=random.randint(1, number_of_entries),
+                                       colorant_name=text.color() + " " + text.color(),
+                                       amount=random.randint(1, 10))
+
+        try:
+            db.session.add_all([dev_colorant])
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+
+    print('Populated colorants')
+
+    for entry in range(0, number_of_entries):
+
+        dev_base = models.Base(formula_id=random.randint(1, number_of_entries),
+                               base_name=text.color() + " " + text.color(),
+                               product_name=business.company())
+
+        try:
+            db.session.add_all([dev_base])
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+
+    print('Populated bases')
 
 
 @MigrateCommand.command
@@ -58,7 +65,7 @@ def empty_db():
     meta = db.metadata
 
     for table in reversed(meta.sorted_tables):
-        print 'Cleared table: {}'.format(table)
+        print('Cleared table: {}'.format(table))
         db.session.execute(table.delete())
 
     db.session.commit()

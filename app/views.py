@@ -1,5 +1,5 @@
 from flask import render_template
-import basecoat.db_utils as db
+from app.basecoat import db_utils as db
 
 from app import app
 

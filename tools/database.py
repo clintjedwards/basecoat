@@ -1,10 +1,9 @@
 from flask_migrate import MigrateCommand
-from elizabeth import Text, Business
+from faker import Faker
 from app import db, models
 import random
 
-text = Text('en')
-business = Business('en')
+fake = Faker()
 
 @MigrateCommand.command
 def populate_db(number_of_entries):
@@ -13,11 +12,11 @@ def populate_db(number_of_entries):
     number_of_entries = int(number_of_entries)
 
     for entry in range(0, number_of_entries):
-        dev_formula = models.Formula(color_name=text.color() + " " + text.color(),
-                                     color_number=text.hex_color(),
-                                     customer_name=business.company(),
-                                     summary=text.sentence(),
-                                     notes=text.text(quantity=5))
+        dev_formula = models.Formula(color_name=fake.color_name() + " " + fake.safe_color_name(),
+                                     color_number=fake.hex_color(),
+                                     customer_name=fake.company(),
+                                     summary=fake.text(max_nb_chars=random.randint(50, 200)),
+                                     notes=fake.paragraph(nb_sentences=3, variable_nb_sentences=True))
 
         try:
             db.session.add_all([dev_formula])
@@ -31,7 +30,7 @@ def populate_db(number_of_entries):
     for entry in range(0, number_of_entries):
 
         dev_colorant = models.Colorant(formula_id=random.randint(1, number_of_entries),
-                                       colorant_name=text.color() + " " + text.color(),
+                                       colorant_name=fake.color_name() + " " + fake.safe_color_name(),
                                        amount=random.randint(1, 10))
 
         try:
@@ -46,8 +45,8 @@ def populate_db(number_of_entries):
     for entry in range(0, number_of_entries):
 
         dev_base = models.Base(formula_id=random.randint(1, number_of_entries),
-                               base_name=text.color() + " " + text.color(),
-                               product_name=business.company())
+                               base_name=fake.color_name() + " " + fake.safe_color_name(),
+                               product_name=fake.company())
 
         try:
             db.session.add_all([dev_base])

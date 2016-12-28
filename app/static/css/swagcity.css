@@ -5,3 +5,7 @@
 .formula{
     cursor: pointer;
 }
+
+.btn:focus {
+    outline: none;
+}

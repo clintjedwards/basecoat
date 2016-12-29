@@ -23,11 +23,22 @@ function filterTable(search_string){
 }
 
 
+function populateModal(formulaID){
+    $("#view_modal").find('.modal-title').text('Formula UID: ' + formulaID);
+    $("#view_modal").find('.modal-body').load("/formula/" + formulaID);
+}
+
+
 $( document ).ready(function() {
 
     //Wait for user input on the search bar and then filter table
     $('#search_bar').bindWithDelay("keyup", function() {
         filterTable($(this).val());
     }, 625);
+
+    //Have modal load relevant information on click
+    $('.formula').click(function() {
+        populateModal($(this).attr('data-formula-id'));
+    });
 
 });

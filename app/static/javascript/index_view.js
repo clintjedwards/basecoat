@@ -23,9 +23,22 @@ function filterTable(search_string){
 }
 
 
-function populateModal(formulaID){
+function populateViewFormulaModal(formulaID){
     $("#view_modal").find('.modal-title').text('Formula UID: ' + formulaID);
     $("#view_modal").find('.modal-body').load("/formula/" + formulaID);
+}
+
+
+function populateAddFormulaModal(formulaID){
+    $("#add_modal").find('.modal-title').text('Add New Formula');
+    $("#add_modal").find('.modal-body').load("/formula/add");
+}
+
+
+function turnTextIntoInputField(inputId) {
+    //We need to iterate through list of elements turning each field into
+    // an element in a form. We also need to swap the edit button to a submit button
+    console.log('pass');
 }
 
 
@@ -38,7 +51,12 @@ $( document ).ready(function() {
 
     //Have modal load relevant information on click
     $('.formula').click(function() {
-        populateModal($(this).attr('data-formula-id'));
+        populateViewFormulaModal($(this).attr('data-formula-id'));
+    });
+
+    //Populate add modal
+    $('i.glyphicon-plus').click(function() {
+        populateAddFormulaModal();
     });
 
 });

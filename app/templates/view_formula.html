@@ -4,6 +4,11 @@
 <br />
 
 <h4 class="text-muted">Forumla Info</h4>
+
+{% for base in base_list -%}
+<p> <b>Base:</b> {{base.product_name}} {{base.base_name}} </p>
+{%- endfor %}
+
 <p> <b>Colorants:</b> </p>
 <ul class="list-group">
   {% for colorant in colorant_list -%}
@@ -14,16 +19,13 @@
   {%- endfor %}
 </ul>
 
-{% for base in base_list -%}
-<p> <b>Base:</b> {{base.product_name}} {{base.base_name}} </p>
-{%- endfor %}
-
 <hr />
+
 <h4 class="text-muted">Additional Info</h4>
+
 <p> <b>Customer Name:</b> {{formula.customer_name}}</p>
 <p> <b>Summary:</b> {{formula.summary}}</p>
 <p> <b>Notes:</b> {{formula.notes}}</p>
-
 
 <hr />
 <p class="text-right"> <b>Created Date:</b> {{formula.created_date}}</p>

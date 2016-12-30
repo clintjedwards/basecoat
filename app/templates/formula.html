@@ -1,2 +1,30 @@
-<h4>{{formula.color_name}}: <span class="text-muted">{{formula.color_number}}</span></h4>
-<p>{{formula.summary}}</p>
+<h1 class="text-center">{{formula.color_name}}</h1>
+<h2 class="text-muted text-center">{{formula.color_number}}</h2>
+
+<br />
+
+<h4 class="text-muted">Forumla Info</h4>
+<p> <b>Colorants:</b> </p>
+<ul class="list-group">
+  {% for colorant in colorant_list -%}
+  <li class="list-group-item">
+    <span class="badge">{{colorant.amount}} gal.</span>
+    {{colorant.colorant_name}}
+  </li>
+  {%- endfor %}
+</ul>
+
+{% for base in base_list -%}
+<p> <b>Base:</b> {{base.product_name}} {{base.base_name}} </p>
+{%- endfor %}
+
+<hr />
+<h4 class="text-muted">Additional Info</h4>
+<p> <b>Customer Name:</b> {{formula.customer_name}}</p>
+<p> <b>Summary:</b> {{formula.summary}}</p>
+<p> <b>Notes:</b> {{formula.notes}}</p>
+
+
+<hr />
+<p class="text-right"> <b>Created Date:</b> {{formula.created_date}}</p>
+<p class="text-right"> <b>Last Modified:</b> {{formula.last_modified}}</p>

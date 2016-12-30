@@ -62,7 +62,7 @@ def get_object_from_table(table_model_class, key_name, key_value):
 
     table_model = getattr(models, table_model_class)
     key = getattr(table_model, key_name)
-    table_info = table_model.query.filter(key == key_value).first()
+    table_info = table_model.query.filter(key == key_value).all()
 
     return table_info
 

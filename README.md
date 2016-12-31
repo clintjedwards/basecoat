@@ -2,12 +2,12 @@
 
 Basecoat is a CRUD formula indexing tool meant to record formulas for certain colors and store them for future reference.
 
-![Basecoat](http://i.imgur.com/HCaE6dY.png)
+![Basecoat](http://i.imgur.com/HCaE6dY.png) ![Basecoat Formula](http://i.imgur.com/4HjYcdv.png)
 
 ### Prerequisites
 
 * Python 3
-* Ubuntu/Mac
+* Ubuntu/OSX
 
 ## Getting Started
 

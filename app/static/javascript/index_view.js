@@ -29,7 +29,7 @@ function populateViewFormulaModal(formulaID){
 }
 
 
-function populateAddFormulaModal(formulaID){
+function populateAddFormulaModal(){
     $("#add_modal").find('.modal-title').text('Add New Formula');
     $("#add_modal").find('.modal-body').load("/formula/add");
 }

@@ -13,7 +13,7 @@ class Formula(db.Model):
     summary = db.Column(db.String(64))
     notes = db.Column(db.Text())
     created_date = db.Column(db.Date, default=datetime.datetime.utcnow)
-    last_modified = db.Column(db.Date, onupdate=datetime.datetime.utcnow)
+    last_modified = db.Column(db.Date, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
 
 class Colorant(db.Model):

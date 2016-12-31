@@ -44,6 +44,9 @@ function turnTextIntoInputField(inputId) {
 
 $( document ).ready(function() {
 
+    //Activate all tooltips
+    $(function () {$('[data-toggle="tooltip"]').tooltip();});
+
     //Wait for user input on the search bar and then filter table
     $('#search_bar').bindWithDelay("keyup", function() {
         filterTable($(this).val());
@@ -55,7 +58,7 @@ $( document ).ready(function() {
     });
 
     //Populate add modal
-    $('i.glyphicon-plus').click(function() {
+    $('#add_button').click(function() {
         populateAddFormulaModal();
     });
 

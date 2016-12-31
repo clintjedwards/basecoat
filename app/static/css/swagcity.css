@@ -9,3 +9,39 @@
 .btn:focus {
     outline: none;
 }
+
+a.deco-none {
+    text-decoration: none;
+}
+
+input.deco-none {
+    border: none;
+    outline: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+input.deco-none:focus {
+    border: none;
+    outline: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+#InputFormulaName{
+    font-size: 36px;
+}
+
+#InputFormulaNumber{
+    font-size: 24px;
+}
+
+#InputFormulaName:focus{
+    font-size: 36px;
+}
+
+#InputFormulaNumber:focus{
+    font-size: 24px;
+}

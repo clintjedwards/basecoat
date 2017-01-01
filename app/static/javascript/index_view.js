@@ -35,17 +35,17 @@ function populateAddFormulaModal(){
 }
 
 
-function turnTextIntoInputField(inputId) {
-    //We need to iterate through list of elements turning each field into
-    // an element in a form. We also need to swap the edit button to a submit button
-    console.log('pass');
+function addExtraBaseForm(){
+    $('.base_list .form-inline:first-child').clone().appendTo('.base_list');
+}
+
+
+function addExtraColorantForm(){
+    $('.colorant_list .form-inline:first-child').clone().appendTo('.colorant_list');
 }
 
 
 $( document ).ready(function() {
-
-    //Activate all tooltips
-    $(function () {$('[data-toggle="tooltip"]').tooltip();});
 
     //Wait for user input on the search bar and then filter table
     $('#search_bar').bindWithDelay("keyup", function() {
@@ -60,6 +60,20 @@ $( document ).ready(function() {
     //Populate add modal
     $('#add_button').click(function() {
         populateAddFormulaModal();
+    });
+
+    //Click to add another base edit or add formula page
+    $('#add_base').click(function(event) {
+        addExtraBaseForm();
+        event.stopPropagation();
+        event.preventDefault();
+    });
+
+    //Click to add another colorant to edit or add formula page
+    $('#add_colorant').click(function(event) {
+        addExtraColorantForm();
+        event.stopPropagation();
+        event.preventDefault();
     });
 
 });

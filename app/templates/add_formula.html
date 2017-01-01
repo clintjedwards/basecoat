@@ -19,27 +19,31 @@
     <h4 class="text-muted">Formula Info</h4>
     <br />
 
-    <h5><a class="deco-none text-muted" href="#">Add Base</a></h5>
-    <div class="form-inline">
-        <div class="form-group">
-            <label for="InputBase1">Base:&nbsp;</label>
-            <input type="text" class="form-control" id="InputBase1" placeholder="Base Name" />
-        </div>
-        <div class="form-group">
-            <label class="sr-only" for="InputProductName1">Base Product Name</label>
-            <input type="text" class="form-control" id="InputProductName1" placeholder="Base Product Name" />
+    <h5><a id="add_base" class="deco-none text-muted" href="#">Add Base</a></h5>
+    <div class="base_list">
+        <div class="form-inline">
+            <div class="form-group">
+                <label for="InputBase1">Base:&nbsp;</label>
+                <input type="text" class="form-control" id="InputBase1" placeholder="Base Name" />
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="InputProductName1">Base Product Name</label>
+                <input type="text" class="form-control" id="InputProductName1" placeholder="Base Product Name" />
+            </div>
         </div>
     </div>
     <br />
-    <h5><a class="deco-none text-muted" href="#">Add Colorant</a></h5>
-    <div class="form-inline">
-        <div class="form-group">
-            <label for="InputColorant1">Colorant:&nbsp;</label>
-            <input type="text" class="form-control" id="InputColorant1" placeholder="Colorant Name" />
-        </div>
-        <div class="form-group">
-            <label class="sr-only" for="InputAmount1">Amount</label>
-            <input type="number" class="form-control" id="InputAmount1" placeholder="Amount (in gallons)" />
+    <h5><a id="add_colorant" class="deco-none text-muted" href="#">Add Colorant</a></h5>
+    <div class="colorant_list">
+        <div class="form-inline">
+            <div class="form-group">
+                <label for="InputColorant1">Colorant:&nbsp;</label>
+                <input type="text" class="form-control" id="InputColorant1" placeholder="Colorant Name" />
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="InputAmount1">Amount</label>
+                <input type="number" class="form-control" id="InputAmount1" placeholder="Amount (in gallons)" />
+            </div>
         </div>
     </div>
 
@@ -59,3 +63,5 @@
         <textarea id="InputNotes" class="form-control" rows="3" placeholder="ex. Don't create this color without contacting Steve first. Becareful when pouring colorant on second machine it has a leak."></textarea>
     </div>
 </form>
+
+<script src="{{ url_for('static',filename='javascript/index_view.js') }}"></script>

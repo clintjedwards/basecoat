@@ -19,11 +19,11 @@ function filterTable(search_string){
     $(".formula").hide();
     $(".formula:contains('" + search_string + "')").show();
 
-    console.log(search_string);
 }
 
 
 function populateViewFormulaModal(formulaID){
+    $("#view_modal").find('.modal-title').attr("data-formula-id", formulaID);
     $("#view_modal").find('.modal-title').text('Formula UID: ' + formulaID);
     $("#view_modal").find('.modal-body').load("/formula/" + formulaID);
 }
@@ -32,16 +32,6 @@ function populateViewFormulaModal(formulaID){
 function populateAddFormulaModal(){
     $("#add_modal").find('.modal-title').text('Add New Formula');
     $("#add_modal").find('.modal-body').load("/formula/add");
-}
-
-
-function addExtraBaseForm(){
-    $('.base_list .form-inline:first-child').clone().appendTo('.base_list');
-}
-
-
-function addExtraColorantForm(){
-    $('.colorant_list .form-inline:first-child').clone().appendTo('.colorant_list');
 }
 
 
@@ -62,16 +52,10 @@ $( document ).ready(function() {
         populateAddFormulaModal();
     });
 
-    //Click to add another base edit or add formula page
-    $('#add_base').click(function(event) {
-        addExtraBaseForm();
-        event.stopPropagation();
-        event.preventDefault();
-    });
-
-    //Click to add another colorant to edit or add formula page
-    $('#add_colorant').click(function(event) {
-        addExtraColorantForm();
+    //Edit button functionality
+    $('#edit_button').off().click(function(event) {
+        formulaID = $("#view_modal").find('.modal-title').attr("data-formula-id");
+        $("#view_modal").find('.modal-body').load("/formula/edit/" + formulaID);
         event.stopPropagation();
         event.preventDefault();
     });

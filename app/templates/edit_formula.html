@@ -19,7 +19,7 @@
     <h4 class="text-muted">Formula Info</h4>
     <br />
 
-    <h5><a id="add_base" class="deco-none text-muted" href="#">Add Base</a></h5>
+    <h5><a id="add_base_edit_form" class="deco-none text-muted" href="#">Add Base</a></h5>
     <div class="base_list">
         {% if not base_list -%}
         <div class="form-inline">
@@ -48,7 +48,7 @@
         {%- endif %}
     </div>
     <br />
-    <h5><a id="add_colorant" class="deco-none text-muted" href="#">Add Colorant</a></h5>
+    <h5><a id="add_colorant_edit_form" class="deco-none text-muted" href="#">Add Colorant</a></h5>
     <div class="colorant_list">
         {% if not colorant_list -%}
         <div class="form-inline">
@@ -94,4 +94,4 @@
     </div>
 </form>
 
-<script src="{{ url_for('static',filename='javascript/modal_view.js') }}"></script>
+<script src="{{ url_for('static',filename='javascript/edit_modal_view.js') }}"></script>

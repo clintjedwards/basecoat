@@ -13,14 +13,14 @@ function addExtraColorantForm(){
 
 $( document ).ready(function() {
     //Click to add another base edit or add formula page
-    $('#add_base').click(function(event) {
+    $('#add_base_add_form').click(function(event) {
         addExtraBaseForm(event);
         event.stopPropagation();
         event.preventDefault();
     });
 
     //Click to add another colorant to edit or add formula page
-    $('#add_colorant').click(function(event) {
+    $('#add_colorant_add_form').click(function(event) {
         addExtraColorantForm(event);
         event.stopPropagation();
         event.preventDefault();

@@ -99,9 +99,9 @@ python manage.py db upgrade
 
 ## Built With
 
-* [Flask](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Flask Script](https://maven.apache.org/) - Dependency Management
-* [Flask Migrate](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Flask](http://flask.pocoo.org/) - The web framework used
+* [Flask Script](https://flask-script.readthedocs.io/en/latest/) - Application management
+* [Flask Migrate](https://flask-migrate.readthedocs.io/en/latest/) - Database migration support/tools
 
 ## Authors
 

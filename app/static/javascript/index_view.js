@@ -53,11 +53,28 @@ $( document ).ready(function() {
     });
 
     //Edit button functionality
-    $('#edit_button').off().click(function(event) {
+    $('#view_edit_button').click(function() {
         formulaID = $("#view_modal").find('.modal-title').attr("data-formula-id");
         $("#view_modal").find('.modal-body').load("/formula/edit/" + formulaID);
-        event.stopPropagation();
-        event.preventDefault();
+
+        $('#view_edit_button').hide();
+        $('#view_save_button').show();
+    });
+
+    //Revert edit button swapout
+    $('#view_close_button').click(function(){
+        $('#view_edit_button').show();
+        $('#view_save_button').hide();
+    });
+
+    //Save button functionality
+    $('#view_save_button').click(function(){
+        console.log('We sent a post request here to edit a formula');
+    });
+
+    //Add formula functionality
+    $('#add_save_button').click(function(){
+        console.log('We sent a post request here to add a formula');
     });
 
 });

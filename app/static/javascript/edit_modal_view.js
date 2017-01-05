@@ -1,12 +1,12 @@
 
 function addExtraBaseForm(event){
-    base_list = $(event.target).parent().next('.base_list');
+    var base_list = $(event.target).parent().next('.base_list');
     base_list.find('.form-inline:first-child').clone().appendTo(base_list);
 }
 
 
 function addExtraColorantForm(){
-    colorant_list = $(event.target).parent().next('.colorant_list');
+    var colorant_list = $(event.target).parent().next('.colorant_list');
     colorant_list.find('.form-inline:first-child').clone().appendTo(colorant_list);
 }
 

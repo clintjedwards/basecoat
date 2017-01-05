@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request, jsonify
 from app.basecoat import db_utils as db
 
 from app import app
@@ -23,9 +23,15 @@ def get_formula(formula_id):
                            base_list=base_list)
 
 
-@app.route('/formula/add')
+@app.route('/formula/add', methods=['GET', 'POST'])
 def add_formula():
-    return render_template('add_formula.html')
+    if request.method == 'POST':
+        for thing in request.form:
+            print(thing + ": ")
+            print(request.form[thing])
+        return jsonify({'success':True}), 200
+    else:
+        return render_template('add_formula.html')
 
 
 @app.route('/formula/edit/<int:formula_id>')

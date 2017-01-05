@@ -74,7 +74,8 @@ $( document ).ready(function() {
 
     //Add formula functionality
     $('#add_save_button').click(function(){
-        console.log('We sent a post request here to add a formula');
+        console.log($("#add_form").serialize());
+        $.post("/formula/add", $("#add_form").serialize());
     });
 
 });

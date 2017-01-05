@@ -1,15 +1,15 @@
-<form>
+<form id="add_form" name="add_form">
     <div class="form-horizontal text-center">
         <div class="form-group-lg row">
             <label class="sr-only" for="InputFormulaName">Formula Name</label>
             <div class="col-sm-offset-2 col-sm-8">
-                <input type="text" class="form-control deco-none text-center" id="InputFormulaName" placeholder="Add Formula Name" />
+                <input type="text" class="form-control deco-none text-center" id="InputFormulaName" name="InputFormulaName" placeholder="Add Formula Name" />
             </div>
         </div>
         <div class="form-group-lg row">
             <label class="sr-only" for="InputFormulaNumber">Formula Color Number</label>
             <div class="col-sm-offset-3 col-sm-6">
-                <input type="text" class="form-control deco-none text-center" id="InputFormulaNumber" placeholder="Add Formula Color Number" />
+                <input type="text" class="form-control deco-none text-center" id="InputFormulaNumber" name="InputFormulaNumber" placeholder="Add Formula Color Number" />
             </div>
         </div>
     </div>
@@ -24,11 +24,11 @@
         <div class="form-inline">
             <div class="form-group">
                 <label for="InputBase1">Base:&nbsp;</label>
-                <input type="text" class="form-control" id="InputBase1" placeholder="Base Name" />
+                <input type="text" class="form-control" id="InputBase1" name="InputBase1" placeholder="Base Name" />
             </div>
             <div class="form-group">
                 <label class="sr-only" for="InputProductName1">Base Product Name</label>
-                <input type="text" class="form-control" id="InputProductName1" placeholder="Base Product Name" />
+                <input type="text" class="form-control" id="InputProductName1" name="InputProductName1" placeholder="Base Product Name" />
             </div>
         </div>
     </div>
@@ -38,11 +38,11 @@
         <div class="form-inline">
             <div class="form-group">
                 <label for="InputColorant1">Colorant:&nbsp;</label>
-                <input type="text" class="form-control" id="InputColorant1" placeholder="Colorant Name" />
+                <input type="text" class="form-control" id="InputColorant1" name="InputColorant1" placeholder="Colorant Name" />
             </div>
             <div class="form-group">
                 <label class="sr-only" for="InputAmount1">Amount</label>
-                <input type="number" class="form-control" id="InputAmount1" placeholder="Amount (in gallons)" />
+                <input type="number" class="form-control" id="InputAmount1" name="InputAmount1" placeholder="Amount (in gallons)" />
             </div>
         </div>
     </div>
@@ -52,15 +52,15 @@
     <h4 class="text-muted">Additional Info</h4>
     <div class="form-group">
         <label for="InputCustomer">Customer Name</label>
-        <input type="text" class="form-control" id="InputCustomer" placeholder="ex. Edwards Inc." />
+        <input type="text" class="form-control" id="InputCustomer" name="InputCustomer" placeholder="ex. Edwards Inc." />
     </div>
     <div class="form-group">
         <label for="InputSummary">Summary</label>
-        <input type="text" class="form-control" id="InputSummary" placeholder="ex. Also known as Van Dyke Gold" />
+        <input type="text" class="form-control" id="InputSummary" name="InputSummary" placeholder="ex. Also known as Van Dyke Gold" />
     </div>
     <div class="form-group">
         <label for="InputNotes">Notes</label>
-        <textarea id="InputNotes" class="form-control" rows="3" placeholder="ex. Don't create this color without contacting Steve first. Becareful when pouring colorant on second machine it has a leak."></textarea>
+        <textarea id="InputNotes" name="InputNotes" class="form-control" rows="3" placeholder="ex. Don't create this color without contacting Steve first. Becareful when pouring colorant on second machine it has a leak."></textarea>
     </div>
 </form>
 

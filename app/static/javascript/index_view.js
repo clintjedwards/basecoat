@@ -69,12 +69,11 @@ $( document ).ready(function() {
 
     //Save button functionality
     $('#view_save_button').click(function(){
-        console.log('We sent a post request here to edit a formula');
+        $.post("/formula/add", $("#edit_form").serialize());
     });
 
     //Add formula functionality
     $('#add_save_button').click(function(){
-        console.log($("#add_form").serialize());
         $.post("/formula/add", $("#add_form").serialize());
     });
 

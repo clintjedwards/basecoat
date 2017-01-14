@@ -21,6 +21,45 @@ function filterTable(search_string){
 
 }
 
+function convertFormToJSON(form){
+
+    var bases = $('.base_list .form-inline');
+    var colorants = $('.colorant_list .form-inline');
+
+    var base_dict = {};
+    var colorant_dict = {};
+
+    $.each(bases, function () {
+       base_name = $(this).find('input[id*="InputBase"]').val();
+       base_product_name = $(this).find('input[id*="InputProductName"]').val();
+
+       if (base_name){
+           base_dict[base_name] = base_product_name
+       };
+    });
+
+    $.each(colorants, function () {
+       colorant_name = $(this).find('input[id*="InputColorant"]').val();
+       colorant_amount = $(this).find('input[id*="InputAmount"]').val();
+
+       if (colorant_name){
+           colorant_dict[colorant_name] = colorant_amount
+       };
+    });
+
+    var form_data = {
+                        "formula_id": $('#InputFormulaID').val(),
+                        "formula_name": $('#InputFormulaName').val(),
+                        "formula_number": $('#InputFormulaNumber').val(),
+                        "base_list": base_dict,
+                        "colorant_list": colorant_dict,
+                        "customer": $('#InputCustomer').val(),
+                        "summary": $('#InputSummary').val(),
+                        "notes": $('#InputNotes').val(),
+                    };
+
+}
+
 
 function populateViewFormulaModal(formulaID){
     $("#view_modal").find('.modal-title').attr("data-formula-id", formulaID);
@@ -71,12 +110,14 @@ $( document ).ready(function() {
 
     //Save button functionality
     $('#view_save_button').click(function(){
-        $.post("/formula/add", $("#edit_form").serialize());
+        convertFormToJSON();
+        //$.post("/formula/add", $("#edit_form").serialize());
     });
 
     //Add formula functionality
     $('#add_save_button').click(function(){
-        $.post("/formula/add", $("#add_form").serialize());
+        convertFormToJSON();
+        //$.post("/formula/add", $("#add_form").serialize());
     });
 
 });

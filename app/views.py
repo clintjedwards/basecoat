@@ -101,6 +101,12 @@ def add_formula():
                                formula_id=new_formula.id,
                                product_name=base_data[base]['base_product_name'])
 
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise
+
         return jsonify({'success':True}), 200
     else:
         return render_template('add_formula.html')

@@ -7,8 +7,8 @@ from app import db
 class Formula(db.Model):
     __tablename__ = "Formulas"
     id = db.Column(db.Integer, primary_key=True)
-    color_name = db.Column(db.String(64))
-    color_number = db.Column(db.String(64))
+    formula_name = db.Column(db.String(64))
+    formula_number = db.Column(db.String(64))
     customer_name = db.Column(db.String(64))
     summary = db.Column(db.String(64))
     notes = db.Column(db.Text())

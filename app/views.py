@@ -1,7 +1,10 @@
+import json
+
 from flask import render_template, request, jsonify
 from app.basecoat import db_utils
 
 from app import app, db, models
+
 
 
 @app.route('/')
@@ -26,26 +29,77 @@ def get_formula(formula_id):
 @app.route('/formula/add', methods=['GET', 'POST'])
 def add_formula():
     if request.method == 'POST':
-        form_data = {key: value.strip() for key, value in request.form.items()}
-        if "InputFormulaID" in form_data:
-            for thing in form_data:
-                print(thing)
-                print(form_data[thing])
+        form_data = request.json
+        colorant_data = form_data.pop('colorant_list', None)
+        base_data = form_data.pop('base_list', None)
+
+        form_data = {key: value.strip() for key, value in form_data.items()}
+
+        if "formula_id" in form_data.keys():
+            db_utils.update_db("Formula", "id", form_data['formula_id'], **form_data)
+            for colorant in colorant_data:
+                colorant_dict = {
+                    'colorant_name': colorant,
+                    'formula_id': form_data['formula_id'],
+                    'amount': colorant_data[colorant]['colorant_amount'],
+                }
+
+                try:
+                    colorant_dict['id'] = colorant_data[colorant]['colorant_id']
+                except KeyError:
+                    pass
+
+                new_colorant = models.Colorant(**colorant_dict)
+
+                try:
+                    db.session.merge(new_colorant)
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+                    raise
+
+            for base in base_data:
+                base_dict = {
+                    'base_name': base,
+                    'formula_id': form_data['formula_id'],
+                    'product_name': base_data[base]['base_product_name'],
+                }
+
+                try:
+                    base_dict['id'] = base_data[base]['base_id']
+                except KeyError:
+                    pass
+
+                new_base = models.Base(**base_dict)
+
+                try:
+                    db.session.merge(new_base)
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+                    raise
+
         else:
-            new_formula = models.Formula(color_name=form_data['InputFormulaName'].title(),
-                                         color_number=form_data['InputFormulaNumber'].title(),
-                                         customer_name=form_data['InputCustomer'].title(),
-                                         summary=form_data['InputSummary'].capitalize(),
-                                         notes=form_data['InputNotes'].capitalize())
+            new_formula = models.Formula(formula_name=form_data['formula_name'].title(),
+                                         formula_number=form_data['formula_number'],
+                                         customer_name=form_data['customer_name'].title(),
+                                         summary=form_data['summary'],
+                                         notes=form_data['notes'])
             db.session.add(new_formula)
             db.session.flush()
 
-            print(new_formula.id)
-            try:
-                db.session.commit()
-            except:
-                db.session.rollback()
-                raise
+            for colorant in colorant_data:
+                db_utils.insert_into_db('Colorant',
+                               colorant_name=colorant,
+                               formula_id=new_formula.id,
+                               amount=colorant_data[colorant]['colorant_amount'])
+
+
+            for base in base_data:
+                db_utils.insert_into_db('Base',
+                               base_name=base,
+                               formula_id=new_formula.id,
+                               product_name=base_data[base]['base_product_name'])
 
         return jsonify({'success':True}), 200
     else:
@@ -61,20 +115,3 @@ def edit_formula(formula_id):
                            formula=formula,
                            colorant_list=colorant_list,
                            base_list=base_list)
-
-# dev_formula = models.Formula(color_name=fake.color_name() + " " + fake.safe_color_name(),
-#                              color_number=fake.hex_color(),
-#                                 customer_name=fake.company(),
-#                         summary=fake.text(max_nb_chars=random.randint(50, 200)),
-#                     notes=fake.paragraph(nb_sentences=3, variable_nb_sentences=True))
-#
-# try:
-#     db.session.add_all([dev_formula])
-#     db.session.commit()
-# #.strip()
-#.title()
-#    color_name = db.Column(db.String(64))
-#    color_number = db.Column(db.String(64))
-#    customer_name = db.Column(db.String(64))
-#    summary = db.Column(db.String(64))
-#    notes = db.Column(db.Text())

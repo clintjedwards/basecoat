@@ -23,40 +23,45 @@ function filterTable(search_string){
 
 function convertFormToJSON(form){
 
-    var bases = $('.base_list .form-inline');
-    var colorants = $('.colorant_list .form-inline');
+    var bases = $(form).find('.base_list .form-inline');
+    var colorants = $(form).find('.colorant_list .form-inline');
 
     var base_dict = {};
     var colorant_dict = {};
 
     $.each(bases, function () {
-       base_name = $(this).find('input[id*="InputBase"]').val();
-       base_product_name = $(this).find('input[id*="InputProductName"]').val();
+        base_id = $(this).find('input[name=InputBaseID]').val();
+        base_name = $(this).find('input[id*="InputBase"]').val();
+        base_product_name = $(this).find('input[id*="InputProductName"]').val();
 
        if (base_name){
-           base_dict[base_name] = base_product_name
+           base_dict[base_name] = {"base_id": base_id, "base_product_name": base_product_name}
        };
     });
 
     $.each(colorants, function () {
-       colorant_name = $(this).find('input[id*="InputColorant"]').val();
-       colorant_amount = $(this).find('input[id*="InputAmount"]').val();
+        colorant_id = $(this).find('input[name=InputColorantID]').val();
+        colorant_name = $(this).find('input[id*="InputColorant"]').val();
+        colorant_amount = $(this).find('input[id*="InputAmount"]').val();
 
-       if (colorant_name){
-           colorant_dict[colorant_name] = colorant_amount
-       };
+        if (colorant_name){
+            colorant_dict[colorant_name] = {"colorant_id": colorant_id, "colorant_amount": colorant_amount}
+        };
     });
 
+
     var form_data = {
-                        "formula_id": $('#InputFormulaID').val(),
-                        "formula_name": $('#InputFormulaName').val(),
-                        "formula_number": $('#InputFormulaNumber').val(),
+                        "formula_id": $(form).find('#InputFormulaID').val(),
+                        "formula_name": $(form).find('#InputFormulaName').val(),
+                        "formula_number": $(form).find('#InputFormulaNumber').val(),
                         "base_list": base_dict,
                         "colorant_list": colorant_dict,
-                        "customer": $('#InputCustomer').val(),
-                        "summary": $('#InputSummary').val(),
-                        "notes": $('#InputNotes').val(),
+                        "customer_name": $(form).find('#InputCustomer').val(),
+                        "summary": $(form).find('#InputSummary').val(),
+                        "notes": $(form).find('#InputNotes').val(),
                     };
+
+    return form_data
 
 }
 
@@ -110,14 +115,24 @@ $( document ).ready(function() {
 
     //Save button functionality
     $('#view_save_button').click(function(){
-        convertFormToJSON();
-        //$.post("/formula/add", $("#edit_form").serialize());
+        $.ajax({
+            type: 'POST',
+            url: '/formula/add',
+            data: JSON.stringify(convertFormToJSON($("#edit_form"))),
+            contentType: "application/json",
+            dataType: 'json'
+        });
     });
 
     //Add formula functionality
     $('#add_save_button').click(function(){
-        convertFormToJSON();
-        //$.post("/formula/add", $("#add_form").serialize());
+        $.ajax({
+            type: 'POST',
+            url: '/formula/add',
+            data: JSON.stringify(convertFormToJSON($("#add_form"))),
+            contentType: "application/json",
+            dataType: 'json'
+        });
     });
 
 });

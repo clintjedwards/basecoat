@@ -12,8 +12,8 @@ def populate_db(number_of_entries):
     number_of_entries = int(number_of_entries)
 
     for entry in range(0, number_of_entries):
-        dev_formula = models.Formula(color_name=fake.color_name() + " " + fake.safe_color_name(),
-                                     color_number=fake.hex_color(),
+        dev_formula = models.Formula(formula_name=fake.color_name() + " " + fake.safe_color_name(),
+                                     formula_number=fake.hex_color(),
                                      customer_name=fake.company(),
                                      summary=fake.text(max_nb_chars=random.randint(50, 200)),
                                      notes=fake.paragraph(nb_sentences=3, variable_nb_sentences=True))

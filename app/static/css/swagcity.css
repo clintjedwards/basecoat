@@ -45,3 +45,7 @@ input.deco-none:focus {
 #InputFormulaNumber:focus{
     font-size: 24px;
 }
+
+.danger-red{
+    color: #d43f3a;
+}

@@ -6,15 +6,15 @@
 <h4 class="text-muted">Forumla Info</h4>
 
 {% for base in base_list -%}
-<p> <b>Base:</b> {{base.product_name}} {{base.base_name}} </p>
+<p> <b>Base:</b> {{base[1]}} {{base[0]}} </p>
 {%- endfor %}
 
 <p> <b>Colorants:</b> </p>
 <ul class="list-group">
   {% for colorant in colorant_list -%}
   <li class="list-group-item">
-    <span class="badge">{{colorant.amount}} gal.</span>
-    {{colorant.colorant_name}}
+    <span class="badge">{{colorant[1]}} gal.</span>
+    {{colorant[0]}}
   </li>
   {%- endfor %}
 </ul>

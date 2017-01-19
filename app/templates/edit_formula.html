@@ -39,11 +39,11 @@
             <div class="form-group">
                 <label for="InputBase{{loop.index}}">Base:&nbsp;</label>
                 <input type="hidden" name="InputBaseID" value="{{base.id}}">
-                <input type="text" class="form-control" id="InputBase{{loop.index}}" name="InputBase{{loop.index}}" value="{{base.base_name}}" />
+                <input type="text" class="form-control" id="InputBase{{loop.index}}" name="InputBase{{loop.index}}" value="{{base[0]}}" />
             </div>
             <div class="form-group">
                 <label class="sr-only" for="InputProductName{{loop.index}}">Base Product Name</label>
-                <input type="text" class="form-control" id="InputProductName{{loop.index}}" name="InputProductName{{loop.index}}" value="{{base.product_name}}" />
+                <input type="text" class="form-control" id="InputProductName{{loop.index}}" name="InputProductName{{loop.index}}" value="{{base[1]}}" />
             </div>
         </div>
         {%- endfor %}
@@ -69,11 +69,11 @@
             <div class="form-group">
                 <label for="InputColorant{{loop.index}}">Colorant:&nbsp;</label>
                 <input type="hidden" name="InputColorantID" value="{{colorant.id}}">
-                <input type="text" class="form-control" id="InputColorant{{loop.index}}" name="InputColorant{{loop.index}}" value="{{colorant.colorant_name}}" />
+                <input type="text" class="form-control" id="InputColorant{{loop.index}}" name="InputColorant{{loop.index}}" value="{{colorant[0]}}" />
             </div>
             <div class="form-group">
                 <label class="sr-only" for="InputAmount{{loop.index}}">Amount</label>
-                <input type="number" class="form-control" id="InputAmount{{loop.index}}" name="InputAmount{{loop.index}}" value="{{colorant.amount}}" />
+                <input type="number" class="form-control" id="InputAmount{{loop.index}}" name="InputAmount{{loop.index}}" value="{{colorant[1]}}" />
             </div>
         </div>
         {%- endfor %}

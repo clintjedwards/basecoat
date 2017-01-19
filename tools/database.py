@@ -2,6 +2,7 @@ from flask_migrate import MigrateCommand
 from faker import Faker
 from app import db, models
 import random
+import json
 
 fake = Faker()
 
@@ -15,6 +16,9 @@ def populate_db(number_of_entries):
         dev_formula = models.Formula(formula_name=fake.color_name() + " " + fake.safe_color_name(),
                                      formula_number=fake.hex_color(),
                                      customer_name=fake.company(),
+                                     colorants=json.dumps([[fake.color_name() + " " + fake.safe_color_name(), random.randint(1, 10)],
+                                                           [fake.color_name() + " " + fake.safe_color_name(), random.randint(1, 10)]]),
+                                     bases=json.dumps([[fake.color_name() + " " + fake.safe_color_name(), fake.company()]]),
                                      summary=fake.text(max_nb_chars=random.randint(50, 200)),
                                      notes=fake.paragraph(nb_sentences=3, variable_nb_sentences=True))
 
@@ -26,36 +30,6 @@ def populate_db(number_of_entries):
             raise
 
     print('Populated formulas')
-
-    for entry in range(0, number_of_entries):
-
-        dev_colorant = models.Colorant(formula_id=random.randint(1, number_of_entries),
-                                       colorant_name=fake.color_name() + " " + fake.safe_color_name(),
-                                       amount=random.randint(1, 10))
-
-        try:
-            db.session.add_all([dev_colorant])
-            db.session.commit()
-        except:
-            db.session.rollback()
-            raise
-
-    print('Populated colorants')
-
-    for entry in range(0, number_of_entries):
-
-        dev_base = models.Base(formula_id=random.randint(1, number_of_entries),
-                               base_name=fake.color_name() + " " + fake.safe_color_name(),
-                               product_name=fake.company())
-
-        try:
-            db.session.add_all([dev_base])
-            db.session.commit()
-        except:
-            db.session.rollback()
-            raise
-
-    print('Populated bases')
 
 
 @MigrateCommand.command

@@ -18,8 +18,10 @@ def index():
 @app.route('/formula/<int:formula_id>')
 def get_formula(formula_id):
     formula = db_utils.get_object_from_table('Formula', 'id', formula_id)[0]
-    colorant_list = db_utils.get_object_from_table('Colorant', 'formula_id', formula_id)
-    base_list = db_utils.get_object_from_table('Base', 'formula_id', formula_id)
+    print(formula.colorants)
+    colorant_list = json.loads(formula.colorants)
+    base_list = json.loads(formula.bases)
+
     return render_template('view_formula.html',
                            formula=formula,
                            colorant_list=colorant_list,
@@ -30,54 +32,14 @@ def get_formula(formula_id):
 def add_formula():
     if request.method == 'POST':
         form_data = request.json
-        colorant_data = form_data.pop('colorant_list', None)
-        base_data = form_data.pop('base_list', None)
+        colorants = form_data.pop('colorant_list', None)
+        bases = form_data.pop('base_list', None)
 
         form_data = {key: value.strip() for key, value in form_data.items()}
 
         if "formula_id" in form_data.keys():
             db_utils.update_db("Formula", "id", form_data['formula_id'], **form_data)
-            for colorant in colorant_data:
-                colorant_dict = {
-                    'colorant_name': colorant,
-                    'formula_id': form_data['formula_id'],
-                    'amount': colorant_data[colorant]['colorant_amount'],
-                }
-
-                try:
-                    colorant_dict['id'] = colorant_data[colorant]['colorant_id']
-                except KeyError:
-                    pass
-
-                new_colorant = models.Colorant(**colorant_dict)
-
-                try:
-                    db.session.merge(new_colorant)
-                    db.session.commit()
-                except:
-                    db.session.rollback()
-                    raise
-
-            for base in base_data:
-                base_dict = {
-                    'base_name': base,
-                    'formula_id': form_data['formula_id'],
-                    'product_name': base_data[base]['base_product_name'],
-                }
-
-                try:
-                    base_dict['id'] = base_data[base]['base_id']
-                except KeyError:
-                    pass
-
-                new_base = models.Base(**base_dict)
-
-                try:
-                    db.session.merge(new_base)
-                    db.session.commit()
-                except:
-                    db.session.rollback()
-                    raise
+            db_utils.update_db("Formula", "id", form_data['formula_id'], colorants=json.dumps(colorants), bases=json.dumps(bases))
 
         else:
             new_formula = models.Formula(formula_name=form_data['formula_name'].title(),
@@ -115,8 +77,8 @@ def add_formula():
 @app.route('/formula/edit/<int:formula_id>')
 def edit_formula(formula_id):
     formula = db_utils.get_object_from_table('Formula', 'id', formula_id)[0]
-    colorant_list = db_utils.get_object_from_table('Colorant', 'formula_id', formula_id)
-    base_list = db_utils.get_object_from_table('Base', 'formula_id', formula_id)
+    colorant_list = json.loads(formula.colorants)
+    base_list = json.loads(formula.bases)
     return render_template('edit_formula.html',
                            formula=formula,
                            colorant_list=colorant_list,

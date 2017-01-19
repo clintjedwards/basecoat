@@ -26,26 +26,24 @@ function convertFormToJSON(form){
     var bases = $(form).find('.base_list .form-inline');
     var colorants = $(form).find('.colorant_list .form-inline');
 
-    var base_dict = {};
-    var colorant_dict = {};
+    var base_list = [];
+    var colorant_list = [];
 
     $.each(bases, function () {
-        base_id = $(this).find('input[name=InputBaseID]').val();
         base_name = $(this).find('input[id*="InputBase"]').val();
         base_product_name = $(this).find('input[id*="InputProductName"]').val();
 
        if (base_name){
-           base_dict[base_name] = {"base_id": base_id, "base_product_name": base_product_name}
+           base_list.push([base_name, base_product_name])
        };
     });
 
     $.each(colorants, function () {
-        colorant_id = $(this).find('input[name=InputColorantID]').val();
         colorant_name = $(this).find('input[id*="InputColorant"]').val();
         colorant_amount = $(this).find('input[id*="InputAmount"]').val();
 
         if (colorant_name){
-            colorant_dict[colorant_name] = {"colorant_id": colorant_id, "colorant_amount": colorant_amount}
+            colorant_list.push([colorant_name, colorant_amount]);
         };
     });
 
@@ -54,8 +52,8 @@ function convertFormToJSON(form){
                         "formula_id": $(form).find('#InputFormulaID').val(),
                         "formula_name": $(form).find('#InputFormulaName').val(),
                         "formula_number": $(form).find('#InputFormulaNumber').val(),
-                        "base_list": base_dict,
-                        "colorant_list": colorant_dict,
+                        "base_list": base_list,
+                        "colorant_list": colorant_list,
                         "customer_name": $(form).find('#InputCustomer').val(),
                         "summary": $(form).find('#InputSummary').val(),
                         "notes": $(form).find('#InputNotes').val(),

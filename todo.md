@@ -3,7 +3,6 @@
 * Deploy/Create deployment tools
 * Backup production database offsite
 * Delete formula function
-* Ability to remove colorants/bases
 
 
 #Test following workflows

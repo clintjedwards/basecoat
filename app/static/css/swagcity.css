@@ -30,6 +30,10 @@ input.deco-none:focus {
     box-shadow: none;
 }
 
+.form-inline > * {
+   margin:5px;
+}
+
 #InputFormulaName{
     font-size: 36px;
 }

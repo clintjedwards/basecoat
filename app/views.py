@@ -32,38 +32,27 @@ def get_formula(formula_id):
 def add_formula():
     if request.method == 'POST':
         form_data = request.json
-        colorants = form_data.pop('colorant_list', None)
-        bases = form_data.pop('base_list', None)
+        colorants = json.dumps(form_data.pop('colorant_list', None))
+        bases = json.dumps(form_data.pop('base_list', None))
 
         form_data = {key: value.strip() for key, value in form_data.items()}
 
         if "formula_id" in form_data.keys():
             db_utils.update_db("Formula", "id", form_data['formula_id'], **form_data)
-            db_utils.update_db("Formula", "id", form_data['formula_id'], colorants=json.dumps(colorants), bases=json.dumps(bases))
+            db_utils.update_db("Formula", "id", form_data['formula_id'], colorants=colorants, bases=bases)
 
         else:
             new_formula = models.Formula(formula_name=form_data['formula_name'].title(),
                                          formula_number=form_data['formula_number'],
                                          customer_name=form_data['customer_name'].title(),
+                                         colorants=colorants,
+                                         bases=bases,
                                          summary=form_data['summary'],
                                          notes=form_data['notes'])
-            db.session.add(new_formula)
-            db.session.flush()
 
-            for colorant in colorant_data:
-                db_utils.insert_into_db('Colorant',
-                               colorant_name=colorant,
-                               formula_id=new_formula.id,
-                               amount=colorant_data[colorant]['colorant_amount'])
-
-
-            for base in base_data:
-                db_utils.insert_into_db('Base',
-                               base_name=base,
-                               formula_id=new_formula.id,
-                               product_name=base_data[base]['base_product_name'])
 
             try:
+                db.session.add(new_formula)
                 db.session.commit()
             except:
                 db.session.rollback()

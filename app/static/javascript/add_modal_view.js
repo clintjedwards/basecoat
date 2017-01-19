@@ -12,7 +12,6 @@ function addExtraBaseForm(event){
             <div class='form-group'>
                 <label class='sr-only' for='InputProductName${next_form_id}'>Base Product Name</label>
                 <input type='text' class='form-control' id='InputProductName${next_form_id}' name='InputProductName${next_form_id}' placeholder='Base Product Name' />
-                <span class='danger-red'>Remove</span>
             </div>
         </div>`;
 
@@ -33,7 +32,6 @@ function addExtraColorantForm(){
             <div class='form-group'>
                 <label class='sr-only' for='InputAmount${next_form_id}'>Amount</label>
                 <input type='number' class='form-control' id='InputAmount${next_form_id}' name='InputAmount${next_form_id}' placeholder='Amount (in gallons)' />
-                <span class='danger-red'>Remove</span>
             </div>
         </div>`;
 

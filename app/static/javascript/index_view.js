@@ -21,6 +21,10 @@ function filterTable(search_string){
 
 }
 
+function testing(){
+    console.log('testing');
+}
+
 function convertFormToJSON(form){
 
     var bases = $(form).find('.base_list .form-inline');
@@ -79,6 +83,10 @@ function populateAddFormulaModal(){
 
 $( document ).ready(function() {
 
+    $('[data-toggle=confirmation]').confirmation({
+      rootSelector: '[data-toggle=confirmation]',
+    });
+
     //Wait for user input on the search bar and then filter table
     $('#search_bar').bindWithDelay("keyup", function() {
         filterTable($(this).val());
@@ -109,6 +117,20 @@ $( document ).ready(function() {
         $('#view_edit_button').show();
         $('#view_save_button').hide();
         $('#view_delete_button').hide();
+    });
+
+    //Delete button functionality
+    $('#view_delete_button').click(function(){
+        formulaID = $("#view_modal").find('.modal-title').attr("data-formula-id");
+
+        $.ajax({
+            url: '/formula/delete/' + formulaID,
+            type: 'DELETE',
+            success: function() {
+                $('#view_modal #view_close_button').click();
+                location.reload(true);
+            }
+        });
     });
 
     //Save button functionality

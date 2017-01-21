@@ -18,7 +18,6 @@ def index():
 @app.route('/formula/<int:formula_id>')
 def get_formula(formula_id):
     formula = db_utils.get_object_from_table('Formula', 'id', formula_id)[0]
-    print(formula.colorants)
     colorant_list = json.loads(formula.colorants)
     base_list = json.loads(formula.bases)
 
@@ -72,3 +71,9 @@ def edit_formula(formula_id):
                            formula=formula,
                            colorant_list=colorant_list,
                            base_list=base_list)
+
+
+@app.route('/formula/delete/<int:formula_id>', methods=['DELETE'])
+def delete_formula(formula_id):
+    db_utils.delete_from_db('Formula', 'id', formula_id)
+    return jsonify({'success':True}), 200

@@ -12,6 +12,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static',filename='javascript/confirmation.min.js') }}"></script>
     <script src="{{ url_for('static',filename='javascript/debounce.js') }}"></script>
     <script src="{{ url_for('static',filename='javascript/index_view.js') }}"></script>
 </head>
@@ -64,7 +65,18 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="view_delete_button" type="button" class="btn btn-danger pull-right" style="display:none;">Delete Formula</button>
+                    <button id="view_delete_button"
+                            type="button" class="btn btn-danger pull-right"
+                            style="display:none;"
+                            data-toggle="confirmation"
+                            data-btn-ok-label="Delete"
+                            data-btn-ok-icon="glyphicon glyphicon-trash"
+                            data-btn-ok-class="btn-danger"
+                            data-btn-cancel-label="Cancel"
+                            data-btn-cancel-icon="glyphicon glyphicon-ban-circle"
+                            data-btn-cancel-class="btn-default"
+                            data-title="Delete Formula?"
+                            data-placement="left">Delete Formula</button>
                     <h4 class="modal-title" id="myModalLabel">Formula</h4>
                 </div>
                 <div class="modal-body">

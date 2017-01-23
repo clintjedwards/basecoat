@@ -2,7 +2,17 @@
 
 * Deploy/Create deployment tools
 * Backup production database offsite
-* Delete formula function
+
+* Remove add base button
+* Base product name should be base product number freeform
+* colorant amount should be text field
+* should be able to search by customer name
+* missing fields should have placeholder
+* summary is not needed
+* Job address should be added should be searchable next to customer
+* colorant needs extra product field
+* size field for end of base color
+* think about replacing label fields with divided ul
 
 
 #Test following workflows

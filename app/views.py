@@ -19,12 +19,12 @@ def index():
 def get_formula(formula_id):
     formula = db_utils.get_object_from_table('Formula', 'id', formula_id)[0]
     colorant_list = json.loads(formula.colorants)
-    base_list = json.loads(formula.bases)
+    base = json.loads(formula.base)
 
     return render_template('view_formula.html',
                            formula=formula,
                            colorant_list=colorant_list,
-                           base_list=base_list)
+                           base=base)
 
 
 @app.route('/formula/add', methods=['GET', 'POST'])
@@ -32,21 +32,21 @@ def add_formula():
     if request.method == 'POST':
         form_data = request.json
         colorants = json.dumps(form_data.pop('colorant_list', None))
-        bases = json.dumps(form_data.pop('base_list', None))
+        base = json.dumps(form_data.pop('base', None))
 
         form_data = {key: value.strip() for key, value in form_data.items()}
 
         if "formula_id" in form_data.keys():
             db_utils.update_db("Formula", "id", form_data['formula_id'], **form_data)
-            db_utils.update_db("Formula", "id", form_data['formula_id'], colorants=colorants, bases=bases)
+            db_utils.update_db("Formula", "id", form_data['formula_id'], colorants=colorants, base=base)
 
         else:
             new_formula = models.Formula(formula_name=form_data['formula_name'].title(),
                                          formula_number=form_data['formula_number'],
                                          customer_name=form_data['customer_name'].title(),
                                          colorants=colorants,
-                                         bases=bases,
-                                         summary=form_data['summary'],
+                                         base=base,
+                                         job_address=form_data['job_address'],
                                          notes=form_data['notes'])
 
 
@@ -66,11 +66,11 @@ def add_formula():
 def edit_formula(formula_id):
     formula = db_utils.get_object_from_table('Formula', 'id', formula_id)[0]
     colorant_list = json.loads(formula.colorants)
-    base_list = json.loads(formula.bases)
+    base = json.loads(formula.base)
     return render_template('edit_formula.html',
                            formula=formula,
                            colorant_list=colorant_list,
-                           base_list=base_list)
+                           base=base)
 
 
 @app.route('/formula/delete/<int:formula_id>', methods=['DELETE'])

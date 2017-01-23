@@ -16,10 +16,10 @@ def populate_db(number_of_entries):
         dev_formula = models.Formula(formula_name=fake.color_name() + " " + fake.safe_color_name(),
                                      formula_number=fake.hex_color(),
                                      customer_name=fake.company(),
-                                     colorants=json.dumps([[fake.color_name() + " " + fake.safe_color_name(), random.randint(1, 10)],
-                                                           [fake.color_name() + " " + fake.safe_color_name(), random.randint(1, 10)]]),
-                                     bases=json.dumps([[fake.color_name() + " " + fake.safe_color_name(), fake.company()]]),
-                                     summary=fake.text(max_nb_chars=random.randint(50, 200)),
+                                     colorants=json.dumps([[fake.company(), fake.color_name() + " " + fake.safe_color_name(), random.randint(1, 10)],
+                                                           [fake.company(), fake.color_name() + " " + fake.safe_color_name(), random.randint(1, 10)]]),
+                                     base=json.dumps({"base_product_name": fake.company(), "base_name": fake.color_name() + " " + fake.safe_color_name(), "base_size": random.randint(1, 20)}),
+                                     job_address=fake.address(),
                                      notes=fake.paragraph(nb_sentences=3, variable_nb_sentences=True))
 
         try:

@@ -1,16 +1,24 @@
 <form id="edit_form" autocomplete="off">
-    <input type="hidden" id="InputFormulaID" name="InputFormulaID" value="{{formula.id}}">
+    <input type="hidden" id="formula_id" name="formula_id" value="{{formula.id}}">
     <div class="form-horizontal text-center">
         <div class="form-group-lg row">
-            <label class="sr-only" for="InputFormulaName">Formula Name</label>
+            <label class="sr-only" for="formula_name">Formula Name</label>
             <div class="col-sm-offset-2 col-sm-8">
-                <input type="text" class="form-control deco-none text-center" id="InputFormulaName" name="InputFormulaName" value="{{formula.formula_name}}" />
+                {% if not formula.formula_name -%}
+                <input type="text" class="form-control deco-none text-center" id="formula_name" name="formula_name" placeholder="Formula Name" />
+                {%- else -%}
+                <input type="text" class="form-control deco-none text-center" id="formula_name" name="formula_name" value="{{formula.formula_name}}" />
+                {%- endif %}
             </div>
         </div>
         <div class="form-group-lg row">
-            <label class="sr-only" for="InputFormulaNumber">Formula Color Number</label>
+            <label class="sr-only" for="formula_number">Formula Color Number</label>
             <div class="col-sm-offset-3 col-sm-6">
-                <input type="text" class="form-control deco-none text-center" id="InputFormulaNumber" name="InputFormulaNumber" value="{{formula.formula_number}}" />
+                {% if not formula.formula_number -%}
+                <input type="text" class="form-control deco-none text-center" id="formula_number" name="formula_number" placeholder="Formula Number" />
+                {%- else -%}
+                <input type="text" class="form-control deco-none text-center" id="formula_number" name="formula_number" value="{{formula.formula_number}}" />
+                {%- endif %}
             </div>
         </div>
     </div>
@@ -19,35 +27,31 @@
 
     <h4 class="text-muted">Formula Info</h4>
     <br />
-
-    <h5><a id="add_base_edit_form" class="deco-none text-muted" href="#">Add Base</a></h5>
-    <div class="base_list">
-        {% if not base_list -%}
+    <div class="base">
         <div class="form-inline">
             <div class="form-group">
-                <label for="InputBase1">Base:&nbsp;</label>
-                <input type="text" class="form-control" id="InputBase1" name="InputBase1" placeholder="Base Name" />
+                <label for="base_product_name">Base:&nbsp;</label>
+                {% if not base.base_product_name -%}
+                <input type="text" class="form-control" id="base_product_name" name="base_product_name" placeholder="Base Product Name" />
+                {%- else -%}
+                <input type="text" class="form-control" id="base_product_name" name="base_product_name" value="{{base.base_product_name}}" />
+                {%- endif %}
             </div>
             <div class="form-group">
-                <label class="sr-only" for="InputProductName1">Base Product Name</label>
-                <input type="text" class="form-control" id="InputProductName1" name="InputProductName1" placeholder="Base Product Name" />
+                {% if not base.base_name -%}
+                <input type="text" class="form-control" id="base_name" name="base_name" placeholder="Base Name" />
+                {%- else -%}
+                <input type="text" class="form-control" id="base_name" name="base_name" value="{{base.base_name}}" />
+                {%- endif %}
+            </div>
+            <div class="form-group">
+                {% if not base.base_size -%}
+                <input type="text" class="form-control" id="base_size" name="base_size" placeholder="Base Size" />
+                {%- else -%}
+                <input type="text" class="form-control" id="base_size" name="base_size" value="{{base.base_size}}" />
+                {%- endif %}
             </div>
         </div>
-        {%- else -%}
-        {% for base in base_list -%}
-        <div class="form-inline">
-            <div class="form-group">
-                <label for="InputBase{{loop.index}}">Base:&nbsp;</label>
-                <input type="hidden" name="InputBaseID" value="{{base.id}}">
-                <input type="text" class="form-control" id="InputBase{{loop.index}}" name="InputBase{{loop.index}}" value="{{base[0]}}" />
-            </div>
-            <div class="form-group">
-                <label class="sr-only" for="InputProductName{{loop.index}}">Base Product Name</label>
-                <input type="text" class="form-control" id="InputProductName{{loop.index}}" name="InputProductName{{loop.index}}" value="{{base[1]}}" />
-            </div>
-        </div>
-        {%- endfor %}
-        {%- endif %}
     </div>
     <br />
     <h5><a id="add_colorant_edit_form" class="deco-none text-muted" href="#">Add Colorant</a></h5>
@@ -55,25 +59,30 @@
         {% if not colorant_list -%}
         <div class="form-inline">
             <div class="form-group">
-                <label for="InputColorant1">Colorant:&nbsp;</label>
-                <input type="text" class="form-control" id="InputColorant1" name="InputColorant1" placeholder="Colorant Name" />
+                <label for="colorant_product_name1">Colorant:&nbsp;</label>
+                <input type="text" class="form-control" id="colorant_product_name1" name="colorant_product_name1" placeholder="Colorant Product Name" />
             </div>
             <div class="form-group">
-                <label class="sr-only" for="InputAmount1">Amount</label>
-                <input type="number" class="form-control" id="InputAmount1" name="InputAmount1" placeholder="Amount (in gallons)" />
+                <input type="text" class="form-control" id="colorant_name1" name="colorant_name1" placeholder="Colorant Name" />
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="colorant_amount1">Amount</label>
+                <input type="text" class="form-control" id="colorant_amount1" name="colorant_amount1" placeholder="Amount" />
             </div>
         </div>
         {%- else -%}
         {% for colorant in colorant_list -%}
         <div class="form-inline">
             <div class="form-group">
-                <label for="InputColorant{{loop.index}}">Colorant:&nbsp;</label>
-                <input type="hidden" name="InputColorantID" value="{{colorant.id}}">
-                <input type="text" class="form-control" id="InputColorant{{loop.index}}" name="InputColorant{{loop.index}}" value="{{colorant[0]}}" />
+                <input type="hidden" name="colorant_id" value="{{colorant.id}}">
+                <label for="colorant_product_name{{loop.index}}">Colorant:&nbsp;</label>
+                <input type="text" class="form-control" id="colorant_product_name{{loop.index}}" name="colorant_product_name{{loop.index}}" value="{{colorant[0]}}" />
             </div>
             <div class="form-group">
-                <label class="sr-only" for="InputAmount{{loop.index}}">Amount</label>
-                <input type="number" class="form-control" id="InputAmount{{loop.index}}" name="InputAmount{{loop.index}}" value="{{colorant[1]}}" />
+                <input type="text" class="form-control" id="colorant_name{{loop.index}}" name="colorant_name{{loop.index}}" value="{{colorant[1]}}" />
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="colorant_amount{{loop.index}}" name="amount{{loop.index}}" value="{{colorant[2]}}" />
             </div>
         </div>
         {%- endfor %}
@@ -84,16 +93,16 @@
 
     <h4 class="text-muted">Additional Info</h4>
     <div class="form-group">
-        <label for="InputCustomer">Customer Name</label>
-        <input type="text" class="form-control" id="InputCustomer" name="InputCustomer" value="{{formula.customer_name}}" />
+        <label for="customer_name">Customer Name</label>
+        <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{formula.customer_name}}" />
     </div>
     <div class="form-group">
-        <label for="InputSummary">Summary</label>
-        <input type="text" class="form-control" id="InputSummary" name="InputSummary" value="{{formula.summary}}" />
+        <label for="job_address">Job Address</label>
+        <input type="text" class="form-control" id="job_address" name="job_address" value="{{formula.job_address}}" />
     </div>
     <div class="form-group">
-        <label for="InputNotes">Notes</label>
-        <textarea id="InputNotes" name="InputNotes" class="form-control" rows="3">{{formula.notes}}</textarea>
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" class="form-control" rows="3">{{formula.notes}}</textarea>
     </div>
 </form>
 

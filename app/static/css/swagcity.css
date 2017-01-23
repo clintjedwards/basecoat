@@ -14,6 +14,10 @@ a.deco-none {
     text-decoration: none;
 }
 
+pre {
+    white-space: pre-wrap;
+}
+
 input.deco-none {
     border: none;
     outline: none;

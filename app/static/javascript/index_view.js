@@ -1,14 +1,4 @@
 
-//When the edit button is clicked we need to open a modal with all the information
-//of the row clicked
-
-//A form needs to be posted updating anything that was edited by the modal
-
-//When a row is clicked it should drop down revealing all the information included with the row
-
-//Clicking the plus symbol should open up a modal allowing you to input a new formula
-
-
 function filterTable(search_string){
 
     // Overwrite contain selector so we can search case insensitively
@@ -21,49 +11,36 @@ function filterTable(search_string){
 
 }
 
-function testing(){
-    console.log('testing');
-}
-
 function convertFormToJSON(form){
 
-    var bases = $(form).find('.base_list .form-inline');
     var colorants = $(form).find('.colorant_list .form-inline');
-
-    var base_list = [];
     var colorant_list = [];
 
-    $.each(bases, function () {
-        base_name = $(this).find('input[id*="InputBase"]').val();
-        base_product_name = $(this).find('input[id*="InputProductName"]').val();
-
-       if (base_name){
-           base_list.push([base_name, base_product_name])
-       };
-    });
-
     $.each(colorants, function () {
-        colorant_name = $(this).find('input[id*="InputColorant"]').val();
-        colorant_amount = $(this).find('input[id*="InputAmount"]').val();
+        colorant_product_name = $(this).find('input[id*="colorant_product_name"]').val();
+        colorant_name = $(this).find('input[id*="colorant_name"]').val();
+        colorant_amount = $(this).find('input[id*="colorant_amount"]').val();
 
         if (colorant_name){
-            colorant_list.push([colorant_name, colorant_amount]);
-        };
+            colorant_list.push([colorant_product_name, colorant_name, colorant_amount]);
+        }
     });
 
 
     var form_data = {
-                        "formula_id": $(form).find('#InputFormulaID').val(),
-                        "formula_name": $(form).find('#InputFormulaName').val(),
-                        "formula_number": $(form).find('#InputFormulaNumber').val(),
-                        "base_list": base_list,
+                        "formula_id": $(form).find('#formula_id').val(),
+                        "formula_name": $(form).find('#formula_name').val(),
+                        "formula_number": $(form).find('#formula_number').val(),
+                        "base": {"base_product_name": $(form).find('#base_product_name').val(),
+                                 "base_name": $(form).find('#base_name').val(),
+                                 "base_size": $(form).find('#base_size').val() },
                         "colorant_list": colorant_list,
-                        "customer_name": $(form).find('#InputCustomer').val(),
-                        "summary": $(form).find('#InputSummary').val(),
-                        "notes": $(form).find('#InputNotes').val(),
+                        "customer_name": $(form).find('#customer_name').val(),
+                        "job_address": $(form).find('#job_address').val(),
+                        "notes": $(form).find('#notes').val(),
                     };
 
-    return form_data
+    return form_data;
 
 }
 
@@ -78,6 +55,17 @@ function populateViewFormulaModal(formulaID){
 function populateAddFormulaModal(){
     $("#add_modal").find('.modal-title').text('Add New Formula');
     $("#add_modal").find('.modal-body').load("/formula/add");
+}
+
+
+function verifyFormulaHasName(form){
+
+    if ($(form).find('#formula_name').val()){
+        return true;
+    }else{
+        return false;
+    }
+
 }
 
 
@@ -135,24 +123,40 @@ $( document ).ready(function() {
 
     //Save button functionality
     $('#view_save_button').click(function(){
-        $.ajax({
-            type: 'POST',
-            url: '/formula/add',
-            data: JSON.stringify(convertFormToJSON($("#edit_form"))),
-            contentType: "application/json",
-            dataType: 'json'
-        });
+        if (verifyFormulaHasName($("#edit_form"))){
+            $.ajax({
+                type: 'POST',
+                url: '/formula/add',
+                data: JSON.stringify(convertFormToJSON($("#edit_form"))),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function() {
+                    $('#view_modal #view_close_button').click();
+                    location.reload(true);
+                }
+            });
+        } else {
+            console.log('Error. Formula has no name');
+        }
     });
 
     //Add formula functionality
     $('#add_save_button').click(function(){
-        $.ajax({
-            type: 'POST',
-            url: '/formula/add',
-            data: JSON.stringify(convertFormToJSON($("#add_form"))),
-            contentType: "application/json",
-            dataType: 'json'
-        });
+        if (verifyFormulaHasName($("#add_form"))){
+            $.ajax({
+                type: 'POST',
+                url: '/formula/add',
+                data: JSON.stringify(convertFormToJSON($("#add_form"))),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function() {
+                    $('#add_modal #add_close_button').click();
+                    location.reload(true);
+                }
+            });
+        } else {
+            console.log('Error. Formula has no name');
+        }
     });
 
 });

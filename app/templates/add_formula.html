@@ -1,15 +1,15 @@
 <form id="add_form" name="add_form" autocomplete="off">
     <div class="form-horizontal text-center">
         <div class="form-group-lg row">
-            <label class="sr-only" for="InputFormulaName">Formula Name</label>
+            <label class="sr-only" for="formula_name">Formula Name</label>
             <div class="col-sm-offset-2 col-sm-8">
-                <input type="text" class="form-control deco-none text-center" id="InputFormulaName" name="InputFormulaName" placeholder="Add Formula Name" />
+                <input type="text" class="form-control deco-none text-center" id="formula_name" name="formula_name" placeholder="Add Formula Name" />
             </div>
         </div>
         <div class="form-group-lg row">
-            <label class="sr-only" for="InputFormulaNumber">Formula Color Number</label>
+            <label class="sr-only" for="formula_number">Formula Color Number</label>
             <div class="col-sm-offset-3 col-sm-6">
-                <input type="text" class="form-control deco-none text-center" id="InputFormulaNumber" name="InputFormulaNumber" placeholder="Add Formula Color Number" />
+                <input type="text" class="form-control deco-none text-center" id="formula_number" name="formula_number" placeholder="Add Formula Color Number" />
             </div>
         </div>
     </div>
@@ -19,16 +19,17 @@
     <h4 class="text-muted">Formula Info</h4>
     <br />
 
-    <h5><a id="add_base_add_form" class="deco-none text-muted" href="#">Add Base</a></h5>
-    <div class="base_list">
+    <div class="base">
         <div class="form-inline">
             <div class="form-group">
-                <label for="InputBase1">Base:&nbsp;</label>
-                <input type="text" class="form-control" id="InputBase1" name="InputBase1" placeholder="Base Name" />
+                <label for="base_product_name">Base:&nbsp;</label>
+                <input type="text" class="form-control" id="base_product_name" name="base_product_name" placeholder="Base Product Name" />
             </div>
             <div class="form-group">
-                <label class="sr-only" for="InputProductName1">Base Product Name</label>
-                <input type="text" class="form-control" id="InputProductName1" name="InputProductName1" placeholder="Base Product Name" />
+                <input type="text" class="form-control" id="base_name" name="base_name" placeholder="Base Name" />
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="base_size" name="base_size" placeholder="Base Size" />
             </div>
         </div>
     </div>
@@ -37,12 +38,14 @@
     <div class="colorant_list">
         <div class="form-inline">
             <div class="form-group">
-                <label for="InputColorant1">Colorant:&nbsp;</label>
-                <input type="text" class="form-control" id="InputColorant1" name="InputColorant1" placeholder="Colorant Name" />
+                <label for="colorant_product_name1">Colorant:&nbsp;</label>
+                <input type="text" class="form-control" id="colorant_product_name1" name="colorant_product_name1" placeholder="Colorant Product Name" />
             </div>
             <div class="form-group">
-                <label class="sr-only" for="InputAmount1">Amount</label>
-                <input type="number" class="form-control" id="InputAmount1" name="InputAmount1" placeholder="Amount (in gallons)" />
+                <input type="text" class="form-control" id="colorant_name1" name="colorant_name1" placeholder="Colorant Name" />
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="colorant_amount1" name="colorant_amount1" placeholder="Amount" />
             </div>
         </div>
     </div>
@@ -51,16 +54,16 @@
 
     <h4 class="text-muted">Additional Info</h4>
     <div class="form-group">
-        <label for="InputCustomer">Customer Name</label>
-        <input type="text" class="form-control" id="InputCustomer" name="InputCustomer" placeholder="ex. Edwards Inc." />
+        <label for="customer_name">Customer Name</label>
+        <input type="text" class="form-control" id="customer_name" name="customer_name" placeholder="Customer Name" />
     </div>
     <div class="form-group">
-        <label for="InputSummary">Summary</label>
-        <input type="text" class="form-control" id="InputSummary" name="InputSummary" placeholder="ex. Also known as Van Dyke Gold" />
+        <label for="job_address">Job Address</label>
+        <input type="text" class="form-control" id="job_address" name="job_address" placeholder="Job Address" />
     </div>
     <div class="form-group">
-        <label for="InputNotes">Notes</label>
-        <textarea id="InputNotes" name="InputNotes" class="form-control" rows="3" placeholder="ex. Don't create this color without contacting Steve first. Becareful when pouring colorant on second machine it has a leak."></textarea>
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="ex. Be careful when pouring colorant on second machine it has a leak."></textarea>
     </div>
 </form>
 

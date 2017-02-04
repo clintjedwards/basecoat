@@ -136,7 +136,11 @@ $( document ).ready(function() {
                 }
             });
         } else {
-            console.log('Error. Formula has no name');
+            $('.top-center').notify({
+                message: { text: 'Error: Formula has no name.' },
+                type: 'warning',
+                closable: false
+              }).show();
         }
     });
 
@@ -155,7 +159,11 @@ $( document ).ready(function() {
                 }
             });
         } else {
-            console.log('Error. Formula has no name');
+            $('.top-right').notify({
+                message: { text: 'Error: Formula has no name.' },
+                type: 'warning',
+                closable: false
+              }).show();
         }
     });
 

@@ -16,3 +16,6 @@ config/config.py
 
 #Mac files
 .DS_Store
+
+#Docker
+.env

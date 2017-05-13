@@ -7,12 +7,12 @@ import json
 fake = Faker()
 
 @MigrateCommand.command
-def populate_db(number_of_entries):
+def populate(number_of_entries):
     "Populates database with fake data. Useful for developement"
 
     number_of_entries = int(number_of_entries)
 
-    for entry in range(0, number_of_entries):
+    for _ in range(0, number_of_entries):
         dev_formula = models.Formula(formula_name=fake.color_name() + " " + fake.safe_color_name(),
                                      formula_number=fake.hex_color(),
                                      customer_name=fake.company(),
@@ -33,7 +33,7 @@ def populate_db(number_of_entries):
 
 
 @MigrateCommand.command
-def empty_db():
+def empty():
     """Clears all information from database"""
     meta = db.metadata
 

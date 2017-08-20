@@ -18,4 +18,4 @@ config/config.py
 .DS_Store
 
 #Docker
-.env
+.env*

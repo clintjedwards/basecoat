@@ -4,7 +4,7 @@ services:
     app:
         image: cje3295/basecoat:app
         volumes:
-            - ${APP_DIRECTORY}:/var/www/basecoat
+            - ${APP_DIRECTORY}/config/config.py:/var/www/basecoat/config/config.py
             - basecoat:/tmp
 
     nginx:

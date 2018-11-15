@@ -1,21 +1,15 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-#VirtualEnv
-.venv/
-venv/
-ENV/
-
-#Configuration files
-config/config.py
-
-#Database files
-*.db
-
 #Mac files
 .DS_Store
 
-#Docker
-.env*
+#Vs Code
+.vscode
+
+#secret files
+.env
+-docker/.env
+
+#frontend
+node_modules/
+dist/*
+-dist/.gitkeep
+main.js

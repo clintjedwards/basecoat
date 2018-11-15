@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Basecoat</title>
+
+    <link rel='shortcut icon' href="images/paintbrush.ico" type='image/x-icon' />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="./javascript/main.js" defer></script>
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <page-header>Basecoat</page-header>
+
+            <!-- Tabs -->
+            <v-tabs centered icons-and-text color="transparent">
+                <v-tabs-slider color="#ff5252"></v-tabs-slider>
+                <v-tab v-on:click="$store.commit('updateCurrentTab', 'formulas')">
+                    Formulas
+                    <v-icon>format_paint</v-icon>
+                </v-tab>
+                <v-tab v-on:click="$store.commit('updateCurrentTab', 'jobs')">
+                    Jobs
+                    <v-icon>work</v-icon>
+                </v-tab>
+            </v-tabs>
+
+            <!-- Search Panels -->
+            <formula-search-panel v-show="$store.state.currentTab === 'formulas'" class="search-panel">
+            </formula-search-panel>
+            <jobs-search-panel v-show="$store.state.currentTab === 'jobs'" class="search-panel"></jobs-search-panel>
+
+            <!-- Tables -->
+            <formula-table v-show="$store.state.currentTab === 'formulas'" class="data-table"></formula-table>
+            <job-table v-show="$store.state.currentTab === 'jobs'" class="data-table"></job-table>
+
+            <!-- Modals-->
+            <create-formula-modal ref="createFormulaForm" @submit-create-form="submitCreateForm">
+                <template slot="heading">Create Formula</template>
+            </create-formula-modal>
+            <add-job-modal ref="addJobForm" @submit-add-job-form="submitAddJobForm">
+                <template slot="heading">Add Job</template>
+            </add-job-modal>
+            <manage-formula-modal ref="manageFormulaForm" @submit-manage-formula-form="submitManageFormulaForm"
+                :formula-in-view="$store.state.formulaInView">
+            </manage-formula-modal>
+            <manage-jobs-modal ref="manageJobsForm" @submit-manage-jobs-form="submitManageJobsForm"
+                :job-in-view="$store.state.jobInView">
+            </manage-jobs-modal>
+            <login-modal ref="loginForm" @validate-login="validateLogin"></login-modal>
+
+            <!-- Notifications-->
+            <v-snackbar v-model="$store.state.displaySnackBar" color="error" :timeout="3000" auto-height top>
+                {{ $store.state.snackBarText }}
+                <v-btn dark flat @click="$store.state.displaySnackBar = false">
+                    Close
+                </v-btn>
+            </v-snackbar>
+        </v-app>
+    </div>
+</body>
+
+</html>

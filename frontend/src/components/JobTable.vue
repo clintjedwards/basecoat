@@ -13,8 +13,8 @@
         @click="$store.commit('showManageJobsModal', props.index)"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
-        <td class="text-capitalize">
-          {{ props.item.contact_name }}
+        <td>
+          <span class="text-capitalize">{{ props.item.contact_name }}</span>
           <template v-if="props.item.contact_name !== ''">|</template>
           {{ props.item.contact_info }}
         </td>

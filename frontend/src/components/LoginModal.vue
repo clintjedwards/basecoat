@@ -47,6 +47,7 @@
                 :loading="$store.state.loginIsLoading"
                 :disabled="$store.state.loginIsLoading"
                 @click="handleLogin()"
+                type="submit"
               >Login</v-btn>
             </v-card-actions>
           </v-layout>

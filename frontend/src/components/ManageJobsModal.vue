@@ -71,7 +71,7 @@
                     v-show="formMode === 'view'"
                   >{{ jobData.street2 }}</h5>
                   <v-text-field
-                    label="Street2"
+                    label="Street 2"
                     hint="Apt Num, Extra Information, etc"
                     v-model="jobData.street2"
                     v-show="formMode === 'edit'"
@@ -86,7 +86,12 @@
                   <v-text-field label="City" v-model="jobData.city" v-show="formMode === 'edit'"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm4 md4>
-                  <v-text-field label="State" v-model="jobData.state" v-show="formMode === 'edit'"></v-text-field>
+                  <v-select
+                    :items="states"
+                    label="State"
+                    v-model="jobData.state"
+                    v-show="formMode === 'edit'"
+                  ></v-select>
                 </v-flex>
                 <v-flex xs12 sm4 md4>
                   <v-text-field
@@ -160,6 +165,67 @@ export default {
     return {
       formMode: "view",
       jobData: {},
+      states: [
+        "Alabama",
+        "Alaska",
+        "American Samoa",
+        "Arizona",
+        "Arkansas",
+        "California",
+        "Colorado",
+        "Connecticut",
+        "Delaware",
+        "District of Columbia",
+        "Federated States of Micronesia",
+        "Florida",
+        "Georgia",
+        "Guam",
+        "Hawaii",
+        "Idaho",
+        "Illinois",
+        "Indiana",
+        "Iowa",
+        "Kansas",
+        "Kentucky",
+        "Louisiana",
+        "Maine",
+        "Marshall Islands",
+        "Maryland",
+        "Massachusetts",
+        "Michigan",
+        "Minnesota",
+        "Mississippi",
+        "Missouri",
+        "Montana",
+        "Nebraska",
+        "Nevada",
+        "New Hampshire",
+        "New Jersey",
+        "New Mexico",
+        "New York",
+        "North Carolina",
+        "North Dakota",
+        "Northern Mariana Islands",
+        "Ohio",
+        "Oklahoma",
+        "Oregon",
+        "Palau",
+        "Pennsylvania",
+        "Puerto Rico",
+        "Rhode Island",
+        "South Carolina",
+        "South Dakota",
+        "Tennessee",
+        "Texas",
+        "Utah",
+        "Vermont",
+        "Virgin Island",
+        "Virginia",
+        "Washington",
+        "West Virginia",
+        "Wisconsin",
+        "Wyoming"
+      ],
       nameRules: [v => !!v || "Company Name is required"]
     };
   },

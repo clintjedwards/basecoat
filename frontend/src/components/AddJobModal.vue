@@ -41,12 +41,12 @@
               <v-spacer>Address Information</v-spacer>
               <v-layout wrap>
                 <v-flex xs12 sm12 md12>
-                  <v-text-field label="Street" v-model="jobData.street"></v-text-field>
+                  <v-text-field label="Street" hint="Street and number" v-model="jobData.street"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm12 md12>
                   <v-text-field
-                    label="Street2"
-                    hint="Apt Num, Extra Information, etc"
+                    label="Street 2"
+                    hint="Apartment number, suite, unit, building, floor, etc."
                     v-model="jobData.street2"
                   ></v-text-field>
                 </v-flex>
@@ -54,7 +54,7 @@
                   <v-text-field label="City" v-model="jobData.city"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm4 md4>
-                  <v-text-field label="State" v-model="jobData.state"></v-text-field>
+                  <v-select :items="states" label="State" v-model="jobData.state"></v-select>
                 </v-flex>
                 <v-flex xs12 sm4 md4>
                   <v-text-field label="Zipcode" v-model="jobData.zipcode"></v-text-field>
@@ -100,6 +100,67 @@ export default {
         zipcode: "",
         notes: ""
       },
+      states: [
+        "Alabama",
+        "Alaska",
+        "American Samoa",
+        "Arizona",
+        "Arkansas",
+        "California",
+        "Colorado",
+        "Connecticut",
+        "Delaware",
+        "District of Columbia",
+        "Federated States of Micronesia",
+        "Florida",
+        "Georgia",
+        "Guam",
+        "Hawaii",
+        "Idaho",
+        "Illinois",
+        "Indiana",
+        "Iowa",
+        "Kansas",
+        "Kentucky",
+        "Louisiana",
+        "Maine",
+        "Marshall Islands",
+        "Maryland",
+        "Massachusetts",
+        "Michigan",
+        "Minnesota",
+        "Mississippi",
+        "Missouri",
+        "Montana",
+        "Nebraska",
+        "Nevada",
+        "New Hampshire",
+        "New Jersey",
+        "New Mexico",
+        "New York",
+        "North Carolina",
+        "North Dakota",
+        "Northern Mariana Islands",
+        "Ohio",
+        "Oklahoma",
+        "Oregon",
+        "Palau",
+        "Pennsylvania",
+        "Puerto Rico",
+        "Rhode Island",
+        "South Carolina",
+        "South Dakota",
+        "Tennessee",
+        "Texas",
+        "Utah",
+        "Vermont",
+        "Virgin Island",
+        "Virginia",
+        "Washington",
+        "West Virginia",
+        "Wisconsin",
+        "Wyoming"
+      ],
       nameRules: [v => !!v || "Company Name is required"]
     };
   },

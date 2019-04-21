@@ -121,6 +121,12 @@
 
           <!-- Buttons -->
           <v-card-actions>
+            <v-btn
+              color="error darken-1"
+              flat
+              v-show="formMode === 'view'"
+              @click="handleFormDelete()"
+            >Delete</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="blue darken-1"
@@ -248,6 +254,9 @@ export default {
       if (this.$refs.manageJobsForm.validate()) {
         this.$emit("submit-manage-jobs-form", this.jobData);
       }
+    },
+    handleFormDelete: function() {
+      this.$emit("delete-job", this.jobData.id);
     }
   }
 };

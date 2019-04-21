@@ -292,7 +292,50 @@ const app = new Vue({
                 .then(function () {
                     self.$refs.manageJobsForm.setFormModeView()
                 })
-        }
+        },
+        deleteJob: function (jobID) {
+            var self = this
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': this.$cookies.get('token'),
+            };
+
+            axios
+                .delete('/jobs/' + jobID, {
+                    headers
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+                .then(function () {
+                    store.commit("hideManageJobsModal")
+                    self.loadJobData()
+                    self.$refs.manageJobsForm.setFormModeView()
+                })
+
+        },
+        deleteFormula: function (formulaID) {
+            var self = this
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': this.$cookies.get('token'),
+            };
+
+            axios
+                .delete('/formulas/' + formulaID, {
+                    headers
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+                .then(function () {
+                    store.commit("hideManageFormulaModal")
+                    self.loadFormulaData()
+                    self.$refs.manageFormulaForm.setFormModeView()
+                })
+        },
     },
     mounted() {
         this.checkLogin();

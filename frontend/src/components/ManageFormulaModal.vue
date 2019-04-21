@@ -166,6 +166,12 @@
 
           <!-- Buttons -->
           <v-card-actions>
+            <v-btn
+              color="error darken-1"
+              flat
+              v-show="formMode === 'view'"
+              @click="handleFormDelete()"
+            >Delete</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="blue darken-1"
@@ -305,6 +311,9 @@ export default {
       });
 
       return flattenedData;
+    },
+    handleFormDelete: function() {
+      this.$emit("delete-formula", this.formulaData.id);
     }
   }
 };

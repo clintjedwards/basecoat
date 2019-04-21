@@ -121,7 +121,13 @@
                     <v-list-tile v-bind:key="`job-tile-${index}`">
                       <v-list-tile-content>
                         <v-list-tile-title v-text="jobDictionary[job].name"></v-list-tile-title>
-                        <v-list-tile-sub-title>{{ jobDictionary[job].street }} {{ jobDictionary[job].city }}, {{ jobDictionary[job].state }} {{ jobDictionary[job].zipcode }}</v-list-tile-sub-title>
+                        <v-list-tile-sub-title>
+                          {{ jobDictionary[job].street }} {{ jobDictionary[job].city }}
+                          <template
+                            v-if="jobDictionary[job].city !== ''"
+                          >,</template>
+                          {{ jobDictionary[job].state }} {{ jobDictionary[job].zipcode }}
+                        </v-list-tile-sub-title>
                       </v-list-tile-content>
                     </v-list-tile>
                     <v-divider v-bind:key="`job-divider-${index}`"></v-divider>

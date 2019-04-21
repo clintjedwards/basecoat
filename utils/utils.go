@@ -67,3 +67,45 @@ func StructuredLog(level, description string, object interface{}) {
 		logger.Infoln(description)
 	}
 }
+
+// RemoveIntFromList removes an element form an array of ints
+// does not preserve list order
+func RemoveIntFromList(list []int, value int) []int {
+	for index, item := range list {
+		if item == value {
+			list[index] = list[len(list)-1]
+			return list[:len(list)-1]
+		}
+	}
+
+	return list
+}
+
+// FindListDifference returns list elements that are in list A
+// but not found in B
+func FindListDifference(a, b []int) []int {
+	m := make(map[int]bool)
+	diff := []int{}
+
+	for _, item := range b {
+		m[item] = true
+	}
+
+	for _, item := range a {
+		if _, ok := m[item]; !ok {
+			diff = append(diff, item)
+		}
+	}
+	return diff
+}
+
+// FindListUpdates is used to compare a new and old version of lists
+// it will compare the old version to the new version and return
+// which elements have been added or removed from the new version
+func FindListUpdates(oldList []int, newList []int) (additions []int, removals []int) {
+
+	removals = FindListDifference(oldList, newList)
+	additions = FindListDifference(newList, oldList)
+
+	return additions, removals
+}

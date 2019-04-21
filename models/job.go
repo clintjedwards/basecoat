@@ -15,4 +15,5 @@ type Job struct {
 	Notes       string   `json:"notes"`
 	Created     int64    `json:"created"`
 	Modified    int64    `json:"modified"`
+	Formulas    []int    `json:"formulas"` // Formula ids
 }

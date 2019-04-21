@@ -18,7 +18,11 @@
           <template v-if="props.item.contact_name !== ''">|</template>
           {{ props.item.contact_info }}
         </td>
-        <td>{{ props.item.street }} {{ props.item.city }}, {{ props.item.state }} {{ props.item.zipcode }}</td>
+        <td>
+          {{ props.item.street }} {{ props.item.city }}
+          <template v-if="props.item.city !== ''">,</template>
+          {{ props.item.state }} {{ props.item.zipcode }}
+        </td>
       </tr>
     </template>
   </v-data-table>

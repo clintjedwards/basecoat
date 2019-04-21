@@ -78,9 +78,11 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm12 md12 v-show="formMode === 'view'">
-                  <h5
-                    class="subheading font-weight-light text-capitalize"
-                  >{{ jobData.city }}, {{ jobData.state }} {{ jobData.zipcode }}</h5>
+                  <h5 class="subheading font-weight-light text-capitalize">
+                    {{ jobData.city }}
+                    <template v-if="jobData.city !== ''">,</template>
+                    {{ jobData.state }} {{ jobData.zipcode }}
+                  </h5>
                 </v-flex>
                 <v-flex xs12 sm4 md4>
                   <v-text-field label="City" v-model="jobData.city" v-show="formMode === 'edit'"></v-text-field>

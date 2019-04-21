@@ -205,16 +205,12 @@ const app = new Vue({
                 .post('/formulas', formulaData, {
                     headers
                 })
-                .then(function (response) {
-                    store.commit("hideCreateFormulaModal")
-                })
                 .catch(function (error) {
                     console.log(error)
                 })
                 .then(function () {
+                    store.commit("hideCreateFormulaModal")
                     self.loadFormulaData()
-                })
-                .then(function () {
                     self.$refs.createFormulaForm.clearForm()
                 })
         },
@@ -230,16 +226,12 @@ const app = new Vue({
                 .post('/jobs', jobData, {
                     headers
                 })
-                .then(function (response) {
-                    store.commit("hideAddJobModal")
-                })
                 .catch(function (error) {
                     console.log(error)
                 })
                 .then(function () {
+                    store.commit("hideAddJobModal")
                     self.loadJobData()
-                })
-                .then(function () {
                     self.$refs.addJobForm.clearForm()
                 })
         },
@@ -255,16 +247,12 @@ const app = new Vue({
                 .put('/formulas/' + formulaData.id, formulaData, {
                     headers
                 })
-                .then(function (response) {
-                    store.commit("hideManageFormulaModal")
-                })
                 .catch(function (error) {
                     console.log(error)
                 })
                 .then(function () {
+                    store.commit("hideManageFormulaModal")
                     self.loadFormulaData()
-                })
-                .then(function () {
                     self.$refs.manageFormulaForm.setFormModeView()
                 })
         },
@@ -280,16 +268,12 @@ const app = new Vue({
                 .put('/jobs/' + jobData.id, jobData, {
                     headers
                 })
-                .then(function (response) {
-                    store.commit("hideManageJobsModal")
-                })
                 .catch(function (error) {
                     console.log(error)
                 })
                 .then(function () {
                     self.loadJobData()
-                })
-                .then(function () {
+                    store.commit("hideManageJobsModal")
                     self.$refs.manageJobsForm.setFormModeView()
                 })
         },

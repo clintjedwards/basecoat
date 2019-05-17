@@ -1,9 +1,7 @@
 SHELL = /bin/bash
-GIT_COMMIT := $(shell git rev-parse --short HEAD)
-VERSION_FILE=VERSION.md
-VERSION=$(shell cat ${VERSION_FILE})
+VERSION=$(shell date +%s)
 
-GO_LDFLAGS := '-X "github.com/clintjedwards/basecoat/cmd.appVersion=$(VERSION) $(GIT_COMMIT)"'
+GO_LDFLAGS := '-X "github.com/clintjedwards/basecoat/cmd.appVersion=$(VERSION)"'
 
 build-dev:
 	npx webpack --config="./frontend/webpack.config.js" --mode="development"

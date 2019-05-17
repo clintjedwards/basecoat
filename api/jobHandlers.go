@@ -77,10 +77,15 @@ func (restAPI *API) updateJobHandler(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
 	err = restAPI.updateJob(vars["id"], &updatedJob)
+	if err == errJobExists {
+		utils.SendResponse(w, http.StatusConflict, fmt.Sprintf("job %s already exists", updatedJob.Name), true)
+		return
+	}
 	if err == errJobNotFound {
 		utils.SendResponse(w, http.StatusNotFound, fmt.Sprintf("%s: %s", errJobNotFound.Error(), vars["id"]), true)
 		return
-	} else if err != nil {
+	}
+	if err != nil {
 		utils.StructuredLog("error", "could not update jobs", err)
 		utils.SendResponse(w, http.StatusInternalServerError, "could not update job", true)
 		return

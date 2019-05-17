@@ -7,6 +7,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/models"
 	"github.com/clintjedwards/basecoat/utils"
+	pg "github.com/go-pg/pg"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -92,6 +93,15 @@ func (restAPI *API) updateFormula(id string, updatedFormula *models.Formula) err
 
 	updatedFormula.Modified = time.Now().Unix()
 
+	_, err := restAPI.db.Model(updatedFormula).Where("id = ?", id).Update()
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && pgErr.IntegrityViolation() {
+			return errFormulaExists
+		}
+		return err
+	}
+
 	currentFormula, _ := restAPI.getFormula(id)
 	additions, removals := utils.FindListUpdates(currentFormula.Jobs, updatedFormula.Jobs)
 
@@ -127,17 +137,17 @@ func (restAPI *API) updateFormula(id string, updatedFormula *models.Formula) err
 		}
 	}
 
-	_, err := restAPI.db.Model(updatedFormula).Where("id = ?", id).Update()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (restAPI *API) deleteFormula(id string) error {
 
 	currentFormula, err := restAPI.getFormula(id)
+	if err != nil {
+		return err
+	}
+
+	err = restAPI.db.Delete(currentFormula)
 	if err != nil {
 		return err
 	}
@@ -156,11 +166,6 @@ func (restAPI *API) deleteFormula(id string) error {
 		if err != nil {
 			continue
 		}
-	}
-
-	err = restAPI.db.Delete(currentFormula)
-	if err != nil {
-		return err
 	}
 
 	return nil

@@ -77,10 +77,15 @@ func (restAPI *API) updateFormulaHandler(w http.ResponseWriter, req *http.Reques
 	defer req.Body.Close()
 
 	err = restAPI.updateFormula(vars["id"], &updatedFormula)
+	if err == errFormulaExists {
+		utils.SendResponse(w, http.StatusConflict, fmt.Sprintf("formula %s already exists", updatedFormula.Name), true)
+		return
+	}
 	if err == errFormulaNotFound {
 		utils.SendResponse(w, http.StatusNotFound, fmt.Sprintf("%s: %s", errFormulaNotFound.Error(), vars["id"]), true)
 		return
-	} else if err != nil {
+	}
+	if err != nil {
 		utils.StructuredLog("error", "could not update formula", err)
 		utils.SendResponse(w, http.StatusInternalServerError, "could not update formula", true)
 		return

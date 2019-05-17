@@ -205,13 +205,20 @@ const app = new Vue({
                 .post('/formulas', formulaData, {
                     headers
                 })
-                .catch(function (error) {
-                    console.log(error)
-                })
                 .then(function () {
                     store.commit("hideCreateFormulaModal")
                     self.loadFormulaData()
                     self.$refs.createFormulaForm.clearForm()
+                })
+                .catch(function (error) {
+                    if (error.response.status == 409) {
+                        store.commit('displaySnackBar', "Could not create formula. Please make sure formula name is unique.")
+                        console.log(error.response)
+                        return
+                    }
+                    store.commit('displaySnackBar', "Could not create formula")
+                    console.log(error.response)
+                    return
                 })
         },
         submitAddJobForm: function (jobData) {
@@ -226,13 +233,15 @@ const app = new Vue({
                 .post('/jobs', jobData, {
                     headers
                 })
-                .catch(function (error) {
-                    console.log(error)
-                })
                 .then(function () {
                     store.commit("hideAddJobModal")
                     self.loadJobData()
                     self.$refs.addJobForm.clearForm()
+                })
+                .catch(function (error) {
+                    store.commit('displaySnackBar', "Could not create job")
+                    console.log(error)
+                    return
                 })
         },
         submitManageFormulaForm: function (formulaData) {
@@ -247,13 +256,20 @@ const app = new Vue({
                 .put('/formulas/' + formulaData.id, formulaData, {
                     headers
                 })
-                .catch(function (error) {
-                    console.log(error)
-                })
                 .then(function () {
                     store.commit("hideManageFormulaModal")
                     self.loadFormulaData()
                     self.$refs.manageFormulaForm.setFormModeView()
+                })
+                .catch(function (error) {
+                    if (error.response.status == 409) {
+                        store.commit('displaySnackBar', "Could not update formula. Please make sure formula name does not conflict with existing.")
+                        console.log(error.response)
+                        return
+                    }
+                    store.commit('displaySnackBar', "Could not update formula")
+                    console.log(error)
+                    return
                 })
         },
         submitManageJobsForm: function (jobData) {
@@ -268,13 +284,15 @@ const app = new Vue({
                 .put('/jobs/' + jobData.id, jobData, {
                     headers
                 })
-                .catch(function (error) {
-                    console.log(error)
-                })
                 .then(function () {
                     self.loadJobData()
                     store.commit("hideManageJobsModal")
                     self.$refs.manageJobsForm.setFormModeView()
+                })
+                .catch(function (error) {
+                    store.commit('displaySnackBar', "Could not update job")
+                    console.log(error)
+                    return
                 })
         },
         deleteJob: function (jobID) {
@@ -289,15 +307,16 @@ const app = new Vue({
                 .delete('/jobs/' + jobID, {
                     headers
                 })
-                .catch(function (error) {
-                    console.log(error)
-                })
                 .then(function () {
                     store.commit("hideManageJobsModal")
                     self.loadJobData()
                     self.$refs.manageJobsForm.setFormModeView()
                 })
-
+                .catch(function (error) {
+                    store.commit('displaySnackBar', "Could not delete job")
+                    console.log(error)
+                    return
+                })
         },
         deleteFormula: function (formulaID) {
             var self = this
@@ -311,13 +330,15 @@ const app = new Vue({
                 .delete('/formulas/' + formulaID, {
                     headers
                 })
-                .catch(function (error) {
-                    console.log(error)
-                })
                 .then(function () {
                     store.commit("hideManageFormulaModal")
                     self.loadFormulaData()
                     self.$refs.manageFormulaForm.setFormModeView()
+                })
+                .catch(function (error) {
+                    store.commit('displaySnackBar', "Could not delete formula")
+                    console.log(error)
+                    return
                 })
         },
     },

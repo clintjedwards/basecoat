@@ -7,6 +7,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/models"
 	"github.com/clintjedwards/basecoat/utils"
+	"github.com/go-pg/pg"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -92,10 +93,16 @@ func (restAPI *API) updateJob(id string, updatedJob *models.Job) error {
 
 	updatedJob.Modified = time.Now().Unix()
 
-	// If formulas are updated make sure those updates are reflected in all formula objects
+	_, err := restAPI.db.Model(updatedJob).Where("id = ?", id).Update()
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && pgErr.IntegrityViolation() {
+			return errJobExists
+		}
+		return err
+	}
 
 	currentJob, _ := restAPI.getJob(id)
-
 	additions, removals := utils.FindListUpdates(currentJob.Formulas, updatedJob.Formulas)
 
 	// Append job id to formula list in job
@@ -128,17 +135,17 @@ func (restAPI *API) updateJob(id string, updatedJob *models.Job) error {
 		}
 	}
 
-	_, err := restAPI.db.Model(updatedJob).Where("id = ?", id).Update()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (restAPI *API) deleteJob(id string) error {
 
 	currentJob, err := restAPI.getJob(id)
+	if err != nil {
+		return err
+	}
+
+	err = restAPI.db.Delete(currentJob)
 	if err != nil {
 		return err
 	}
@@ -161,11 +168,6 @@ func (restAPI *API) deleteJob(id string) error {
 				map[string]string{"error": err.Error(), "formulaID": strconv.Itoa(formulaID)})
 			continue
 		}
-	}
-
-	err = restAPI.db.Delete(currentJob)
-	if err != nil {
-		return err
 	}
 
 	return nil

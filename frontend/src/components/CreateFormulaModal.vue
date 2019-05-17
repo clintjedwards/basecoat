@@ -16,6 +16,7 @@
                 <v-flex xs12 sm6 md6>
                   <v-text-field
                     label="Formula Name"
+                    hint="Must be unique"
                     :rules="nameRules"
                     v-model="formulaData.name"
                     required
@@ -24,7 +25,7 @@
                 <v-flex xs12 sm6 md6>
                   <v-text-field
                     label="Formula Number"
-                    hint="custom unique number pertaining to formula"
+                    hint="Custom number used to reference formula"
                     :rules="numberRules"
                     v-model="formulaData.number"
                     required

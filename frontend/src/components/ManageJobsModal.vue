@@ -126,9 +126,15 @@
             <v-btn
               color="error darken-1"
               flat
-              v-show="formMode === 'view'"
-              @click="handleFormDelete()"
+              v-show="formMode === 'view' && !showConfirmDelete"
+              @click="showConfirmDelete = true"
             >Delete</v-btn>
+            <v-btn
+              color="error darken-1"
+              flat
+              v-show="formMode === 'view' && showConfirmDelete"
+              @click="handleFormDelete()"
+            >Confirm Delete</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="blue darken-1"
@@ -172,6 +178,7 @@ export default {
   data: function() {
     return {
       formMode: "view",
+      showConfirmDelete: false,
       jobData: {},
       states: [
         "Alabama",
@@ -259,6 +266,7 @@ export default {
     },
     handleFormDelete: function() {
       this.$emit("delete-job", this.jobData.id);
+      this.showConfirmDelete = false;
     }
   }
 };

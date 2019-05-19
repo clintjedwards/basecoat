@@ -175,9 +175,15 @@
             <v-btn
               color="error darken-1"
               flat
-              v-show="formMode === 'view'"
-              @click="handleFormDelete()"
+              v-show="formMode === 'view' && !showConfirmDelete"
+              @click="showConfirmDelete = true"
             >Delete</v-btn>
+            <v-btn
+              color="error darken-1"
+              flat
+              v-show="formMode === 'view' && showConfirmDelete"
+              @click="handleFormDelete()"
+            >Confirm Delete</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="blue darken-1"
@@ -221,6 +227,7 @@ export default {
   data: function() {
     return {
       formMode: "view",
+      showConfirmDelete: false,
       formulaData: {},
       nameRules: [v => !!v || "Formula Name is required"],
       numberRules: [v => !!v || "Formula Number is required"]
@@ -320,6 +327,7 @@ export default {
     },
     handleFormDelete: function() {
       this.$emit("delete-formula", this.formulaData.id);
+      this.showConfirmDelete = false;
     }
   }
 };

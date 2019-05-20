@@ -30,21 +30,21 @@
                 <v-flex xs12 sm6 md6>
                   <h6
                     class="subheading font-weight-light text-capitalize"
-                  >{{ jobData.contact_name }}</h6>
+                  >{{ jobData.contact.name }}</h6>
                 </v-flex>
                 <v-flex xs12 sm6 md6>
-                  <h6 class="subheading font-weight-light pull-right">{{ jobData.contact_info }}</h6>
+                  <h6 class="subheading font-weight-light pull-right">{{ jobData.contact.info }}</h6>
                 </v-flex>
               </v-layout>
               <v-layout wrap v-show="formMode === 'edit'">
                 <v-flex xs12 sm12 md12>
-                  <v-text-field label="Contact Name" v-model="jobData.contact_name"></v-text-field>
+                  <v-text-field label="Contact Name" v-model="jobData.contact.name"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm12 md12>
                   <v-text-field
                     label="Contact Info"
                     hint="This can be an email address, phone number, etc"
-                    v-model="jobData.contact_info"
+                    v-model="jobData.contact.info"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -172,14 +172,46 @@
   </v-layout>
 </template>
 
-<script>
-export default {
-  props: ["jobInView"],
+<script lang="ts">
+import Vue from "vue";
+import { UpdateJobRequest, Contact, Job } from "../basecoat_pb";
+
+let contact: Contact.AsObject = {
+  name: "",
+  info: ""
+};
+
+let jobData: UpdateJobRequest.AsObject = {
+  id: "",
+  name: "",
+  street: "",
+  street2: "",
+  city: "",
+  state: "",
+  zipcode: "",
+  notes: "",
+  formulasList: [],
+  contact: contact
+};
+
+let job: Job;
+
+export default Vue.extend({
+  props: ["jobIdInView"],
   data: function() {
     return {
       formMode: "view",
       showConfirmDelete: false,
-      jobData: {},
+      jobData: jobData,
+      jobInView: job,
+      nameRules: [
+        function(v: string) {
+          if (!!v) {
+            return true;
+          }
+          return "Company Name is required";
+        }
+      ],
       states: [
         "Alabama",
         "Alaska",
@@ -240,14 +272,19 @@ export default {
         "West Virginia",
         "Wisconsin",
         "Wyoming"
-      ],
-      nameRules: [v => !!v || "Company Name is required"]
+      ]
     };
   },
   watch: {
+    jobIdInView: function() {
+      this.jobInView = this.$store.state.jobData[this.jobIdInView];
+    },
     jobInView: function() {
       this.populateFormData();
     }
+  },
+  computed: {
+    formulaDataToList: function() {}
   },
   methods: {
     setFormModeEdit: function() {
@@ -257,10 +294,36 @@ export default {
       this.formMode = "view";
     },
     populateFormData: function() {
-      this.jobData = JSON.parse(JSON.stringify(this.jobInView));
+      let currentJob = this.jobInView;
+
+      this.jobData.id = currentJob.getId();
+      this.jobData.name = currentJob.getName();
+      this.jobData.street = currentJob.getStreet();
+      this.jobData.street2 = currentJob.getStreet2();
+      this.jobData.city = currentJob.getCity();
+      this.jobData.state = currentJob.getState();
+      this.jobData.zipcode = currentJob.getZipcode();
+      this.jobData.notes = currentJob.getNotes();
+      this.jobData.formulasList = currentJob.getFormulasList();
+
+      let contact: Contact.AsObject;
+      contact = {
+        name: "",
+        info: ""
+      };
+
+      if (currentJob.getContact() != undefined) {
+        let currentContact = currentJob.getContact() || new Contact();
+        contact = {
+          name: currentContact.getName(),
+          info: currentContact.getInfo()
+        };
+      }
+
+      this.jobData.contact = contact;
     },
     handleFormSave: function() {
-      if (this.$refs.manageJobsForm.validate()) {
+      if ((this.$refs.manageJobsForm as HTMLFormElement).validate()) {
         this.$emit("submit-manage-jobs-form", this.jobData);
       }
     },
@@ -269,7 +332,7 @@ export default {
       this.showConfirmDelete = false;
     }
   }
-};
+});
 </script>
 
 <style scoped>

@@ -26,7 +26,6 @@
                   <v-text-field
                     label="Formula Number"
                     hint="Custom number used to reference formula"
-                    :rules="numberRules"
                     v-model="formulaData.number"
                     required
                   ></v-text-field>
@@ -40,7 +39,7 @@
               <v-layout
                 row
                 wrap
-                v-for="(base, index) in formulaData.base"
+                v-for="(base, index) in formulaData.basesList"
                 v-bind:key="`base-${index}`"
               >
                 <v-flex xs10 sm9>
@@ -64,7 +63,7 @@
               <v-layout
                 row
                 wrap
-                v-for="(colorant, index) in formulaData.colorants"
+                v-for="(colorant, index) in formulaData.colorantsList"
                 v-bind:key="`colorant-${index}`"
               >
                 <v-flex xs9 sm9>
@@ -89,7 +88,7 @@
                 <v-flex xs12>
                   <v-autocomplete
                     v-model="formulaData.jobs"
-                    :items="$store.state.jobData"
+                    :items="jobDataToList"
                     item-text="name"
                     item-value="id"
                     hide-selected
@@ -134,83 +133,98 @@
   </v-layout>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from "vue";
+import {
+  Formula,
+  Base,
+  Colorant,
+  CreateFormulaRequest,
+  Job
+} from "../basecoat_pb";
+
+let baseList: Base.AsObject[] = [];
+let colorantList: Colorant.AsObject[] = [];
+
+let formulaData: CreateFormulaRequest.AsObject = {
+  name: "",
+  number: "",
+  jobsList: [],
+  basesList: baseList,
+  colorantsList: colorantList,
+  notes: ""
+};
+
+interface modifiedJob {
+  id: string;
+  name: string;
+  street: string;
+}
+
+export default Vue.extend({
   data: function() {
     return {
-      formulaData: {
-        name: "",
-        number: "",
-        jobs: [],
-        base: [
-          {
-            name: "",
-            amount: ""
+      formulaData: formulaData,
+      nameRules: [
+        function(v: string) {
+          if (!!v) {
+            return true;
           }
-        ],
-        colorants: [
-          {
-            name: "",
-            amount: ""
-          }
-        ],
-        notes: ""
-      },
-      nameRules: [v => !!v || "Formula Name is required"],
-      numberRules: [v => !!v || "Formula Number is required"]
+          return "Formula Name is required";
+        }
+      ]
     };
+  },
+  computed: {
+    jobDataToList(): modifiedJob[] {
+      let jobDataMap: { [key: string]: Job } = this.$store.state.jobData;
+      let jobDataList: modifiedJob[] = [];
+
+      for (const [key, value] of Object.entries(jobDataMap)) {
+        let job: modifiedJob;
+        job = {
+          id: value.getId(),
+          name: value.getName(),
+          street: value.getStreet()
+        };
+        jobDataList.push(job);
+      }
+      return jobDataList;
+    }
   },
   methods: {
     addBaseField: function() {
-      this.formulaData.base.push({
+      this.formulaData.basesList.push({
+        type: "",
         name: "",
         amount: ""
       });
     },
     addColorantField: function() {
-      this.formulaData.colorants.push({
+      this.formulaData.colorantsList.push({
+        type: "",
         name: "",
         amount: ""
       });
     },
-    removeColorantField: function(index) {
-      this.formulaData.colorants.splice(index, 1);
+    removeColorantField: function(index: number) {
+      this.formulaData.colorantsList.splice(index, 1);
     },
-    removeBaseField: function(index) {
-      this.formulaData.base.splice(index, 1);
+    removeBaseField: function(index: number) {
+      this.formulaData.basesList.splice(index, 1);
     },
     clearForm: function() {
-      this.$refs.createFormulaForm.reset();
-      this.formulaData.base = [{ name: "", amount: "" }];
-      this.formulaData.colorants = [{ name: "", amount: "" }];
+      (this.$refs.createFormulaForm as HTMLFormElement).reset();
+      this.formulaData.basesList = [{ type: "", name: "", amount: "" }];
+      this.formulaData.colorantsList = [{ type: "", name: "", amount: "" }];
     },
     handleFormSave: function() {
-      let newFormulaData = this.flattenFormulaData(this.formulaData);
-      if (this.$refs.createFormulaForm.validate()) {
-        this.$emit("submit-create-form", newFormulaData);
+      if ((this.$refs.createFormulaForm as HTMLFormElement).validate()) {
+        this.$emit("submit-create-form", this.formulaData);
       }
-    },
-    flattenFormulaData: function(formulaData) {
-      var flattenedData = JSON.parse(JSON.stringify(this.formulaData));
-      flattenedData.base = {};
-      flattenedData.colorants = {};
-
-      formulaData.base.forEach(function(base) {
-        if (base.name == "") {
-          return;
-        }
-        flattenedData.base[base.name] = base.amount;
-      });
-
-      formulaData.colorants.forEach(function(colorant) {
-        if (colorant.name == "") {
-          return;
-        }
-        flattenedData.colorants[colorant.name] = colorant.amount;
-      });
-
-      return flattenedData;
     }
   }
-};
+});
 </script>
+
+

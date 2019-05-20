@@ -2,21 +2,24 @@ const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
-    entry: path.resolve(__dirname, 'src'),
+    entry: path.resolve(__dirname, './src/index.ts'),
     context: path.resolve(__dirname, 'frontend'),
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'public/javascript')
     },
-    resolve: {
-        alias: {
-            'vue$': 'vue/dist/vue.esm.js'
-        },
-    },
     module: {
         rules: [{
             test: /\.vue$/,
             loader: 'vue-loader',
+        },
+        {
+            test: /\.tsx?$/,
+            loader: 'ts-loader',
+            exclude: /node_modules/,
+            options: {
+                appendTsSuffixTo: [/\.vue$/],
+            }
         },
         {
             test: /\.js$/,
@@ -31,6 +34,12 @@ module.exports = {
             ]
         }
         ]
+    },
+    resolve: {
+        extensions: ['.ts', '.js', '.vue', '.json'],
+        alias: {
+            'vue$': 'vue/dist/vue.esm.js'
+        },
     },
     plugins: [
         new VueLoaderPlugin()

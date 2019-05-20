@@ -13,7 +13,7 @@ var cmdServer = &cobra.Command{
 }
 
 func runServerCmd(cmd *cobra.Command, args []string) {
-	app.RunServer(app.InitializeApplication())
+	app.StartServices()
 }
 
 func init() {

@@ -28,8 +28,7 @@
                 <v-flex xs12 sm6 md6 v-show="formMode === 'edit'">
                   <v-text-field
                     label="Formula Number"
-                    hint="custom unique number pertaining to formula"
-                    :rules="numberRules"
+                    hint="Custom number used to reference formula"
                     v-model="formulaData.number"
                     required
                   ></v-text-field>
@@ -43,7 +42,7 @@
               <v-layout
                 row
                 wrap
-                v-for="(base, index) in formulaData.base"
+                v-for="(base, index) in formulaData.basesList"
                 v-bind:key="`base-${index}`"
               >
                 <v-list v-show="formMode === 'view'" style="width:100%;">
@@ -81,7 +80,7 @@
               <v-layout
                 row
                 wrap
-                v-for="(colorant, index) in formulaData.colorants"
+                v-for="(colorant, index) in formulaData.colorantsList"
                 v-bind:key="`colorant-${index}`"
               >
                 <v-list v-show="formMode === 'view'" style="width:100%;">
@@ -117,16 +116,16 @@
               <v-spacer>Jobs</v-spacer>
               <v-layout>
                 <v-list two-line v-show="formMode === 'view'" style="width:100%;">
-                  <template v-for="(job, index) in formulaData.jobs">
+                  <template v-for="(jobID, index) in formulaData.jobsList">
                     <v-list-tile v-bind:key="`job-tile-${index}`">
                       <v-list-tile-content>
-                        <v-list-tile-title v-text="jobDictionary[job].name"></v-list-tile-title>
+                        <v-list-tile-title v-text="$store.state.jobData[jobID].getName()"></v-list-tile-title>
                         <v-list-tile-sub-title>
-                          {{ jobDictionary[job].street }} {{ jobDictionary[job].city }}
+                          {{ $store.state.jobData[jobID].getStreet() }} {{ $store.state.jobData[jobID].getCity() }}
                           <template
-                            v-if="jobDictionary[job].city !== ''"
+                            v-if="$store.state.jobData[jobID].getCity() !== ''"
                           >,</template>
-                          {{ jobDictionary[job].state }} {{ jobDictionary[job].zipcode }}
+                          {{ $store.state.jobData[jobID].getState() }} {{ $store.state.jobData[jobID].getZipcode() }}
                         </v-list-tile-sub-title>
                       </v-list-tile-content>
                     </v-list-tile>
@@ -136,8 +135,8 @@
 
                 <v-flex xs12 v-show="formMode === 'edit'">
                   <v-autocomplete
-                    v-model="formulaData.jobs"
-                    :items="$store.state.jobData"
+                    v-model="formulaData.jobsList"
+                    :items="jobDataToList"
                     item-text="name"
                     item-value="id"
                     hide-selected
@@ -221,32 +220,89 @@
   </v-layout>
 </template>
 
-<script>
-export default {
-  props: ["formulaInView"],
+<script lang="ts">
+import Vue from "vue";
+import {
+  UpdateFormulaRequest,
+  Base,
+  Colorant,
+  Job,
+  Formula
+} from "../basecoat_pb";
+
+let baseList: Base.AsObject[] = [];
+let colorantList: Colorant.AsObject[] = [];
+
+let formulaData: UpdateFormulaRequest.AsObject = {
+  id: "",
+  name: "",
+  number: "",
+  jobsList: [],
+  basesList: baseList,
+  colorantsList: colorantList,
+  notes: ""
+};
+
+let formula: Formula;
+
+export default Vue.extend({
+  props: ["formulaIdInView"],
   data: function() {
     return {
       formMode: "view",
       showConfirmDelete: false,
-      formulaData: {},
-      nameRules: [v => !!v || "Formula Name is required"],
-      numberRules: [v => !!v || "Formula Number is required"]
+      formulaData: formulaData,
+      formulaInView: formula,
+      nameRules: [
+        function(v: string) {
+          if (!!v) {
+            return true;
+          }
+          return "Formula Name is required";
+        }
+      ]
     };
   },
   watch: {
+    formulaIdInView: function() {
+      this.formulaInView = this.$store.state.formulaData[this.formulaIdInView];
+    },
     formulaInView: function() {
       this.populateFormData();
     }
   },
   computed: {
-    jobDictionary: function() {
-      let jobDictionary = {};
+    jobDataToList: function() {
+      interface modifiedJob {
+        id: string;
+        name: string;
+        street: string;
+      }
 
-      this.$store.state.jobData.forEach(function(job) {
-        jobDictionary[job.id] = job;
-      });
+      let jobDataMap: { [key: string]: Job } = this.$store.state.jobData;
+      let jobDataList: Job[] = [];
 
-      return jobDictionary;
+      for (const [key, value] of Object.entries(jobDataMap)) {
+        jobDataList.push(value);
+      }
+      let modifiedJobList: modifiedJob[] = [];
+      let job: Job;
+
+      for (job of jobDataList) {
+        let modifiedJob: modifiedJob = {
+          id: "",
+          name: "",
+          street: ""
+        };
+
+        modifiedJob.id = job.getId();
+        modifiedJob.name = job.getName();
+        modifiedJob.street = job.getStreet();
+
+        modifiedJobList.push(modifiedJob);
+      }
+
+      return modifiedJobList;
     }
   },
   methods: {
@@ -257,80 +313,83 @@ export default {
       this.formMode = "view";
     },
     populateFormData: function() {
-      this.formulaData = JSON.parse(JSON.stringify(this.formulaInView));
-      this.formulaData.base = [];
-      this.formulaData.colorants = [];
+      let currentFormula = this.formulaInView;
 
-      for (var key in this.formulaInView.base) {
-        this.formulaData.base.push({
-          name: key,
-          amount: this.formulaInView.base[key]
-        });
-      }
+      this.formulaData.id = currentFormula.getId();
+      this.formulaData.name = currentFormula.getName();
+      this.formulaData.number = currentFormula.getNumber();
+      this.formulaData.notes = currentFormula.getNotes();
+      this.formulaData.jobsList = currentFormula.getJobsList();
 
-      for (var key in this.formulaInView.colorants) {
-        this.formulaData.colorants.push({
-          name: key,
-          amount: this.formulaInView.colorants[key]
+      //We need to format this as an object because the protomessage type resoves as a weird array
+      let basesList: Base.AsObject[] = [];
+      currentFormula
+        .getBasesList()
+        .forEach(function(item: Base, index: number) {
+          let newBase: Base.AsObject;
+          newBase = {
+            type: item.getType(),
+            name: item.getName(),
+            amount: item.getAmount()
+          };
+
+          basesList.push(newBase);
         });
-      }
+
+      //We need to format this as an object because the protomessage type resoves as a weird array
+      let colorantsList: Colorant.AsObject[] = [];
+      currentFormula
+        .getColorantsList()
+        .forEach(function(item: Colorant, index: number) {
+          let newColorant: Colorant.AsObject;
+          newColorant = {
+            type: item.getType(),
+            name: item.getName(),
+            amount: item.getAmount()
+          };
+
+          colorantsList.push(newColorant);
+        });
+
+      this.formulaData.basesList = basesList;
+      this.formulaData.colorantsList = colorantsList;
     },
     addBaseField: function() {
-      this.formulaData.base.push({
+      this.formulaData.basesList.push({
+        type: "",
         name: "",
         amount: ""
       });
     },
     addColorantField: function() {
-      this.formulaData.colorants.push({
+      this.formulaData.colorantsList.push({
+        type: "",
         name: "",
         amount: ""
       });
     },
-    removeColorantField: function(index) {
-      this.formulaData.colorants.splice(index, 1);
+    removeColorantField: function(index: number) {
+      this.formulaData.colorantsList.splice(index, 1);
     },
-    removeBaseField: function(index) {
-      this.formulaData.base.splice(index, 1);
+    removeBaseField: function(index: number) {
+      this.formulaData.basesList.splice(index, 1);
     },
     clearForm: function() {
-      this.$refs.manageFormulaForm.reset();
-      this.formulaData.base = [{ name: "", amount: "" }];
-      this.formulaData.colorants = [{ name: "", amount: "" }];
+      (this.$refs.manageFormulaForm as HTMLFormElement).reset();
+      this.formulaData.basesList = [{ type: "", name: "", amount: "" }];
+      this.formulaData.colorantsList = [{ type: "", name: "", amount: "" }];
     },
     handleFormSave: function() {
-      let newFormulaData = this.flattenFormulaData(this.formulaData);
-      if (this.$refs.manageFormulaForm.validate()) {
-        this.$emit("submit-manage-formula-form", newFormulaData);
+      if ((this.$refs.manageFormulaForm as HTMLFormElement).validate()) {
+        this.$emit("submit-manage-formula-form", this.formulaData);
       }
-    },
-    flattenFormulaData: function(formulaData) {
-      var flattenedData = JSON.parse(JSON.stringify(this.formulaData));
-      flattenedData.base = {};
-      flattenedData.colorants = {};
-
-      formulaData.base.forEach(function(base) {
-        if (base.name == "") {
-          return;
-        }
-        flattenedData.base[base.name] = base.amount;
-      });
-
-      formulaData.colorants.forEach(function(colorant) {
-        if (colorant.name == "") {
-          return;
-        }
-        flattenedData.colorants[colorant.name] = colorant.amount;
-      });
-
-      return flattenedData;
     },
     handleFormDelete: function() {
       this.$emit("delete-formula", this.formulaData.id);
       this.showConfirmDelete = false;
     }
   }
-};
+});
 </script>
 
 <style scoped>

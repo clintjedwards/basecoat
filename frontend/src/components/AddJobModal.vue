@@ -24,13 +24,13 @@
               </v-layout>
               <v-layout wrap>
                 <v-flex xs12 sm6 md6>
-                  <v-text-field label="Contact Name" v-model="jobData.contact_name"></v-text-field>
+                  <v-text-field label="Contact Name" v-model="jobData.contact.name"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md6>
                   <v-text-field
                     label="Contact Info"
                     hint="This can be an email address, phone number, etc"
-                    v-model="jobData.contact_info"
+                    v-model="jobData.contact.info"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -85,21 +85,29 @@
   </v-layout>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from "vue";
+import { Contact, CreateJobRequest } from "../basecoat_pb";
+
+let contact: Contact.AsObject = { name: "", info: "" };
+let formulaList: string[] = [];
+
+let jobData: CreateJobRequest.AsObject = {
+  name: "",
+  street: "",
+  street2: "",
+  city: "",
+  state: "",
+  zipcode: "",
+  notes: "",
+  formulasList: formulaList,
+  contact: contact
+};
+
+export default Vue.extend({
   data: function() {
     return {
-      jobData: {
-        name: "",
-        contact_name: "",
-        contact_info: "",
-        street: "",
-        street2: "",
-        city: "",
-        state: "",
-        zipcode: "",
-        notes: ""
-      },
+      jobData: jobData,
       states: [
         "Alabama",
         "Alaska",
@@ -161,18 +169,25 @@ export default {
         "Wisconsin",
         "Wyoming"
       ],
-      nameRules: [v => !!v || "Company Name is required"]
+      nameRules: [
+        function(v: string) {
+          if (!!v) {
+            return true;
+          }
+          return "Company Name is required";
+        }
+      ]
     };
   },
   methods: {
     clearForm: function() {
-      this.$refs.addJobForm.reset();
+      (this.$refs.addJobForm as HTMLFormElement).reset();
     },
     handleFormSave: function() {
-      if (this.$refs.addJobForm.validate()) {
+      if ((this.$refs.addJobForm as HTMLFormElement).validate()) {
         this.$emit("submit-add-job-form", this.jobData);
       }
     }
   }
-};
+});
 </script>

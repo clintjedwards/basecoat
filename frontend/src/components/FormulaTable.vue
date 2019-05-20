@@ -2,7 +2,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="stringifyFormulaData"
+    :items="formulaDataToList"
     :search="$store.state.formulaTableSearchTerm"
     hide-actions
   >
@@ -10,7 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        v-on:click="$store.commit('showManageFormulaModal', props.index)"
+        v-on:click="$store.commit('showManageFormulaModal', props.item.id)"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>{{ props.item.number }}</td>
@@ -22,8 +22,20 @@
   </v-data-table>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from "vue";
+import { Formula } from "../basecoat_pb";
+
+interface modifiedFormula {
+  id: string;
+  name: string;
+  number: string;
+  base: string;
+  colorants: number;
+  created: number;
+}
+
+export default Vue.extend({
   data: function() {
     return {
       headers: [
@@ -57,29 +69,45 @@ export default {
     // the formula table sorts based on the data structure that
     // you pass it. So you have to pass it a data structure with
     // correct types in order of it to sort properly
-    stringifyFormulaData: function() {
-      let modifiedFormulaList = JSON.parse(
-        JSON.stringify(this.$store.state.formulaData)
-      );
-      let formula = "";
+    formulaDataToList(): modifiedFormula[] {
+      let formulaDataMap: { [key: string]: Formula } = this.$store.state
+        .formulaData;
+      let formulaDataList: Formula[] = [];
 
-      for (formula of modifiedFormulaList) {
-        if (formula.base == null) {
-          formula.base = { "": "" };
-        }
+      for (const [key, value] of Object.entries(formulaDataMap)) {
+        formulaDataList.push(value);
+      }
 
-        if (formula.colorants == null) {
-          formula.colorants = {};
+      let modifiedFormulaList: modifiedFormula[] = [];
+      let formula: Formula;
+
+      for (formula of formulaDataList) {
+        let modifiedFormula: modifiedFormula = {
+          id: "",
+          name: "",
+          number: "",
+          base: "",
+          colorants: 0,
+          created: 0
+        };
+
+        modifiedFormula.id = formula.getId();
+        modifiedFormula.colorants = formula.getColorantsList().length;
+        modifiedFormula.name = formula.getName();
+        modifiedFormula.number = formula.getNumber();
+        modifiedFormula.created = formula.getCreated();
+        modifiedFormula.base = "None";
+
+        if (formula.getBasesList().length != 0) {
+          modifiedFormula.base = formula.getBasesList()[0].getName();
         }
-        formula.base = String(Object.keys(formula.base)[0]);
-        formula.colorants = Object.keys(formula.colorants).length;
-        formula.created = parseInt(formula.created);
+        modifiedFormulaList.push(modifiedFormula);
       }
 
       return modifiedFormulaList;
     }
   }
-};
+});
 </script>
 
 <style scoped>

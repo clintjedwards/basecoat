@@ -2,7 +2,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="this.$store.state.jobData"
+    :items="jobDataToList"
     :search="$store.state.jobTableSearchTerm"
     hide-actions
   >
@@ -10,7 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        @click="$store.commit('showManageJobsModal', props.index)"
+        @click="$store.commit('showManageJobsModal', props.item.id)"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>
@@ -28,8 +28,11 @@
   </v-data-table>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from "vue";
+import { Job, Contact } from "../basecoat_pb";
+
+export default Vue.extend({
   data: function() {
     return {
       headers: [
@@ -48,8 +51,60 @@ export default {
         }
       ]
     };
+  },
+  computed: {
+    jobDataToList: function() {
+      interface modifiedJob {
+        id: string;
+        name: string;
+        contact_name: string;
+        contact_info: string;
+        street: string;
+        city: string;
+        state: string;
+        zipcode: string;
+      }
+
+      let jobDataMap: { [key: string]: Job } = this.$store.state.jobData;
+      let jobDataList: Job[] = [];
+
+      for (const [key, value] of Object.entries(jobDataMap)) {
+        jobDataList.push(value);
+      }
+      let modifiedJobList: modifiedJob[] = [];
+      let job: Job;
+
+      for (job of jobDataList) {
+        let modifiedJob: modifiedJob = {
+          id: "",
+          name: "",
+          contact_name: "",
+          contact_info: "",
+          street: "",
+          city: "",
+          state: "",
+          zipcode: ""
+        };
+
+        modifiedJob.id = job.getId();
+        modifiedJob.name = job.getName();
+        let jobContact = job.getContact();
+        if (jobContact != undefined) {
+          modifiedJob.contact_name = jobContact.getName();
+          modifiedJob.contact_info = jobContact.getInfo();
+        }
+        modifiedJob.street = job.getStreet();
+        modifiedJob.city = job.getCity();
+        modifiedJob.state = job.getState();
+        modifiedJob.zipcode = job.getZipcode();
+
+        modifiedJobList.push(modifiedJob);
+      }
+
+      return modifiedJobList;
+    }
   }
-};
+});
 </script>
 
 <style scoped>

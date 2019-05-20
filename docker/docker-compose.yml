@@ -2,10 +2,7 @@ version: "3"
 
 services:
   basecoat_db:
-    image: postgres
-    env_file:
-      - .env
+    image: google/cloud-sdk
+    command: gcloud beta emulators datastore start --project=test --host-port 0.0.0.0:8000
     ports:
-      - "5432:5432"
-    expose:
-      - "5432"
+      - "8000:8000"

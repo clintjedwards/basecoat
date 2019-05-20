@@ -58,8 +58,10 @@
   </v-layout>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from "vue";
+
+export default Vue.extend({
   data: function() {
     return {
       showPass: false,
@@ -67,23 +69,32 @@ export default {
         username: "",
         password: ""
       },
-      nameRules: [v => !!v || "Username is required"],
-      passwordRules: [v => !!v || "Password is required"]
+      nameRules: [
+        function(v: string) {
+          if (!!v) {
+            return true;
+          }
+          return "Username is required";
+        }
+      ],
+      passwordRules: [
+        function(v: string) {
+          if (!!v) {
+            return true;
+          }
+          return "Password is required";
+        }
+      ]
     };
   },
   methods: {
     handleLogin: function() {
-      if (this.$refs.loginForm.validate()) {
-        let loginData = {};
-        loginData.username = this.loginInfo.username;
-        loginData.token = btoa(
-          this.loginInfo.username + ":" + this.loginInfo.password
-        );
-        this.$emit("validate-login", loginData);
+      if ((this.$refs.loginForm as HTMLFormElement).validate()) {
+        this.$emit("validate-login", this.loginInfo);
       }
     }
   }
-};
+});
 </script>
 
 <style scoped>

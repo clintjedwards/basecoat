@@ -50,10 +50,10 @@
                 <template slot="heading">Add Job</template>
             </add-job-modal>
             <manage-formula-modal ref="manageFormulaForm" @submit-manage-formula-form="submitManageFormulaForm"
-                @delete-formula="deleteFormula" :formula-in-view="$store.state.formulaInView">
+                @delete-formula="deleteFormula" :formula-id-in-view="$store.state.formulaIdInView">
             </manage-formula-modal>
             <manage-jobs-modal ref="manageJobsForm" @submit-manage-jobs-form="submitManageJobsForm"
-                @delete-job="deleteJob" :job-in-view="$store.state.jobInView">
+                @delete-job="deleteJob" :job-id-in-view="$store.state.jobIdInView">
             </manage-jobs-modal>
             <login-modal ref="loginForm" @validate-login="validateLogin"></login-modal>
 

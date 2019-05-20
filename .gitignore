@@ -13,3 +13,13 @@ node_modules/
 dist/*
 -dist/.gitkeep
 main.js
+
+#protobuf
+*.pb.go
+*_pb.d.ts
+*_pb.js
+*Pb.ts
+
+#localhost cert files
+*.crt
+*.key

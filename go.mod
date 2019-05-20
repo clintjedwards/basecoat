@@ -1,26 +1,30 @@
 module github.com/clintjedwards/basecoat
 
 require (
-	github.com/corpix/uarand v0.0.0 // indirect
-	github.com/go-pg/pg v7.0.0+incompatible
-	github.com/gobuffalo/envy v1.6.15 // indirect
-	github.com/gobuffalo/packd v0.0.0-20190224160250-d04dd98aca5b // indirect
-	github.com/gobuffalo/packr v1.22.0
-	github.com/gobuffalo/syncx v0.0.0-20190224160051-33c29581e754 // indirect
-	github.com/golang/protobuf v1.3.0 // indirect
+	cloud.google.com/go v0.34.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gobuffalo/packr v1.25.0
+	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/golang/protobuf v1.3.1
+	github.com/google/go-cmp v0.3.0
+	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
 	github.com/gorilla/handlers v1.4.0
-	github.com/gorilla/mux v1.7.0
-	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
-	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
+	github.com/gorilla/mux v1.7.2
+	github.com/gorilla/websocket v1.4.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
+	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c
+	github.com/improbable-eng/grpc-web v0.9.5
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/rogpeppe/go-internal v1.2.2 // indirect
-	github.com/sirupsen/logrus v1.4.0
+	github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223 // indirect
+	github.com/rs/cors v1.6.0 // indirect
+	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/cobra v0.0.3
-	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25 // indirect
-	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95 // indirect
-	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6 // indirect
-	golang.org/x/sys v0.0.0-20190303192550-c2f5717e611c // indirect
-	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 // indirect
-	mellium.im/sasl v0.2.1 // indirect
+	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
+	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6 // indirect
+	golang.org/x/sys v0.0.0-20190426135247-a129542de9ae // indirect
+	golang.org/x/text v0.3.2 // indirect
+	google.golang.org/api v0.5.0 // indirect
+	google.golang.org/genproto v0.0.0-20190425155659-357c62f0e4bb // indirect
+	google.golang.org/grpc v1.20.1
 )

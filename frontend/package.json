@@ -23,13 +23,13 @@
     "google-protobuf": "^3.8.0",
     "grpc-web": "^1.0.4",
     "ts-loader": "^6.0.2",
-    "typescript": "^3.5.1",
+    "typescript": "^3.5.2",
     "vue": "^2.6.10",
     "vue-cookies": "^1.5.13",
     "vue-loader": "^15.7.0",
     "vue-template-compiler": "^2.6.10",
     "vuetify": "^1.5.14",
     "vuex": "^3.1.1",
-    "webpack": "^4.33.0"
+    "webpack": "^4.34.0"
   }
 }

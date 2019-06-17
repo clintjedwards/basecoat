@@ -1,5 +1,6 @@
 const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const webpack = require('webpack')
 
 module.exports = {
     entry: path.resolve(__dirname, './src/index.ts'),
@@ -42,6 +43,25 @@ module.exports = {
         },
     },
     plugins: [
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new webpack.DefinePlugin({ __API__: apiHost })
     ]
 };
+
+var apiHost;
+
+var setupAPI = function () {
+    switch (process.env.NODE_ENV) {
+        case 'production':
+            apiHost = "'https://basecoat.clintjedwards.com'";
+            break;
+        case 'development':
+            apiHost = "'https://localhost:8080'";
+            break;
+        default:
+            apiHost = "'https://localhost:8080'";
+            break;
+    }
+}
+
+setupAPI();

@@ -18,20 +18,20 @@ build: check-path-included
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
 	go test ./utils
-	npx webpack --config="./frontend/webpack.config.js" --mode="development"
+	npm run --prefix ./frontend build:production
 	packr build -ldflags $(GO_LDFLAGS) -o $(path)
 
 run:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
-	npx webpack --config="./frontend/webpack.config.js" --mode="development"
+	npm run --prefix ./frontend build:development
 	packr build -ldflags $(GO_LDFLAGS) -o /tmp/basecoat && /tmp/basecoat server
 
 install:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	go mod tidy
-	npx webpack --config="./frontend/webpack.config.js" --mode="production"
+	npm run --prefix ./frontend build:production
 	packr build -ldflags $(GO_LDFLAGS) -o /tmp/basecoat
 	sudo mv /tmp/basecoat /usr/local/bin/
 	chmod +x /usr/local/bin/basecoat

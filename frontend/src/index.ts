@@ -35,6 +35,9 @@ Vue.use(Vuex)
 Vue.use(Vuetify)
 Vue.use(VueCookies)
 
+let __API__: string = ""
+let hostURL = __API__
+
 interface LoginInfo {
     username: string;
     password: string;
@@ -184,7 +187,7 @@ const app = new Vue({
         LoginModal
     },
     created: function () {
-        client = new BasecoatClient("https://basecoat.clintjedwards.com", null, null);
+        client = new BasecoatClient(hostURL, null, null);
     },
     methods: {
         checkLogin: function () {

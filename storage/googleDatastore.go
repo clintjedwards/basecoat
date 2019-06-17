@@ -18,13 +18,12 @@ type googleDatastore struct {
 
 func (db *googleDatastore) Init(config *config.Config) error {
 
-	context := context.Background()
-
 	if config.Database.GoogleDatastore.EmulatorHost != "" {
 		os.Setenv("DATASTORE_EMULATOR_HOST", config.Database.GoogleDatastore.EmulatorHost)
+		utils.StructuredLog(utils.LogLevelInfo, "connecting to google datastore emulator", config.Database.GoogleDatastore.EmulatorHost)
 	}
 
-	client, err := datastore.NewClient(context, config.Database.GoogleDatastore.ProjectID)
+	client, err := datastore.NewClient(context.Background(), config.Database.GoogleDatastore.ProjectID)
 	if err != nil {
 		return err
 	}

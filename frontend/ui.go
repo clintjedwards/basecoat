@@ -40,7 +40,7 @@ func InitHTTPService(config *config.Config, server *grpc.Server) {
 
 	router := mux.NewRouter()
 
-	if config.Frontend {
+	if config.Frontend.Enable {
 		frontend := NewFrontend()
 		frontend.RegisterUIRoutes(router)
 		utils.StructuredLog(utils.LogLevelInfo, "basecoat frontend enabled", config.Frontend)

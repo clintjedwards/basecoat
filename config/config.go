@@ -26,12 +26,21 @@ type GoogleDatastoreConfig struct {
 // Config refers to general application configuration
 type Config struct {
 	Debug       bool   `envconfig:"debug" default:"false"`
-	Frontend    bool   `envconfig:"frontend" default:"true"`
 	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"`
 	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`
+	Frontend    *FrontendConfig
 	Backend     *BackendConfig
 	Database    *DatabaseConfig
 	CommandLine *CommandLineConfig
+}
+
+// FrontendConfig represents configuration for frontend basecoat
+type FrontendConfig struct {
+	Enable bool `envconfig:"frontend_enable" default:"true"`
+	// This envvar is not used from this config but is here for completeness
+	// it is set in the makefile and is injected into the js code at build time.
+	// It controls where the frontend client should look for the gprc backend
+	APIHost string `envconfig:"frontend_api_host" default:"https://localhost:8080"`
 }
 
 // BackendConfig represents configuration for backend basecoat grpc service

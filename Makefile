@@ -13,6 +13,7 @@ build-backend: check-path-included
 	go test ./utils
 	go build -ldflags $(GO_LDFLAGS) -o $(path)
 
+build: export FRONTEND_API_HOST="https://basecoat.clintjedwards.com"
 build: check-path-included
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
@@ -21,6 +22,7 @@ build: check-path-included
 	npm run --prefix ./frontend build:production
 	packr build -ldflags $(GO_LDFLAGS) -o $(path)
 
+run: export FRONTEND_API_HOST="https://localhost:8080"
 run:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto

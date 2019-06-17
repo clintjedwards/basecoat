@@ -11,29 +11,29 @@ module.exports = {
     },
     module: {
         rules: [{
-            test: /\.vue$/,
-            loader: 'vue-loader',
-        },
-        {
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            exclude: /node_modules/,
-            options: {
-                appendTsSuffixTo: [/\.vue$/],
+                test: /\.vue$/,
+                loader: 'vue-loader',
+            },
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+                options: {
+                    appendTsSuffixTo: [/\.vue$/],
+                }
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'vue-style-loader',
+                    'css-loader'
+                ]
             }
-        },
-        {
-            test: /\.js$/,
-            exclude: /node_modules/,
-            loader: 'babel-loader'
-        },
-        {
-            test: /\.css$/,
-            use: [
-                'vue-style-loader',
-                'css-loader'
-            ]
-        }
         ]
     },
     resolve: {
@@ -44,24 +44,8 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new webpack.DefinePlugin({ __API__: apiHost })
+        new webpack.DefinePlugin({
+            __API__: process.env.FRONTEND_API_HOST
+        })
     ]
 };
-
-var apiHost;
-
-var setupAPI = function () {
-    switch (process.env.NODE_ENV) {
-        case 'production':
-            apiHost = "'https://basecoat.clintjedwards.com'";
-            break;
-        case 'development':
-            apiHost = "'https://localhost:8080'";
-            break;
-        default:
-            apiHost = "'https://localhost:8080'";
-            break;
-    }
-}
-
-setupAPI();

@@ -7,12 +7,23 @@
     <v-spacer></v-spacer>
     <h3
       class="page-header-text-username title font-weight-light text-capitalize"
-    >{{ $store.state.username }}</h3>
+    >{{ $store.state.username }}</h3>&nbsp;
+    <v-btn flat icon color="white">
+      <v-icon @click="handleLogout()">exit_to_app</v-icon>
+    </v-btn>
   </v-toolbar>
 </template>
 
 <script lang="ts">
-export default {};
+import Vue from "vue";
+
+export default Vue.extend({
+  methods: {
+    handleLogout: function() {
+      this.$emit("logout");
+    }
+  }
+});
 </script>
 
 <style scoped>

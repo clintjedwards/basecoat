@@ -18,7 +18,7 @@
 <body>
     <div id="app" v-cloak>
         <v-app>
-            <page-header>Basecoat</page-header>
+            <page-header @logout="handleLogout">Basecoat</page-header>
 
             <!-- Tabs -->
             <v-tabs centered icons-and-text color="transparent">

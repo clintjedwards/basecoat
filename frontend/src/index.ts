@@ -221,6 +221,12 @@ const app = new Vue({
                 store.commit('updateLoginIsLoading', false)
             })
         },
+        handleLogout: function () {
+            let self = this
+            self.$cookies.remove('username')
+            self.$cookies.remove('token')
+            this.checkLogin()
+        },
         loadFormulaData: function () {
             let listFormulasRequest = new ListFormulasRequest();
             let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }

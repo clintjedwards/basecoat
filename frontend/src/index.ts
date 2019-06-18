@@ -197,6 +197,8 @@ const app = new Vue({
 
             store.commit('updateUsername', this.$cookies.get('username'))
             store.commit('updateLoginState', true)
+            this.loadFormulaData();
+            this.loadJobData();
         },
         validateLogin: function (loginInfo: LoginInfo) {
             let self = this
@@ -219,6 +221,8 @@ const app = new Vue({
                 store.commit('updateUsername', loginInfo.username)
                 store.commit('updateLoginState', true)
                 store.commit('updateLoginIsLoading', false)
+                self.loadFormulaData();
+                self.loadJobData();
             })
         },
         handleLogout: function () {
@@ -459,11 +463,11 @@ const app = new Vue({
     mounted() {
         this.checkLogin();
 
-        this.loadFormulaData();
-        this.loadJobData();
         setInterval(() => {
-            this.loadFormulaData();
-            this.loadJobData();
+            if (this.$store.state.isLoggedIn) {
+                this.loadFormulaData();
+                this.loadJobData();
+            }
         }, 180000); //3mins
     }
 })

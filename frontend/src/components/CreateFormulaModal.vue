@@ -60,16 +60,28 @@
 
               <!-- Colorants -->
               <v-spacer>Colorants</v-spacer>
+              <v-flex xs6 sm6 v-show="formulaData.colorantsList.length != 0">
+                <v-select
+                  :items="colorantTypesToList"
+                  label="Colorant Type"
+                  v-model="currentColorantType"
+                  v-on:change="fillColorantTypes(currentColorantType)"
+                  clearable
+                ></v-select>
+              </v-flex>
               <v-layout
                 row
                 wrap
                 v-for="(colorant, index) in formulaData.colorantsList"
                 v-bind:key="`colorant-${index}`"
               >
-                <v-flex xs9 sm9>
+                <v-flex xs2 sm2>
+                  <v-text-field label="Type" v-model="colorant.type"></v-text-field>
+                </v-flex>
+                <v-flex xs7 sm7>
                   <v-text-field label="Colorant Name" v-model="colorant.name"></v-text-field>
                 </v-flex>
-                <v-flex xs2 sm3>
+                <v-flex xs3 sm3>
                   <v-text-field
                     label="Amount"
                     v-model="colorant.amount"
@@ -165,6 +177,7 @@ export default Vue.extend({
   data: function() {
     return {
       formulaData: formulaData,
+      currentColorantType: "",
       nameRules: [
         function(v: string) {
           if (!!v) {
@@ -190,6 +203,19 @@ export default Vue.extend({
         jobDataList.push(job);
       }
       return jobDataList;
+    },
+    colorantTypesToList(): string[] {
+      let colorantTypeMap: { [key: string]: string } = this.$store.state
+        .colorantTypes;
+      let colorantTypeList: string[] = [];
+
+      for (const [key, value] of Object.entries(colorantTypeMap)) {
+        let colorantType: string;
+        colorantType = key;
+        colorantTypeList.push(colorantType);
+      }
+
+      return colorantTypeList;
     }
   },
   methods: {
@@ -201,10 +227,21 @@ export default Vue.extend({
       });
     },
     addColorantField: function() {
+      let type: string = "";
+
+      if (this.currentColorantType != "") {
+        type = this.currentColorantType;
+      }
+
       this.formulaData.colorantsList.push({
-        type: "",
+        type: type,
         name: "",
         amount: ""
+      });
+    },
+    fillColorantTypes: function(type: string) {
+      this.formulaData.colorantsList.forEach(function(colorant) {
+        colorant.type = type;
       });
     },
     removeColorantField: function(index: number) {

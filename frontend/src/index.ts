@@ -50,6 +50,10 @@ interface JobMap {
     [key: string]: Job;
 }
 
+interface colorantTypeMap {
+    [key: string]: string;
+}
+
 interface RootState {
     formulaData: FormulaMap,
     jobData: JobMap,
@@ -69,7 +73,8 @@ interface RootState {
     isLoggedIn: boolean,
     loginIsLoading: boolean,
     displaySnackBar: boolean,
-    snackBarText: string
+    snackBarText: string,
+    colorantTypes: colorantTypeMap
 }
 
 const state: RootState = {
@@ -91,7 +96,11 @@ const state: RootState = {
     isLoggedIn: false,
     loginIsLoading: false,
     displaySnackBar: false,
-    snackBarText: ""
+    snackBarText: "",
+    colorantTypes: {
+        "PPG Pittsburgh Paints": "images/ppg.png",
+        "Benjamin Moore": "images/benjamin-moore.png"
+    }
 }
 
 const mutations: MutationTree<RootState> = {

@@ -339,7 +339,7 @@ const app = new Vue({
             if (jobData.contact != undefined) {
                 let contact = new Contact();
                 contact.setName(jobData.contact.name)
-                contact.setInfo(jobData.contact.name)
+                contact.setInfo(jobData.contact.info)
                 createJobRequest.setContact(contact)
             }
 
@@ -416,7 +416,7 @@ const app = new Vue({
             if (jobData.contact != undefined) {
                 let contact = new Contact();
                 contact.setName(jobData.contact.name)
-                contact.setInfo(jobData.contact.name)
+                contact.setInfo(jobData.contact.info)
                 updateJobRequest.setContact(contact)
             }
 

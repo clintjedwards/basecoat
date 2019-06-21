@@ -38,7 +38,8 @@
               <br>
 
               <!-- Base -->
-              <v-spacer>Base</v-spacer>
+              <v-spacer v-show="formulaData.basesList.length === 0">No Bases Listed</v-spacer>
+              <v-spacer v-show="formulaData.basesList.length > 0">Base</v-spacer>
               <v-layout
                 row
                 wrap
@@ -76,7 +77,29 @@
               <br>
 
               <!-- Colorants -->
-              <v-spacer>Colorants</v-spacer>
+              <v-spacer v-show="formulaData.colorantsList.length === 0">No Colorants Listed</v-spacer>
+              <v-spacer v-show="formulaData.colorantsList.length > 0">Colorants</v-spacer>
+
+              <v-list v-show="formMode === 'view' && colorantOverallTypeSet" style="width:100%;">
+                <v-list-tile>
+                  <v-list-tile-avatar tile>
+                    <v-img max-height="25" max-width="30" v-bind:src="colorantTypeInfo.imageURL"></v-img>
+                  </v-list-tile-avatar>
+                  <v-list-tile-content>
+                    <v-list-tile-title v-text="colorantTypeInfo.userMessage"></v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+                <v-divider></v-divider>
+              </v-list>
+              <v-flex xs6 sm6 v-show="formulaData.colorantsList.length != 0 && formMode === 'edit'">
+                <v-select
+                  :items="colorantTypesToList"
+                  label="Colorant Type"
+                  v-model="currentColorantType"
+                  v-on:change="fillColorantTypes(currentColorantType)"
+                  clearable
+                ></v-select>
+              </v-flex>
               <v-layout
                 row
                 wrap
@@ -85,7 +108,14 @@
               >
                 <v-list v-show="formMode === 'view'" style="width:100%;">
                   <v-list-tile>
+                    <v-list-tile-avatar>
+                      <v-icon>invert_colors</v-icon>
+                    </v-list-tile-avatar>
                     <v-list-tile-content>
+                      <v-list-tile-sub-title
+                        v-show="currentColorantType === ''"
+                        v-text="colorant.type"
+                      ></v-list-tile-sub-title>
                       <v-list-tile-title v-text="colorant.name"></v-list-tile-title>
                     </v-list-tile-content>
                     <v-list-tile-avatar>
@@ -95,10 +125,13 @@
                   <v-divider></v-divider>
                 </v-list>
 
-                <v-flex xs9 sm9 v-show="formMode === 'edit'">
+                <v-flex xs2 sm2 v-show="formMode === 'edit'">
+                  <v-text-field label="Type" v-model="colorant.type"></v-text-field>
+                </v-flex>
+                <v-flex xs7 sm7 v-show="formMode === 'edit'">
                   <v-text-field label="Colorant Name" v-model="colorant.name"></v-text-field>
                 </v-flex>
-                <v-flex xs2 sm3 v-show="formMode === 'edit'">
+                <v-flex xs3 sm3 v-show="formMode === 'edit'">
                   <v-text-field
                     label="Amount"
                     v-model="colorant.amount"
@@ -113,11 +146,16 @@
               <br>
 
               <!-- Jobs -->
-              <v-spacer>Jobs</v-spacer>
+              <v-spacer v-show="formulaData.jobsList.length === 0">No Jobs Listed</v-spacer>
+              <v-spacer v-show="formulaData.jobsList.length > 0">Jobs</v-spacer>
+
               <v-layout>
                 <v-list two-line v-show="formMode === 'view'" style="width:100%;">
                   <template v-for="(jobID, index) in formulaData.jobsList">
                     <v-list-tile v-bind:key="`job-tile-${index}`">
+                      <v-list-tile-avatar>
+                        <v-icon>work</v-icon>
+                      </v-list-tile-avatar>
                       <v-list-tile-content>
                         <v-list-tile-title v-text="$store.state.jobData[jobID].getName()"></v-list-tile-title>
                         <v-list-tile-sub-title>
@@ -199,7 +237,7 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="setFormModeView()"
+              @click="parseColorantListForSameType(); setFormModeView();"
             >View</v-btn>
             <v-btn
               color="blue darken-1"
@@ -211,7 +249,7 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="handleFormSave()"
+              @click="parseColorantListForSameType(); handleFormSave();"
             >Save</v-btn>
           </v-card-actions>
         </v-card>
@@ -253,6 +291,9 @@ export default Vue.extend({
       showConfirmDelete: false,
       formulaData: formulaData,
       formulaInView: formula,
+      colorantOverallTypeSet: false,
+      colorantTypeInfo: {},
+      currentColorantType: "",
       nameRules: [
         function(v: string) {
           if (!!v) {
@@ -269,6 +310,9 @@ export default Vue.extend({
     },
     formulaInView: function() {
       this.populateFormData();
+    },
+    "formulaData.colorantsList": function() {
+      this.parseColorantListForSameType();
     }
   },
   computed: {
@@ -303,6 +347,19 @@ export default Vue.extend({
       }
 
       return modifiedJobList;
+    },
+    colorantTypesToList(): string[] {
+      let colorantTypeMap: { [key: string]: string } = this.$store.state
+        .colorantTypes;
+      let colorantTypeList: string[] = [];
+
+      for (const [key, value] of Object.entries(colorantTypeMap)) {
+        let colorantType: string;
+        colorantType = key;
+        colorantTypeList.push(colorantType);
+      }
+
+      return colorantTypeList;
     }
   },
   methods: {
@@ -354,6 +411,30 @@ export default Vue.extend({
       this.formulaData.basesList = basesList;
       this.formulaData.colorantsList = colorantsList;
     },
+    parseColorantListForSameType: function() {
+      let self = this;
+      for (let i = 0; i < self.formulaData.colorantsList.length; ++i) {
+        if (
+          self.formulaData.colorantsList[i].type !=
+          self.formulaData.colorantsList[0].type
+        ) {
+          this.colorantOverallTypeSet = false;
+          this.currentColorantType = "";
+          return;
+        }
+      }
+
+      if (
+        self.formulaData.colorantsList[0].type in
+        this.$store.state.colorantTypes
+      ) {
+        this.colorantOverallTypeSet = true;
+        this.colorantTypeInfo = this.$store.state.colorantTypes[
+          self.formulaData.colorantsList[0].type
+        ];
+        this.currentColorantType = self.formulaData.colorantsList[0].type;
+      }
+    },
     addBaseField: function() {
       this.formulaData.basesList.push({
         type: "",
@@ -362,10 +443,21 @@ export default Vue.extend({
       });
     },
     addColorantField: function() {
+      let type: string = "";
+
+      if (this.currentColorantType != "") {
+        type = this.currentColorantType;
+      }
+
       this.formulaData.colorantsList.push({
-        type: "",
+        type: type,
         name: "",
         amount: ""
+      });
+    },
+    fillColorantTypes: function(type: string) {
+      this.formulaData.colorantsList.forEach(function(colorant) {
+        colorant.type = type;
       });
     },
     removeColorantField: function(index: number) {

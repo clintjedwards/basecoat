@@ -50,8 +50,13 @@ interface JobMap {
     [key: string]: Job;
 }
 
+interface colorantType {
+    imageURL: string
+    userMessage: string
+}
+
 interface colorantTypeMap {
-    [key: string]: string;
+    [key: string]: colorantType;
 }
 
 interface RootState {
@@ -98,8 +103,8 @@ const state: RootState = {
     displaySnackBar: false,
     snackBarText: "",
     colorantTypes: {
-        "PPG Pittsburgh Paints": "images/ppg.png",
-        "Benjamin Moore": "images/benjamin-moore.png"
+        "PPG Pittsburgh Paints": { imageURL: "/images/ppg.png", userMessage: "Use PPG Colorant Only" },
+        "Benjamin Moore": { imageURL: "/images/benjamin-moore.png", userMessage: "Use Benjamin Moore Colorant Only" }
     }
 }
 

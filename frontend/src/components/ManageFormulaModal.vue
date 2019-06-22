@@ -243,13 +243,13 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="populateFormData()"
+              @click="populateFormData(); parseColorantListForSameType();"
             >Reset</v-btn>
             <v-btn
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="parseColorantListForSameType(); handleFormSave();"
+              @click="handleFormSave(); parseColorantListForSameType();"
             >Save</v-btn>
           </v-card-actions>
         </v-card>
@@ -433,7 +433,11 @@ export default Vue.extend({
           self.formulaData.colorantsList[0].type
         ];
         this.currentColorantType = self.formulaData.colorantsList[0].type;
+        return;
       }
+
+      this.colorantOverallTypeSet = false;
+      this.currentColorantType = "";
     },
     addBaseField: function() {
       this.formulaData.basesList.push({

@@ -25,6 +25,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Formula } from "../basecoat_pb";
+import * as moment from "moment";
 
 interface modifiedFormula {
   id: string;
@@ -32,7 +33,7 @@ interface modifiedFormula {
   number: string;
   base: string;
   colorants: number;
-  created: number;
+  created: string;
 }
 
 export default Vue.extend({
@@ -88,14 +89,16 @@ export default Vue.extend({
           number: "",
           base: "",
           colorants: 0,
-          created: 0
+          created: ""
         };
 
         modifiedFormula.id = formula.getId();
         modifiedFormula.colorants = formula.getColorantsList().length;
         modifiedFormula.name = formula.getName();
         modifiedFormula.number = formula.getNumber();
-        modifiedFormula.created = formula.getCreated();
+        modifiedFormula.created = moment(
+          moment.unix(formula.getCreated())
+        ).fromNow();
         modifiedFormula.base = "None";
 
         if (formula.getBasesList().length != 0) {

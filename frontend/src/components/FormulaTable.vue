@@ -10,13 +10,14 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        v-on:click="$store.commit('showManageFormulaModal', props.item.id)"
+        v-on:click="$store.commit('showManageFormulaModal');
+                    $emit('load-formula-into-modal', props.item.id);"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>{{ props.item.number }}</td>
         <td class="text-capitalize">{{ props.item.base }}</td>
         <td>{{ props.item.colorants }}</td>
-        <td>{{ props.item.created }}</td>
+        <td class="text-capitalize">{{ props.item.created }}</td>
       </tr>
     </template>
   </v-data-table>

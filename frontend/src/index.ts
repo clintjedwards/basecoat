@@ -73,8 +73,6 @@ interface RootState {
     displayManageJobsModal: boolean,
     displayLoginModal: boolean,
     currentTab: string,
-    formulaIdInView: string,
-    jobIdInView: string,
     isLoggedIn: boolean,
     loginIsLoading: boolean,
     displaySnackBar: boolean,
@@ -96,8 +94,6 @@ const state: RootState = {
     displayManageJobsModal: false,
     displayLoginModal: false,
     currentTab: "formulas",
-    formulaIdInView: "",
-    jobIdInView: "",
     isLoggedIn: false,
     loginIsLoading: false,
     displaySnackBar: false,
@@ -121,16 +117,14 @@ const mutations: MutationTree<RootState> = {
     hideAddJobModal(state) {
         state.displayAddJobModal = false
     },
-    showManageFormulaModal(state, formulaID: string) {
-        state.displayManageFormulaModal = true
-        state.formulaIdInView = formulaID
+    showManageFormulaModal(state) {
+        state.displayManageFormulaModal = true;
     },
     hideManageFormulaModal(state) {
         state.displayManageFormulaModal = false
     },
-    showManageJobsModal(state, jobID: string) {
+    showManageJobsModal(state) {
         state.displayManageJobsModal = true
-        state.jobIdInView = jobID
     },
     hideManageJobsModal(state) {
         state.displayManageJobsModal = false
@@ -245,6 +239,12 @@ const app = new Vue({
             self.$cookies.remove('token')
             this.checkLogin()
         },
+        loadFormulaIntoModal: function (formulaID: string) {
+            (this.$refs.manageFormulaForm as HTMLFormElement).loadFormulaIntoView(formulaID);
+        },
+        loadJobIntoModal: function (jobID: string) {
+            (this.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
+        },
         loadFormulaData: function () {
             let listFormulasRequest = new ListFormulasRequest();
             let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
@@ -326,7 +326,8 @@ const app = new Vue({
                 }
                 store.commit("hideCreateFormulaModal")
                 self.loadFormulaData();
-                (self.$refs.createFormulaForm as HTMLFormElement).clearForm()
+                self.loadJobData();
+                (self.$refs.createFormulaForm as HTMLFormElement).clearForm();
             })
         },
         submitAddJobForm: function (jobData: CreateJobRequest.AsObject) {
@@ -356,8 +357,9 @@ const app = new Vue({
                     return
                 }
                 store.commit("hideAddJobModal")
+                self.loadFormulaData();
                 self.loadJobData();
-                (self.$refs.addJobForm as HTMLFormElement).clearForm()
+                (self.$refs.addJobForm as HTMLFormElement).clearForm();
             })
         },
         submitManageFormulaForm: function (formulaData: UpdateFormulaRequest.AsObject) {
@@ -402,7 +404,8 @@ const app = new Vue({
                 }
                 store.commit("hideManageFormulaModal")
                 self.loadFormulaData();
-                (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView()
+                self.loadJobData();
+                (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView();
             })
         },
         submitManageJobsForm: function (jobData: UpdateJobRequest.AsObject) {
@@ -432,9 +435,10 @@ const app = new Vue({
                     store.commit('displaySnackBar', "Could not update job")
                     return
                 }
-                self.loadJobData()
+                self.loadFormulaData();
+                self.loadJobData();
                 store.commit("hideManageJobsModal");
-                (self.$refs.manageJobsForm as HTMLFormElement).setFormModeView()
+                (self.$refs.manageJobsForm as HTMLFormElement).setFormModeView();
             })
         },
         deleteJob: function (jobID: string) {

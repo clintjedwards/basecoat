@@ -106,6 +106,51 @@
               <v-divider></v-divider>
               <br>
 
+              <!-- Formulas -->
+              <v-spacer v-show="jobData.formulasList.length === 0">No Formulas Listed</v-spacer>
+              <v-spacer v-show="jobData.formulasList.length > 0">Formulas</v-spacer>
+
+              <v-layout>
+                <v-list two-line v-show="formMode === 'view'" style="width:100%;">
+                  <template v-for="(formulaID, index) in jobData.formulasList">
+                    <v-list-tile v-bind:key="`formula-tile-${index}`">
+                      <v-list-tile-avatar>
+                        <v-icon>invert_colors</v-icon>
+                      </v-list-tile-avatar>
+                      <v-list-tile-content>
+                        <v-list-tile-title v-text="$store.state.formulaData[formulaID].getName()"></v-list-tile-title>
+                        <v-list-tile-sub-title
+                          v-text="$store.state.formulaData[formulaID].getNumber()"
+                        ></v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                    <v-divider v-bind:key="`formula-divider-${index}`"></v-divider>
+                  </template>
+                </v-list>
+
+                <v-flex xs12 v-show="formMode === 'edit'">
+                  <v-autocomplete
+                    v-model="jobData.formulasList"
+                    :items="formulaDataToList"
+                    item-text="name"
+                    item-value="id"
+                    hide-selected
+                    label="Link formulas to this job"
+                    placeholder="Start typing to Search"
+                    multiple
+                    clearable
+                    counter
+                  >
+                    <template slot="item" slot-scope="data">
+                      <v-list-tile-content>
+                        <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
+                        <v-list-tile-sub-title v-html="data.item.number"></v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </template>
+                  </v-autocomplete>
+                </v-flex>
+              </v-layout>
+
               <!-- Notes -->
               <v-spacer v-show="formMode === 'edit'">Miscellaneous Information</v-spacer>
               <v-layout>
@@ -174,7 +219,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { UpdateJobRequest, Contact, Job } from "../basecoat_pb";
+import { UpdateJobRequest, Contact, Job, Formula } from "../basecoat_pb";
 
 let contact: Contact.AsObject = {
   name: "",
@@ -197,7 +242,6 @@ let jobData: UpdateJobRequest.AsObject = {
 let job: Job;
 
 export default Vue.extend({
-  props: ["jobIdInView"],
   data: function() {
     return {
       formMode: "view",
@@ -276,15 +320,44 @@ export default Vue.extend({
     };
   },
   watch: {
-    jobIdInView: function() {
-      this.jobInView = this.$store.state.jobData[this.jobIdInView];
-    },
     jobInView: function() {
       this.populateFormData();
     }
   },
   computed: {
-    formulaDataToList: function() {}
+    formulaDataToList: function() {
+      interface modifiedFormula {
+        id: string;
+        name: string;
+        number: string;
+      }
+
+      let formulaDataMap: { [key: string]: Formula } = this.$store.state
+        .formulaData;
+      let formulaDataList: Formula[] = [];
+
+      for (const [key, value] of Object.entries(formulaDataMap)) {
+        formulaDataList.push(value);
+      }
+      let modifiedFormulaList: modifiedFormula[] = [];
+      let formula: Formula;
+
+      for (formula of formulaDataList) {
+        let modifiedFormula: modifiedFormula = {
+          id: "",
+          name: "",
+          number: ""
+        };
+
+        modifiedFormula.id = formula.getId();
+        modifiedFormula.name = formula.getName();
+        modifiedFormula.number = formula.getNumber();
+
+        modifiedFormulaList.push(modifiedFormula);
+      }
+
+      return modifiedFormulaList;
+    }
   },
   methods: {
     setFormModeEdit: function() {
@@ -292,6 +365,10 @@ export default Vue.extend({
     },
     setFormModeView: function() {
       this.formMode = "view";
+    },
+    loadJobIntoView: function(jobID: string) {
+      this.jobInView = this.$store.state.jobData[jobID];
+      this.populateFormData();
     },
     populateFormData: function() {
       let currentJob = this.jobInView;

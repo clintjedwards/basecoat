@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"github.com/clintjedwards/basecoat/api"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -45,88 +44,6 @@ func FindListUpdates(oldList, newList []string) (additions, removals []string) {
 	additions = FindListDifference(newList, oldList)
 
 	return additions, removals
-}
-
-// MergeFormulaStruct aids in updating formulas by overwriting old formula
-// objects with only non-nil fields from a provided new formula object
-func MergeFormulaStruct(oldFormula, newFormula *api.Formula) *api.Formula {
-
-	if newFormula.Name != "" {
-		oldFormula.Name = newFormula.Name
-	}
-
-	if newFormula.Number != "" {
-		oldFormula.Number = newFormula.Number
-	}
-
-	if newFormula.Notes != "" {
-		oldFormula.Notes = newFormula.Notes
-	}
-
-	if newFormula.Modified != 0 {
-		oldFormula.Modified = newFormula.Modified
-	}
-
-	if newFormula.Jobs != nil {
-		oldFormula.Jobs = newFormula.Jobs
-	}
-
-	if newFormula.Bases != nil {
-		oldFormula.Bases = newFormula.Bases
-	}
-
-	if newFormula.Colorants != nil {
-		oldFormula.Colorants = newFormula.Colorants
-	}
-
-	return oldFormula
-}
-
-// MergeJobStruct aids in updating formulas by overwriting old formula
-// objects with only non-nil fields from a provided new formula object
-func MergeJobStruct(oldJob, newJob *api.Job) *api.Job {
-
-	if newJob.Name != "" {
-		oldJob.Name = newJob.Name
-	}
-
-	if newJob.Street != "" {
-		oldJob.Street = newJob.Street
-	}
-
-	if newJob.Street2 != "" {
-		oldJob.Street2 = newJob.Street2
-	}
-
-	if newJob.City != "" {
-		oldJob.City = newJob.City
-	}
-
-	if newJob.State != "" {
-		oldJob.State = newJob.State
-	}
-
-	if newJob.Zipcode != "" {
-		oldJob.Zipcode = newJob.Zipcode
-	}
-
-	if newJob.Notes != "" {
-		oldJob.Notes = newJob.Notes
-	}
-
-	if newJob.Formulas != nil {
-		oldJob.Formulas = newJob.Formulas
-	}
-
-	if newJob.Modified != 0 {
-		oldJob.Modified = newJob.Modified
-	}
-
-	if newJob.Contact != nil {
-		oldJob.Contact = newJob.Contact
-	}
-
-	return oldJob
 }
 
 // CheckPasswordHash validates a password against the stored hash

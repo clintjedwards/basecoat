@@ -231,11 +231,19 @@ func TestUpdateFormula(t *testing.T) {
 	basecoatClient := api.NewBasecoatClient(conn)
 
 	updateFormulaRequest := &api.UpdateFormulaRequest{
-		Id:    FormulaID,
-		Notes: "A different note",
+		Id:     FormulaID,
+		Name:   "antique copper",
+		Number: "1001",
+		Notes:  "Some writing here that we don't care about for testing purposes",
+		Jobs:   []string{JobID},
 		Colorants: []*api.Colorant{
 			&api.Colorant{
 				Name: "Color 5",
+			},
+		},
+		Bases: []*api.Base{
+			&api.Base{
+				Name: "Color 0",
 			},
 		},
 	}

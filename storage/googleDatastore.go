@@ -198,7 +198,7 @@ func (db *googleDatastore) AddFormula(account, key string, newFormula *api.Formu
 	return nil
 }
 
-func (db *googleDatastore) UpdateFormula(account, key string, newFormula *api.Formula) error {
+func (db *googleDatastore) UpdateFormula(account, key string, updatedFormula *api.Formula) error {
 	parentKey := datastore.NameKey(string(FormulasBucket), account, nil)
 	updateKey := datastore.NameKey(string(FormulasBucket), key, parentKey)
 
@@ -214,8 +214,6 @@ func (db *googleDatastore) UpdateFormula(account, key string, newFormula *api.Fo
 			}
 			return err
 		}
-
-		updatedFormula := utils.MergeFormulaStruct(&formula, newFormula)
 
 		_, err = tx.Put(updateKey, updatedFormula)
 		if err != nil {
@@ -329,7 +327,7 @@ func (db *googleDatastore) AddJob(account, key string, newJob *api.Job) error {
 	return nil
 }
 
-func (db *googleDatastore) UpdateJob(account, key string, newJob *api.Job) error {
+func (db *googleDatastore) UpdateJob(account, key string, updatedJob *api.Job) error {
 	parentKey := datastore.NameKey(string(JobsBucket), account, nil)
 	updateKey := datastore.NameKey(string(JobsBucket), key, parentKey)
 
@@ -345,8 +343,6 @@ func (db *googleDatastore) UpdateJob(account, key string, newJob *api.Job) error
 			}
 			return err
 		}
-
-		updatedJob := utils.MergeJobStruct(&job, newJob)
 
 		_, err = tx.Put(updateKey, updatedJob)
 		if err != nil {

@@ -284,7 +284,6 @@ let formulaData: UpdateFormulaRequest.AsObject = {
 let formula: Formula;
 
 export default Vue.extend({
-  props: ["formulaIdInView"],
   data: function() {
     return {
       formMode: "view",
@@ -305,12 +304,6 @@ export default Vue.extend({
     };
   },
   watch: {
-    formulaIdInView: function() {
-      this.formulaInView = this.$store.state.formulaData[this.formulaIdInView];
-    },
-    formulaInView: function() {
-      this.populateFormData();
-    },
     "formulaData.colorantsList": function() {
       this.parseColorantListForSameType();
     }
@@ -369,6 +362,10 @@ export default Vue.extend({
     setFormModeView: function() {
       this.formMode = "view";
     },
+    loadFormulaIntoView: function(formulaID: string) {
+      this.formulaInView = this.$store.state.formulaData[formulaID];
+      this.populateFormData();
+    },
     populateFormData: function() {
       let currentFormula = this.formulaInView;
 
@@ -413,6 +410,13 @@ export default Vue.extend({
     },
     parseColorantListForSameType: function() {
       let self = this;
+
+      if (self.formulaData.colorantsList.length < 1) {
+        this.colorantOverallTypeSet = false;
+        this.currentColorantType = "";
+        return;
+      }
+
       for (let i = 0; i < self.formulaData.colorantsList.length; ++i) {
         if (
           self.formulaData.colorantsList[i].type !=

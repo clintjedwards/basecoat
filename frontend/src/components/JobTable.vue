@@ -10,7 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        @click="$store.commit('showManageJobsModal', props.item.id)"
+        @click="$store.commit('showManageJobsModal'); $emit('load-job-into-modal', props.item.id);"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>
@@ -51,6 +51,12 @@ export default Vue.extend({
         }
       ]
     };
+  },
+  methods: {
+    populateJobForm(jobID: string) {
+      let self = this;
+      (self.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
+    }
   },
   computed: {
     jobDataToList: function() {

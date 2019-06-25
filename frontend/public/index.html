@@ -39,8 +39,10 @@
             <jobs-search-panel v-show="$store.state.currentTab === 'jobs'" class="search-panel"></jobs-search-panel>
 
             <!-- Tables -->
-            <formula-table v-show="$store.state.currentTab === 'formulas'" class="data-table"></formula-table>
-            <job-table v-show="$store.state.currentTab === 'jobs'" class="data-table"></job-table>
+            <formula-table v-show="$store.state.currentTab === 'formulas'" class="data-table"
+                @load-formula-into-modal="loadFormulaIntoModal"></formula-table>
+            <job-table v-show="$store.state.currentTab === 'jobs'" class="data-table"
+                @load-job-into-modal="loadJobIntoModal"></job-table>
 
             <!-- Modals-->
             <create-formula-modal ref="createFormulaForm" @submit-create-form="submitCreateForm">
@@ -50,10 +52,10 @@
                 <template slot="heading">Add Job</template>
             </add-job-modal>
             <manage-formula-modal ref="manageFormulaForm" @submit-manage-formula-form="submitManageFormulaForm"
-                @delete-formula="deleteFormula" :formula-id-in-view="$store.state.formulaIdInView">
+                @delete-formula="deleteFormula">
             </manage-formula-modal>
             <manage-jobs-modal ref="manageJobsForm" @submit-manage-jobs-form="submitManageJobsForm"
-                @delete-job="deleteJob" :job-id-in-view="$store.state.jobIdInView">
+                @delete-job="deleteJob">
             </manage-jobs-modal>
             <login-modal ref="loginForm" @validate-login="validateLogin"></login-modal>
 

@@ -10,8 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        v-on:click="$store.commit('showManageFormulaModal');
-                    $emit('load-formula-into-modal', props.item.id);"
+        v-on:click="$store.commit('showManageFormulaModal', props.item.id);"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>{{ props.item.number }}</td>

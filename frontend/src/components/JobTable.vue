@@ -10,7 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        @click="$store.commit('showManageJobsModal'); $emit('load-job-into-modal', props.item.id);"
+        @click="$store.commit('showManageJobsModal', props.item.id);"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>

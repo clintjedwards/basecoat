@@ -304,6 +304,7 @@ export default Vue.extend({
     };
   },
   watch: {
+    // FIGURE OUT
     "formulaData.colorantsList": function() {
       this.parseColorantListForSameType();
     }

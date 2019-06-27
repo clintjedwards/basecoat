@@ -2,12 +2,13 @@ import Vue from 'vue'
 import Vuex, { MutationTree } from 'vuex'
 import Vuetify from 'vuetify'
 import VueCookies from 'vue-cookies'
+import VueRouter from 'vue-router'
+
+import * as bcInterface from './basecoatInterfaces'
 
 import PageHeader from "./components/PageHeader.vue"
-import FormulaSearchPanel from "./components/FormulaSearchPanel.vue"
-import JobsSearchPanel from "./components/JobsSearchPanel.vue"
-import FormulaTable from "./components/FormulaTable.vue"
-import JobTable from "./components/JobTable.vue"
+import FormulasPage from "./components/FormulasPage.vue"
+import JobsPage from "./components/JobsPage.vue"
 import CreateFormulaModal from "./components/CreateFormulaModal.vue"
 import AddJobModal from "./components/AddJobModal.vue"
 import ManageFormulaModal from "./components/ManageFormulaModal.vue"
@@ -34,34 +35,26 @@ import {
 Vue.use(Vuex)
 Vue.use(Vuetify)
 Vue.use(VueCookies)
+Vue.use(VueRouter)
 
+// This is automatically set by the build process
 declare var __API__: string;
 
-interface LoginInfo {
-    username: string;
-    password: string;
-}
+const routes = [
+    { path: '/', redirect: '/formulas' },
+    { path: '/formulas', component: FormulasPage },
+    { path: '/formulas/:id', component: ManageFormulaModal },
+    { path: '/jobs', component: JobsPage },
+    { path: '/jobs/:id', component: ManageJobsModal },
+]
 
-interface FormulaMap {
-    [key: string]: Formula;
-}
-
-interface JobMap {
-    [key: string]: Job;
-}
-
-interface colorantType {
-    imageURL: string
-    userMessage: string
-}
-
-interface colorantTypeMap {
-    [key: string]: colorantType;
-}
+const router = new VueRouter({
+    routes
+})
 
 interface RootState {
-    formulaData: FormulaMap,
-    jobData: JobMap,
+    formulaData: bcInterface.FormulaMap,
+    jobData: bcInterface.JobMap,
     totalFormulas: number,
     totalJobs: number,
     formulaTableSearchTerm: string,
@@ -77,7 +70,7 @@ interface RootState {
     loginIsLoading: boolean,
     displaySnackBar: boolean,
     snackBarText: string,
-    colorantTypes: colorantTypeMap
+    colorantTypes: bcInterface.colorantTypeMap
 }
 
 const state: RootState = {
@@ -99,8 +92,8 @@ const state: RootState = {
     displaySnackBar: false,
     snackBarText: "",
     colorantTypes: {
-        "PPG Pittsburgh Paints": { imageURL: "/images/ppg.png", userMessage: "Use PPG Colorant Only" },
-        "Benjamin Moore": { imageURL: "/images/benjamin-moore.png", userMessage: "Use Benjamin Moore Colorant Only" }
+        "Benjamin Moore": { imageURL: "/images/benjamin-moore.png", userMessage: "Use Benjamin Moore Colorant Only" },
+        "PPG Pittsburgh Paints": { imageURL: "/images/ppg.png", userMessage: "Use PPG Colorant Only" }
     }
 }
 
@@ -117,14 +110,18 @@ const mutations: MutationTree<RootState> = {
     hideAddJobModal(state) {
         state.displayAddJobModal = false
     },
-    showManageFormulaModal(state) {
+    showManageFormulaModal(state, formulaID: string) {
         state.displayManageFormulaModal = true;
+        (app.$refs.manageFormulaForm as HTMLFormElement).loadFormulaIntoView(formulaID);
+        app.$router.push('./formulas/' + formulaID)
     },
     hideManageFormulaModal(state) {
         state.displayManageFormulaModal = false
     },
-    showManageJobsModal(state) {
-        state.displayManageJobsModal = true
+    showManageJobsModal(state, jobID: string) {
+        state.displayManageJobsModal = true;
+        (app.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
+        app.$router.push('./jobs/' + jobID)
     },
     hideManageJobsModal(state) {
         state.displayManageJobsModal = false
@@ -144,10 +141,10 @@ const mutations: MutationTree<RootState> = {
     updateJobTableSearchTerm(state, searchTerm: string) {
         state.jobTableSearchTerm = searchTerm
     },
-    updateFormulaData(state, formulaData: FormulaMap) {
+    updateFormulaData(state, formulaData: bcInterface.FormulaMap) {
         state.formulaData = formulaData
     },
-    updateJobData(state, jobData: JobMap) {
+    updateJobData(state, jobData: bcInterface.JobMap) {
         state.jobData = jobData
     },
     updateCurrentTab(state, tabName: string) {
@@ -181,12 +178,11 @@ let client: BasecoatClient
 const app = new Vue({
     el: '#app',
     store,
+    router,
     components: {
         PageHeader,
-        FormulaSearchPanel,
-        JobsSearchPanel,
-        FormulaTable,
-        JobTable,
+        FormulasPage,
+        JobsPage,
         CreateFormulaModal,
         AddJobModal,
         ManageFormulaModal,
@@ -197,6 +193,12 @@ const app = new Vue({
         client = new BasecoatClient(__API__, null, null);
     },
     methods: {
+        navigateToFormulas() {
+            this.$router.push('/formulas');
+        },
+        navigateToJobs() {
+            this.$router.push('/jobs');
+        },
         checkLogin: function () {
             if (!this.$cookies.isKey('username') || !this.$cookies.isKey('token')) {
                 store.commit('updateLoginState', false)
@@ -208,7 +210,7 @@ const app = new Vue({
             this.loadFormulaData();
             this.loadJobData();
         },
-        validateLogin: function (loginInfo: LoginInfo) {
+        validateLogin: function (loginInfo: bcInterface.LoginInfo) {
             let self = this
             store.commit('updateLoginIsLoading', true)
 
@@ -238,12 +240,6 @@ const app = new Vue({
             self.$cookies.remove('username')
             self.$cookies.remove('token')
             this.checkLogin()
-        },
-        loadFormulaIntoModal: function (formulaID: string) {
-            (this.$refs.manageFormulaForm as HTMLFormElement).loadFormulaIntoView(formulaID);
-        },
-        loadJobIntoModal: function (jobID: string) {
-            (this.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
         },
         loadFormulaData: function () {
             let listFormulasRequest = new ListFormulasRequest();

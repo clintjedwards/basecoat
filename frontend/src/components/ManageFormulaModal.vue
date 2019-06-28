@@ -225,7 +225,7 @@
             <v-btn
               color="blue darken-1"
               flat
-              @click="$store.commit('hideManageFormulaModal'); setFormModeView(); populateFormData();"
+              @click="$store.commit('hideManageFormulaModal'); setFormModeView();"
             >Close</v-btn>
             <v-btn
               color="blue darken-1"
@@ -284,6 +284,7 @@ let formulaData: UpdateFormulaRequest.AsObject = {
 let formula: Formula;
 
 export default Vue.extend({
+  props: ["id"],
   data: function() {
     return {
       formMode: "view",
@@ -303,8 +304,18 @@ export default Vue.extend({
       ]
     };
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.$root.loading = true;
+    });
+  },
+  mounted: function() {
+    if (this.id != undefined) {
+      this.loadFormulaIntoView(this.id);
+      this.$store.commit("showManageFormulaModal");
+    }
+  },
   watch: {
-    // FIGURE OUT
     "formulaData.colorantsList": function() {
       this.parseColorantListForSameType();
     }

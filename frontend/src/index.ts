@@ -43,7 +43,7 @@ declare var __API__: string;
 const routes = [
     { path: '/', redirect: '/formulas' },
     { path: '/formulas', component: FormulasPage },
-    { path: '/formulas/:id', component: ManageFormulaModal },
+    { path: '/formulas/:id', component: ManageFormulaModal, props: true },
     { path: '/jobs', component: JobsPage },
     { path: '/jobs/:id', component: ManageJobsModal },
 ]
@@ -109,19 +109,17 @@ const mutations: MutationTree<RootState> = {
     },
     hideAddJobModal(state) {
         state.displayAddJobModal = false
+        app.$router.push('/jobs');
     },
-    showManageFormulaModal(state, formulaID: string) {
+    showManageFormulaModal(state) {
         state.displayManageFormulaModal = true;
-        (app.$refs.manageFormulaForm as HTMLFormElement).loadFormulaIntoView(formulaID);
-        app.$router.push('./formulas/' + formulaID)
     },
     hideManageFormulaModal(state) {
-        state.displayManageFormulaModal = false
+        state.displayManageFormulaModal = false;
+        app.$router.push('/formulas');
     },
-    showManageJobsModal(state, jobID: string) {
+    showManageJobsModal(state) {
         state.displayManageJobsModal = true;
-        (app.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
-        app.$router.push('./jobs/' + jobID)
     },
     hideManageJobsModal(state) {
         state.displayManageJobsModal = false
@@ -191,6 +189,13 @@ const app = new Vue({
     },
     created: function () {
         client = new BasecoatClient(__API__, null, null);
+
+        setInterval(() => {
+            if (this.$store.state.isLoggedIn) {
+                this.loadFormulaData();
+                this.loadJobData();
+            }
+        }, 180000); //3mins
     },
     methods: {
         navigateToFormulas() {
@@ -473,15 +478,5 @@ const app = new Vue({
                 (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView()
             })
         },
-    },
-    mounted() {
-        this.checkLogin();
-
-        setInterval(() => {
-            if (this.$store.state.isLoggedIn) {
-                this.loadFormulaData();
-                this.loadJobData();
-            }
-        }, 180000); //3mins
     }
 })

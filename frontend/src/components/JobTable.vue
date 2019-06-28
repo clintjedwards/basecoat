@@ -10,7 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        @click="$store.commit('showManageJobsModal', props.item.id);"
+        @click="this.$router.push('./jobs/' + props.item.id)"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>

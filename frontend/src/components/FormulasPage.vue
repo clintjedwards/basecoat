@@ -3,6 +3,7 @@
   <div>
     <formula-search-panel class="search-panel"></formula-search-panel>
     <formula-table class="data-table"></formula-table>
+    <router-view></router-view>
   </div>
 </template>
 

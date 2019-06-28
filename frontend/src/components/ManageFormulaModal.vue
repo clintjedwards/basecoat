@@ -267,6 +267,9 @@ import {
   Job,
   Formula
 } from "../basecoat_pb";
+import { BasecoatFrontend } from "../methods";
+import { BasecoatClient } from "../BasecoatServiceClientPb";
+import { frontend } from "../index";
 
 let baseList: Base.AsObject[] = [];
 let colorantList: Colorant.AsObject[] = [];
@@ -370,9 +373,12 @@ export default Vue.extend({
       this.formMode = "view";
     },
     loadFormulaIntoView: function(formulaID: string) {
-      this.populateFormData(this.$store.state.formulaData[formulaID]);
+      this.populateFormData(formulaID);
     },
-    populateFormData: function(currentFormula: Formula) {
+    populateFormData: function(formulaID: string) {
+      // Create a basecoat client to communicate with grpc-web backend
+      let currentFormula = frontend.GetFormula(formulaID);
+
       this.formulaData.id = currentFormula.getId();
       this.formulaData.name = currentFormula.getName();
       this.formulaData.number = currentFormula.getNumber();

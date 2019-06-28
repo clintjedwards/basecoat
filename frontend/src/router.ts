@@ -10,10 +10,16 @@ Vue.use(VueRouter)
 
 const routes = [
     { path: '/', redirect: '/formulas' },
-    { path: '/formulas', component: FormulasPage },
-    { path: '/formulas/:id', component: ManageFormulaModal, props: true },
-    { path: '/jobs', component: JobsPage },
-    { path: '/jobs/:id', component: ManageJobsModal, props: true },
+    {
+        path: '/formulas',
+        component: FormulasPage,
+        children: [{ path: ':id', component: ManageFormulaModal, props: true }]
+    },
+    {
+        path: '/jobs',
+        component: JobsPage,
+        children: [{ path: ':id', component: ManageJobsModal, props: true }]
+    },
 ]
 
 const router = new VueRouter({

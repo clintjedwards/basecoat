@@ -2,13 +2,6 @@ import Vue from 'vue'
 import Vuex, { MutationTree } from 'vuex'
 import * as bcInterface from './basecoatInterfaces'
 import { app } from './index'
-import { BasecoatClient } from "./BasecoatServiceClientPb"
-
-import {
-    LoadFormulaData,
-    LoadJobData,
-    VerifyLogin,
-} from './methods'
 
 Vue.use(Vuex)
 
@@ -62,14 +55,6 @@ const state: RootState = {
 }
 
 const mutations: MutationTree<RootState> = {
-    loadState(state) {
-        // Create a basecoat client to communicate with grpc-web backend
-        let client = new BasecoatClient(__API__, null, null);
-        VerifyLogin(client);
-        LoadFormulaData(client);
-        LoadJobData(client);
-        state.isLoaded = true;
-    },
     showCreateFormulaModal(state) {
         state.displayCreateFormulaModal = true
     },
@@ -140,12 +125,7 @@ const mutations: MutationTree<RootState> = {
 
 const store = new Vuex.Store<RootState>({
     state,
-    mutations,
-    actions: {
-        loadState(context) {
-            context.commit('loadState')
-        }
-    }
+    mutations
 })
 
 export default store

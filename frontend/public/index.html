@@ -42,8 +42,8 @@
             <add-job-modal ref="addJobForm" @submit-add-job-form="submitAddJobForm">
                 <template slot="heading">Add Job</template>
             </add-job-modal>
-            <manage-formula-modal ref="manageFormulaForm" @submit-manage-formula-form="submitManageFormulaForm"
-                @delete-formula="deleteFormula">
+            <manage-formula-modal ref="manageFormulaForm" getformula="getFormula"
+                @submit-manage-formula-form="submitManageFormulaForm" @delete-formula="deleteFormula">
             </manage-formula-modal>
             <manage-jobs-modal ref="manageJobsForm" @submit-manage-jobs-form="submitManageJobsForm"
                 @delete-job="deleteJob">

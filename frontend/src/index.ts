@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex, { MutationTree } from 'vuex'
 import Vuetify from 'vuetify'
 import VueCookies from 'vue-cookies'
+import page from 'page';
 
 import PageHeader from "./components/PageHeader.vue"
 import FormulaSearchPanel from "./components/FormulaSearchPanel.vue"
@@ -36,6 +37,10 @@ Vue.use(Vuetify)
 Vue.use(VueCookies)
 
 declare var __API__: string;
+
+page('/formulas', function () {
+    store.commit('displaySnackBar', "Test")
+})
 
 interface LoginInfo {
     username: string;
@@ -489,3 +494,5 @@ const app = new Vue({
         }, 180000); //3mins
     }
 })
+
+page({ hashbang: true })

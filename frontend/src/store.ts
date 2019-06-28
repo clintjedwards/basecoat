@@ -1,10 +1,21 @@
 import Vue from 'vue'
 import Vuex, { MutationTree } from 'vuex'
 import * as bcInterface from './basecoatInterfaces'
+import { app } from './index'
+import { BasecoatClient } from "./BasecoatServiceClientPb"
+
+import {
+    LoadFormulaData,
+    LoadJobData,
+    VerifyLogin,
+} from './methods'
 
 Vue.use(Vuex)
 
+declare var __API__: string;
+
 interface RootState {
+    isLoaded: boolean,
     formulaData: bcInterface.FormulaMap,
     jobData: bcInterface.JobMap,
     totalFormulas: number,
@@ -26,6 +37,7 @@ interface RootState {
 }
 
 const state: RootState = {
+    isLoaded: false,
     formulaData: {},
     jobData: {},
     totalFormulas: 0,
@@ -50,6 +62,14 @@ const state: RootState = {
 }
 
 const mutations: MutationTree<RootState> = {
+    loadState(state) {
+        // Create a basecoat client to communicate with grpc-web backend
+        let client = new BasecoatClient(__API__, null, null);
+        VerifyLogin(client);
+        LoadFormulaData(client);
+        LoadJobData(client);
+        state.isLoaded = true;
+    },
     showCreateFormulaModal(state) {
         state.displayCreateFormulaModal = true
     },
@@ -61,14 +81,14 @@ const mutations: MutationTree<RootState> = {
     },
     hideAddJobModal(state) {
         state.displayAddJobModal = false
-        //app.$router.push('/jobs');
+        app.$router.push('/jobs');
     },
     showManageFormulaModal(state) {
         state.displayManageFormulaModal = true;
     },
     hideManageFormulaModal(state) {
         state.displayManageFormulaModal = false;
-        //app.$router.push('/formulas');
+        app.$router.push('/formulas');
     },
     showManageJobsModal(state) {
         state.displayManageJobsModal = true;
@@ -120,7 +140,12 @@ const mutations: MutationTree<RootState> = {
 
 const store = new Vuex.Store<RootState>({
     state,
-    mutations
+    mutations,
+    actions: {
+        loadState(context) {
+            context.commit('loadState')
+        }
+    }
 })
 
 export default store

@@ -90,7 +90,7 @@ export default Vue.extend({
   methods: {
     handleLogin: function() {
       if ((this.$refs.loginForm as HTMLFormElement).validate()) {
-        this.$emit("validate-login", this.loginInfo);
+        this.$emit("handle-login", this.loginInfo);
       }
     }
   }

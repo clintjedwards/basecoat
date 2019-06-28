@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueCookies from 'vue-cookies'
 import store from './store';
 import * as bcInterface from './basecoatInterfaces'
+import { app } from './index'
 
 import {
     ListFormulasRequest,
@@ -23,17 +24,10 @@ export function VerifyLogin(client: BasecoatClient) {
         return
     }
 
-    store.commit('updateUsername', !Vue.cookies.get('username'))
+    store.commit('updateUsername', Vue.cookies.get('username'))
     store.commit('updateLoginState', true)
     LoadFormulaData(client);
     LoadJobData(client);
-}
-
-// HandleLogout clears cookies and brings back up the login modal
-export function HandleLogout(client: BasecoatClient) {
-    Vue.cookies.remove('username')
-    Vue.cookies.remove('token')
-    VerifyLogin(client)
 }
 
 // HandleLogin checks the backend for successful login and sets appropriate cookie
@@ -60,6 +54,13 @@ export function HandleLogin(client: BasecoatClient, loginInfo: bcInterface.Login
         LoadFormulaData(client)
         LoadJobData(client)
     })
+}
+
+// HandleLogout clears cookies and brings back up the login modal
+export function HandleLogout(client: BasecoatClient) {
+    Vue.cookies.remove('username')
+    Vue.cookies.remove('token')
+    VerifyLogin(client)
 }
 
 export function LoadFormulaData(client: BasecoatClient) {
@@ -145,7 +146,7 @@ export function SubmitCreateForm(client: BasecoatClient, formulaData: CreateForm
         store.commit("hideCreateFormulaModal")
         LoadFormulaData(client);
         LoadJobData(client);
-        (Vue.$refs.createFormulaForm as HTMLFormElement).clearForm();
+        (app.$refs.createFormulaForm as HTMLFormElement).clearForm();
     })
 }
 

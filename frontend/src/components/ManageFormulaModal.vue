@@ -370,12 +370,9 @@ export default Vue.extend({
       this.formMode = "view";
     },
     loadFormulaIntoView: function(formulaID: string) {
-      this.formulaInView = this.$store.state.formulaData[formulaID];
-      this.populateFormData();
+      this.populateFormData(this.$store.state.formulaData[formulaID]);
     },
-    populateFormData: function() {
-      let currentFormula = this.formulaInView;
-
+    populateFormData: function(currentFormula: Formula) {
       this.formulaData.id = currentFormula.getId();
       this.formulaData.name = currentFormula.getName();
       this.formulaData.number = currentFormula.getNumber();

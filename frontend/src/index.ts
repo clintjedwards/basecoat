@@ -1,10 +1,17 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 
-import { VerifyLogin, LoadFormulaData, LoadJobData, SubmitCreateForm } from './methods'
 import * as bcInterface from './basecoatInterfaces'
 import store from './store'
 import router from './router'
+import {
+    VerifyLogin,
+    LoadFormulaData,
+    LoadJobData,
+    SubmitCreateForm,
+    HandleLogin,
+    HandleLogout
+} from './methods'
 
 import PageHeader from "./components/PageHeader.vue"
 import FormulasPage from "./components/FormulasPage.vue"
@@ -37,11 +44,20 @@ declare var __API__: string;
 // Create a basecoat client to communicate with grpc-web backend
 let client = new BasecoatClient(__API__, null, null);
 
+router.beforeEach((to, from, next) => {
+    console.log('test')
+    if (!store.state.isLoaded) {
+        store.dispatch('loadState')
+            .then(next);
+        console.log('test2')
+    }
+})
+
 // We handle login out here because we need to handle it before
 // vuerouter kicks in
 VerifyLogin(client)
 
-const app = new Vue({
+export const app = new Vue({
     el: '#app',
     store,
     router,
@@ -70,10 +86,14 @@ const app = new Vue({
         navigateToJobs() {
             this.$router.push('/jobs');
         },
+        handleLogin(loginInfo: bcInterface.LoginInfo) {
+            HandleLogin(client, loginInfo);
+        },
+        handleLogout() {
+            HandleLogout(client);
+        },
         submitCreateForm: function (formulaData: CreateFormulaRequest.AsObject) {
-            let self = this;
             SubmitCreateForm(client, formulaData);
-            (self.$refs.createFormulaForm as HTMLFormElement).clearForm();
         },
         submitAddJobForm: function (jobData: CreateJobRequest.AsObject) {
             let self = this
@@ -102,8 +122,8 @@ const app = new Vue({
                     return
                 }
                 store.commit("hideAddJobModal")
-                self.loadFormulaData();
-                self.loadJobData();
+                LoadFormulaData(client);
+                LoadJobData(client);
                 (self.$refs.addJobForm as HTMLFormElement).clearForm();
             })
         },
@@ -148,8 +168,8 @@ const app = new Vue({
                     return
                 }
                 store.commit("hideManageFormulaModal")
-                self.loadFormulaData();
-                self.loadJobData();
+                LoadFormulaData(client);
+                LoadJobData(client);
                 (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView();
             })
         },
@@ -180,8 +200,8 @@ const app = new Vue({
                     store.commit('displaySnackBar', "Could not update job")
                     return
                 }
-                self.loadFormulaData();
-                self.loadJobData();
+                LoadFormulaData(client);
+                LoadJobData(client);
                 store.commit("hideManageJobsModal");
                 (self.$refs.manageJobsForm as HTMLFormElement).setFormModeView();
             })
@@ -199,8 +219,8 @@ const app = new Vue({
                     return
                 }
                 store.commit("hideManageJobsModal")
-                self.loadFormulaData();
-                self.loadJobData();
+                LoadFormulaData(client);
+                LoadJobData(client);
                 (self.$refs.manageJobsForm as HTMLFormElement).setFormModeView()
             })
         },
@@ -217,8 +237,8 @@ const app = new Vue({
                     return
                 }
                 store.commit("hideManageFormulaModal")
-                self.loadFormulaData();
-                self.loadJobData();
+                LoadFormulaData(client);
+                LoadJobData(client);
                 (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView()
             })
         },

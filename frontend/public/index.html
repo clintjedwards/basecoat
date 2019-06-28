@@ -48,7 +48,7 @@
             <manage-jobs-modal ref="manageJobsForm" @submit-manage-jobs-form="submitManageJobsForm"
                 @delete-job="deleteJob">
             </manage-jobs-modal>
-            <login-modal ref="loginForm" @validate-login="validateLogin"></login-modal>
+            <login-modal ref="loginForm" @handle-login="handleLogin"></login-modal>
 
             <!-- Notifications-->
             <v-snackbar v-model="$store.state.displaySnackBar" color="error" :timeout="3000" auto-height top>

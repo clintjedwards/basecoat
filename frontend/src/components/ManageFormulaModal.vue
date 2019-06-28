@@ -304,11 +304,6 @@ export default Vue.extend({
       ]
     };
   },
-  beforeRouteEnter(to, from, next) {
-    next(vm => {
-      vm.$root.loading = true;
-    });
-  },
   mounted: function() {
     if (this.id != undefined) {
       this.loadFormulaIntoView(this.id);

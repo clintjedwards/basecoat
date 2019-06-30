@@ -7,11 +7,7 @@
     hide-actions
   >
     <template v-slot:items="props">
-      <tr
-        style="cursor: pointer;"
-        :ripple="{ center: true }"
-        @click="$store.commit('showManageJobsModal'); $emit('load-job-into-modal', props.item.id);"
-      >
+      <tr style="cursor: pointer;" :ripple="{ center: true }" @click="navigateToJob(props.item.id)">
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>
           <span class="text-capitalize">{{ props.item.contact_name }}</span>
@@ -53,9 +49,8 @@ export default Vue.extend({
     };
   },
   methods: {
-    populateJobForm(jobID: string) {
-      let self = this;
-      (self.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
+    navigateToJob: function(jobID: string) {
+      this.$router.push("/jobs/" + jobID);
     }
   },
   computed: {

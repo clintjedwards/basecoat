@@ -10,8 +10,7 @@
       <tr
         style="cursor: pointer;"
         :ripple="{ center: true }"
-        v-on:click="$store.commit('showManageFormulaModal');
-                    $emit('load-formula-into-modal', props.item.id);"
+        v-on:click="navigateToFormula(props.item.id)"
       >
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>{{ props.item.number }}</td>
@@ -109,6 +108,11 @@ export default Vue.extend({
       }
 
       return modifiedFormulaList;
+    }
+  },
+  methods: {
+    navigateToFormula: function(formulaID: string) {
+      this.$router.push("/formulas/" + formulaID);
     }
   }
 });

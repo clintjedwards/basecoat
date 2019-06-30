@@ -225,7 +225,7 @@
             <v-btn
               color="blue darken-1"
               flat
-              @click="$store.commit('hideManageFormulaModal'); setFormModeView(); populateFormData();"
+              @click="$store.commit('hideManageFormulaModal'); setFormModeView();"
             >Close</v-btn>
             <v-btn
               color="blue darken-1"
@@ -243,7 +243,7 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="populateFormData(); parseColorantListForSameType();"
+              @click="getFormula(this.formulaData.id); parseColorantListForSameType();"
             >Reset</v-btn>
             <v-btn
               color="blue darken-1"
@@ -261,12 +261,15 @@
 <script lang="ts">
 import Vue from "vue";
 import {
+  GetFormulaRequest,
   UpdateFormulaRequest,
   Base,
   Colorant,
   Job,
   Formula
 } from "../basecoat_pb";
+
+import { BasecoatClient } from "../BasecoatServiceClientPb";
 
 let baseList: Base.AsObject[] = [];
 let colorantList: Colorant.AsObject[] = [];
@@ -282,6 +285,8 @@ let formulaData: UpdateFormulaRequest.AsObject = {
 };
 
 let formula: Formula;
+declare var __API__: string;
+let client = new BasecoatClient(__API__, null, null);
 
 export default Vue.extend({
   data: function() {
@@ -289,7 +294,6 @@ export default Vue.extend({
       formMode: "view",
       showConfirmDelete: false,
       formulaData: formulaData,
-      formulaInView: formula,
       colorantOverallTypeSet: false,
       colorantTypeInfo: {},
       currentColorantType: "",
@@ -302,6 +306,12 @@ export default Vue.extend({
         }
       ]
     };
+  },
+  mounted() {
+    if (this.$route.name === "formulaModal" && Vue.cookies.isKey("token")) {
+      this.getFormula(this.$route.params.id);
+      this.$store.commit("showManageFormulaModal");
+    }
   },
   watch: {
     "formulaData.colorantsList": function() {
@@ -362,12 +372,28 @@ export default Vue.extend({
     setFormModeView: function() {
       this.formMode = "view";
     },
-    loadFormulaIntoView: function(formulaID: string) {
-      this.formulaInView = this.$store.state.formulaData[formulaID];
-      this.populateFormData();
+    getFormula: function(formulaID: string) {
+      let self = this;
+      let getFormulaRequest = new GetFormulaRequest();
+      getFormulaRequest.setId(formulaID);
+      let metadata = { Authorization: "Bearer " + Vue.cookies.get("token") };
+      client.getFormula(getFormulaRequest, metadata, function(err, response) {
+        if (err) {
+          console.log(err);
+          self.$store.commit("displaySnackBar", "Could not load formula.");
+          return;
+        }
+        self.populateFormData(response.getFormula());
+      });
     },
-    populateFormData: function() {
-      let currentFormula = this.formulaInView;
+    populateFormData: function(currentFormula: Formula | undefined) {
+      if (currentFormula === undefined) {
+        console.log(
+          "could not load formula while trying to populate form data"
+        );
+        this.$store.commit("displaySnackBar", "Could not load formula.");
+        return;
+      }
 
       this.formulaData.id = currentFormula.getId();
       this.formulaData.name = currentFormula.getName();

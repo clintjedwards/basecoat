@@ -1,131 +1,256 @@
-package tests
+package main
 
-// import (
-// 	"bytes"
-// 	"encoding/json"
-// 	"log"
-// 	"math/rand"
-// 	"net/http"
-// 	"os"
-// 	"strconv"
-// 	"time"
+import (
+	"context"
+	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"strconv"
+	"time"
 
-// 	"github.com/clintjedwards/basecoat/models"
-// 	"github.com/icrowley/fake"
-// )
+	"github.com/clintjedwards/basecoat/api"
+	"github.com/clintjedwards/basecoat/storage"
+	"github.com/clintjedwards/basecoat/utils"
+	"github.com/icrowley/fake"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
+)
 
-// func generateColor() string {
+var JobIDs []string
+var APIKey string
+var opts []grpc.DialOption
 
-// 	colorNames := []string{
-// 		"old soul",
-// 		"mountain peak white",
-// 		"white cloud",
-// 		"plaster of paris",
-// 		"pacific ocean blue",
-// 		"true green",
-// 		"gulf shores",
-// 		"cayman lagoon",
-// 		"paradise peach",
-// 		"antique copper",
-// 	}
+func init() {
+	creds, err := credentials.NewClientTLSFromFile("./localhost.crt", "")
+	if err != nil {
+		utils.StructuredLog(utils.LogLevelFatal, "failed to get certificates", err)
+	}
 
-// 	rand.Seed(time.Now().UTC().UnixNano())
-// 	randColor := rand.Intn(len(colorNames))
-// 	return colorNames[randColor]
-// }
+	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-// func populateDB(entries int) {
-// 	client := &http.Client{}
+	hash, err := utils.HashPassword([]byte("test"))
+	if err != nil {
+		log.Fatalf("failed to hash password: %v", err)
+	}
 
-// 	Jobs := []models.Job{}
+	storage, err := storage.InitStorage()
+	if err != nil {
+		log.Fatalf("could not connect to storage: %v", err)
+	}
 
-// 	rand.Seed(time.Now().UTC().UnixNano())
-// 	randJob := rand.Intn(5)
+	err = storage.CreateUser("test", &api.User{
+		Name: "test",
+		Hash: string(hash),
+	})
+	if err != nil {
+		if err == utils.ErrUserExists {
+			log.Printf("could not create user: %v\n", err)
+			return
+		}
+		log.Fatalf("could not create user: %v", err)
+	}
 
-// 	for i := 0; i < 5; i++ {
-// 		id, _ := strconv.Atoi(fake.Digits())
-// 		job := models.Job{
-// 			ID:      id,
-// 			Name:    fake.Company(),
-// 			Street:  fake.StreetAddress(),
-// 			City:    fake.City(),
-// 			State:   fake.State(),
-// 			Zipcode: fake.Zip(),
-// 		}
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	if err != nil {
+		log.Fatalf("could not connect to basecoat: %v", err)
+	}
+	defer conn.Close()
 
-// 		Jobs = append(Jobs, job)
+	basecoatClient := api.NewBasecoatClient(conn)
 
-// 		requestBodyBytes, err := json.Marshal(job)
-// 		if err != nil {
-// 			log.Fatalf("could not marshal json data: %v", err)
-// 		}
+	createAPITokenRequest := &api.CreateAPITokenRequest{
+		User:     "test",
+		Password: "test",
+		Duration: 14400,
+	}
 
-// 		request, err := http.NewRequest("POST", "http://localhost:8080/jobs", bytes.NewReader(requestBodyBytes))
-// 		if err != nil {
-// 			log.Fatalf("could not create request: %v", err)
-// 		}
+	createResponse, err := basecoatClient.CreateAPIToken(context.Background(), createAPITokenRequest)
+	if err != nil {
+		log.Fatalf("could not create Token: %v", err)
+	}
 
-// 		request.Header.Set("Authorization", "aG9sYnJvOnRlc3R0b2tlbg==")
+	APIKey = createResponse.Key
+}
 
-// 		response, err := client.Do(request)
-// 		if err != nil {
-// 			log.Fatalf("could not get response: %v", err)
-// 		}
-// 		defer response.Body.Close()
+func generateColor() string {
+	colorNames := []string{
+		"Alluring Light",
+		"Antigua Blue",
+		"Aroma",
+		"Baby Frog",
+		"Bazooka Pink",
+		"Biscay",
+		"Blue Beauty",
+		"Bluewash",
+		"Bright Cerulean",
+		"Bungalow Gold",
+		"Can Can",
+		"Cathay Spice",
+		"Cherub",
+		"City Loft",
+		"Community",
+		"Cradle Pink",
+		"Daddy-O",
+		"Deep Orange-coloured Brown",
+		"Dirty White",
+		"Dusky Citron",
+		"Elusive",
+		"Eyre",
+		"First Frost",
+		"Fozzie Bear",
+		"Gainsboro",
+		"Gluten",
+		"Grape Haze",
+		"Greige",
+		"Haute Red",
+		"Hoeth Blue",
+		"Ice Mist",
+		"Irresistible Beige",
+		"Kaitoke Green",
+		"Lahmian Medium",
+		"Liberal Lilac",
+		"Light Spring Burst",
+		"Lola",
+		"Maiden's Blush",
+		"Mayan Treasure",
+		"Midnight Blush",
+		"Monarch",
+		"Murdoch",
+		"Night Mode",
+		"Oil Yellow",
+		"Orion Blue",
+		"Parachute Silk",
+		"Pekin Chicken",
+		"Pincushion",
+		"Platonic Blue",
+		"Pragmatic",
+		"Purple Ragwort",
+		"Rattan Palm",
+		"Retro",
+		"Rose Taupe",
+		"Salina Springs",
+		"Scrofulous Brown",
+		"Shamanic Journey",
+		"Silver Sage",
+		"Snuggle Pie",
+		"Spiced Nectarine",
+		"Stone Harbour",
+		"Sunday Niqab",
+		"Tambua Bay",
+		"Thought",
+		"Transformer",
+		"Ultraviolet Cryner",
+		"Victorian Cottage",
+		"Wasabi Nori",
+		"White Mecca",
+		"Wisteria Yellow",
+		"Zelyony Green",
+		"Zhēn Zhū Bái Pearl",
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	randColor := rand.Intn(len(colorNames))
+	return colorNames[randColor]
+}
 
-// 		if response.StatusCode != http.StatusCreated {
-// 			log.Printf("expected status Created; got %v", response.Status)
-// 		}
-// 	}
+func createJob() {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	if err != nil {
+		log.Fatalf("could not connect to basecoat: %v", err)
+	}
+	defer conn.Close()
 
-// 	for i := 0; i < entries; i++ {
+	basecoatClient := api.NewBasecoatClient(conn)
 
-// 		formula := models.Formula{
-// 			Name:   generateColor(),
-// 			Number: fake.CharactersN(2) + "-" + fake.DigitsN(3),
-// 			Notes:  fake.SentencesN(3),
-// 			Base: map[string]string{
-// 				generateColor(): fake.DigitsN(1),
-// 			},
-// 			Colorants: map[string]string{
-// 				generateColor(): fake.DigitsN(1),
-// 				generateColor(): fake.DigitsN(1),
-// 			},
-// 		}
+	createJobRequest := &api.CreateJobRequest{
+		Name:    fake.Company(),
+		Street:  fake.StreetAddress(),
+		Street2: "APT 5E",
+		City:    fake.City(),
+		State:   fake.State(),
+		Zipcode: fake.Zip(),
+		Notes:   fake.WordsN(20),
+		Contact: &api.Contact{
+			Name: fake.FullName(),
+			Info: fake.EmailAddress(),
+		},
+	}
 
-// 		if i%2 == 0 {
-// 			formula.Jobs = append(formula.Jobs, Jobs[randJob].ID)
-// 		}
+	md := metadata.Pairs("Authorization", "Bearer "+APIKey)
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
-// 		requestBodyBytes, err := json.Marshal(formula)
-// 		if err != nil {
-// 			log.Fatalf("could not marshal json data: %v", err)
-// 		}
+	response, err := basecoatClient.CreateJob(ctx, createJobRequest)
+	if err != nil {
+		log.Fatalf("could not create Job: %v", err)
+	}
 
-// 		request, err := http.NewRequest("POST", "http://localhost:8080/formulas", bytes.NewReader(requestBodyBytes))
-// 		if err != nil {
-// 			log.Fatalf("could not create request: %v", err)
-// 		}
+	JobIDs = append(JobIDs, response.Id)
+}
 
-// 		request.Header.Set("Authorization", "aG9sYnJvOnRlc3R0b2tlbg==")
+func createFormula() {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	if err != nil {
+		log.Fatalf("could not connect to basecoat: %v", err)
+	}
+	defer conn.Close()
 
-// 		response, err := client.Do(request)
-// 		if err != nil {
-// 			log.Fatalf("could not get response: %v", err)
-// 		}
-// 		defer response.Body.Close()
+	basecoatClient := api.NewBasecoatClient(conn)
 
-// 		if response.StatusCode != http.StatusCreated {
-// 			log.Printf("expected status Created; got %v", response.Status)
-// 		}
-// 	}
-// }
+	rand.Seed(time.Now().UTC().UnixNano())
+	randJob := rand.Intn(5)
+
+	createFormulaRequest := &api.CreateFormulaRequest{
+		Name:   generateColor(),
+		Number: fake.DigitsN(2) + "-" + fake.DigitsN(4),
+		Notes:  fake.EmailBody(),
+		Jobs:   []string{JobIDs[randJob]},
+		Bases: []*api.Base{
+			&api.Base{
+				Type:   fake.Company(),
+				Name:   generateColor(),
+				Amount: fake.DigitsN(2),
+			},
+		},
+		Colorants: []*api.Colorant{
+			&api.Colorant{
+				Type:   fake.Company(),
+				Name:   generateColor(),
+				Amount: fake.DigitsN(2),
+			},
+			&api.Colorant{
+				Type:   fake.Company(),
+				Name:   generateColor(),
+				Amount: fake.DigitsN(2),
+			},
+		},
+	}
+
+	md := metadata.Pairs("Authorization", "Bearer "+APIKey)
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
+
+	_, err = basecoatClient.CreateFormula(ctx, createFormulaRequest)
+	if err != nil {
+		log.Fatalf("could not create formula: %v", err)
+	}
+}
+
+func populateDB(entries int) {
+	for i := 0; i < 5; i++ {
+		createJob()
+	}
+
+	for i := 0; i < entries; i++ {
+		createFormula()
+	}
+}
 
 func main() {
-	// if len(os.Args) < 2 {
-	// 	log.Fatal("not enough arguments")
-	// }
-	// entryString := os.Args[1]
-	// entryNum, _ := strconv.Atoi(entryString)
-	// populateDB(entryNum)
+	if len(os.Args) < 2 {
+		log.Fatal("not enough arguments")
+	}
+
+	entryString := os.Args[1]
+	entryNum, _ := strconv.Atoi(entryString)
+	populateDB(entryNum)
 }

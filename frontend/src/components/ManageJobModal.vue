@@ -1,7 +1,7 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="$store.state.displayManageJobsModal" max-width="600px" persistent>
-      <v-form ref="manageJobsForm" lazy-validation>
+    <v-dialog v-model="$store.state.displayManageJobModal" max-width="600px" persistent>
+      <v-form ref="manageJobForm" lazy-validation>
         <v-card>
           <v-card-title>
             <span>ID: {{ jobData.id }}</span>
@@ -25,7 +25,7 @@
                   ></v-text-field>
                 </v-flex>
               </v-layout>
-              <br>
+              <br />
               <v-layout v-show="formMode === 'view'">
                 <v-flex xs12 sm6 md6>
                   <h6
@@ -49,7 +49,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Address -->
               <v-spacer>Address Information</v-spacer>
@@ -104,7 +104,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Formulas -->
               <v-spacer v-show="jobData.formulasList.length === 0">No Formulas Listed</v-spacer>
@@ -156,7 +156,7 @@
               <v-layout>
                 <v-flex xs12 v-show="formMode === 'view'">
                   <v-spacer>Notes</v-spacer>
-                  <br>
+                  <br />
                   <pre>{{ jobData.notes }}</pre>
                 </v-flex>
                 <v-flex xs12 v-show="formMode === 'edit'">
@@ -184,7 +184,7 @@
             <v-btn
               color="blue darken-1"
               flat
-              @click="$store.commit('hideManageJobsModal'); setFormModeView(); populateFormData();"
+              @click="$store.commit('hideManageJobModal'); setFormModeView();"
             >Close</v-btn>
             <v-btn
               color="blue darken-1"
@@ -202,7 +202,7 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="populateFormData()"
+              @click="getJob(this.jobData.id)"
             >Reset</v-btn>
             <v-btn
               color="blue darken-1"
@@ -219,7 +219,15 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { UpdateJobRequest, Contact, Job, Formula } from "../basecoat_pb";
+import {
+  GetJobRequest,
+  UpdateJobRequest,
+  Contact,
+  Job,
+  Formula
+} from "../basecoat_pb";
+
+import { BasecoatClient } from "../BasecoatServiceClientPb";
 
 let contact: Contact.AsObject = {
   name: "",
@@ -240,6 +248,8 @@ let jobData: UpdateJobRequest.AsObject = {
 };
 
 let job: Job;
+declare var __API__: string;
+let client = new BasecoatClient(__API__, null, null);
 
 export default Vue.extend({
   data: function() {
@@ -247,7 +257,6 @@ export default Vue.extend({
       formMode: "view",
       showConfirmDelete: false,
       jobData: jobData,
-      jobInView: job,
       nameRules: [
         function(v: string) {
           if (!!v) {
@@ -319,9 +328,10 @@ export default Vue.extend({
       ]
     };
   },
-  watch: {
-    jobInView: function() {
-      this.populateFormData();
+  mounted() {
+    if (this.$route.name === "jobModal" && Vue.cookies.isKey("token")) {
+      this.getJob(this.$route.params.id);
+      this.$store.commit("showManageJobModal");
     }
   },
   computed: {
@@ -366,12 +376,28 @@ export default Vue.extend({
     setFormModeView: function() {
       this.formMode = "view";
     },
-    loadJobIntoView: function(jobID: string) {
-      this.jobInView = this.$store.state.jobData[jobID];
-      this.populateFormData();
+    getJob: function(jobID: string) {
+      let self = this;
+      let getJobRequest = new GetJobRequest();
+      getJobRequest.setId(jobID);
+      let metadata = { Authorization: "Bearer " + Vue.cookies.get("token") };
+      client.getJob(getJobRequest, metadata, function(err, response) {
+        if (err) {
+          console.log(err);
+          self.$store.commit("displaySnackBar", "Could not load job.");
+          return;
+        }
+        self.populateFormData(response.getJob());
+      });
     },
-    populateFormData: function() {
-      let currentJob = this.jobInView;
+    populateFormData: function(currentJob: Job | undefined) {
+      if (currentJob === undefined) {
+        console.log(
+          "could not load formula while trying to populate form data"
+        );
+        this.$store.commit("displaySnackBar", "Could not load formula.");
+        return;
+      }
 
       this.jobData.id = currentJob.getId();
       this.jobData.name = currentJob.getName();
@@ -400,8 +426,8 @@ export default Vue.extend({
       this.jobData.contact = contact;
     },
     handleFormSave: function() {
-      if ((this.$refs.manageJobsForm as HTMLFormElement).validate()) {
-        this.$emit("submit-manage-jobs-form", this.jobData);
+      if ((this.$refs.manageJobForm as HTMLFormElement).validate()) {
+        this.$emit("submit-manage-job-form", this.jobData);
       }
     },
     handleFormDelete: function() {

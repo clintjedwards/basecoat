@@ -2,6 +2,7 @@ module github.com/clintjedwards/basecoat
 
 require (
 	cloud.google.com/go v0.40.0
+	github.com/corpix/uarand v0.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gobuffalo/packd v0.2.0 // indirect
 	github.com/gobuffalo/packr v1.26.0
@@ -14,6 +15,7 @@ require (
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c
+	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
 	github.com/improbable-eng/grpc-web v0.9.5
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223 // indirect

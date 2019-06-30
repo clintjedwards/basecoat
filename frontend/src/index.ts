@@ -3,15 +3,17 @@ import Vuex, { MutationTree } from 'vuex'
 import Vuetify from 'vuetify'
 import VueCookies from 'vue-cookies'
 
+import router from './router'
+
 import PageHeader from "./components/PageHeader.vue"
 import FormulaSearchPanel from "./components/FormulaSearchPanel.vue"
-import JobsSearchPanel from "./components/JobsSearchPanel.vue"
+import JobSearchPanel from "./components/JobSearchPanel.vue"
 import FormulaTable from "./components/FormulaTable.vue"
 import JobTable from "./components/JobTable.vue"
 import CreateFormulaModal from "./components/CreateFormulaModal.vue"
 import AddJobModal from "./components/AddJobModal.vue"
 import ManageFormulaModal from "./components/ManageFormulaModal.vue"
-import ManageJobsModal from "./components/ManageJobsModal.vue"
+import ManageJobModal from "./components/ManageJobModal.vue"
 import LoginModal from "./components/LoginModal.vue"
 
 import { BasecoatClient } from "./BasecoatServiceClientPb"
@@ -70,7 +72,7 @@ interface RootState {
     displayCreateFormulaModal: boolean,
     displayAddJobModal: boolean,
     displayManageFormulaModal: boolean,
-    displayManageJobsModal: boolean,
+    displayManageJobModal: boolean,
     displayLoginModal: boolean,
     currentTab: string,
     isLoggedIn: boolean,
@@ -91,7 +93,7 @@ const state: RootState = {
     displayCreateFormulaModal: false,
     displayAddJobModal: false,
     displayManageFormulaModal: false,
-    displayManageJobsModal: false,
+    displayManageJobModal: false,
     displayLoginModal: false,
     currentTab: "formulas",
     isLoggedIn: false,
@@ -99,8 +101,8 @@ const state: RootState = {
     displaySnackBar: false,
     snackBarText: "",
     colorantTypes: {
-        "PPG Pittsburgh Paints": { imageURL: "/images/ppg.png", userMessage: "Use PPG Colorant Only" },
-        "Benjamin Moore": { imageURL: "/images/benjamin-moore.png", userMessage: "Use Benjamin Moore Colorant Only" }
+        "Benjamin Moore": { imageURL: "/images/benjamin-moore.png", userMessage: "Use Benjamin Moore Colorant Only" },
+        "PPG Pittsburgh Paints": { imageURL: "/images/ppg.png", userMessage: "Use PPG Colorant Only" }
     }
 }
 
@@ -122,12 +124,14 @@ const mutations: MutationTree<RootState> = {
     },
     hideManageFormulaModal(state) {
         state.displayManageFormulaModal = false
+        app.$router.push('/formulas')
     },
-    showManageJobsModal(state) {
-        state.displayManageJobsModal = true
+    showManageJobModal(state) {
+        state.displayManageJobModal = true
     },
-    hideManageJobsModal(state) {
-        state.displayManageJobsModal = false
+    hideManageJobModal(state) {
+        state.displayManageJobModal = false
+        app.$router.push('/jobs')
     },
     updateTotalFormulas(state) {
         state.totalFormulas = Object.keys(state.formulaData).length
@@ -181,22 +185,29 @@ let client: BasecoatClient
 const app = new Vue({
     el: '#app',
     store,
+    router,
     components: {
         PageHeader,
         FormulaSearchPanel,
-        JobsSearchPanel,
+        JobSearchPanel,
         FormulaTable,
         JobTable,
         CreateFormulaModal,
         AddJobModal,
         ManageFormulaModal,
-        ManageJobsModal,
+        ManageJobModal,
         LoginModal
     },
     created: function () {
         client = new BasecoatClient(__API__, null, null);
     },
     methods: {
+        navigateToFormulas() {
+            this.$router.push('/formulas')
+        },
+        navigateToJobs() {
+            this.$router.push('/jobs')
+        },
         checkLogin: function () {
             if (!this.$cookies.isKey('username') || !this.$cookies.isKey('token')) {
                 store.commit('updateLoginState', false)
@@ -238,12 +249,6 @@ const app = new Vue({
             self.$cookies.remove('username')
             self.$cookies.remove('token')
             this.checkLogin()
-        },
-        loadFormulaIntoModal: function (formulaID: string) {
-            (this.$refs.manageFormulaForm as HTMLFormElement).loadFormulaIntoView(formulaID);
-        },
-        loadJobIntoModal: function (jobID: string) {
-            (this.$refs.manageJobsForm as HTMLFormElement).loadJobIntoView(jobID);
         },
         loadFormulaData: function () {
             let listFormulasRequest = new ListFormulasRequest();
@@ -408,7 +413,7 @@ const app = new Vue({
                 (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView();
             })
         },
-        submitManageJobsForm: function (jobData: UpdateJobRequest.AsObject) {
+        submitManageJobForm: function (jobData: UpdateJobRequest.AsObject) {
             let self = this
             let updateJobRequest = new UpdateJobRequest();
             updateJobRequest.setId(jobData.id)
@@ -437,8 +442,8 @@ const app = new Vue({
                 }
                 self.loadFormulaData();
                 self.loadJobData();
-                store.commit("hideManageJobsModal");
-                (self.$refs.manageJobsForm as HTMLFormElement).setFormModeView();
+                store.commit("hideManageJobModal");
+                (self.$refs.manageJobForm as HTMLFormElement).setFormModeView();
             })
         },
         deleteJob: function (jobID: string) {
@@ -453,10 +458,10 @@ const app = new Vue({
                     store.commit('displaySnackBar', "Could not delete job")
                     return
                 }
-                store.commit("hideManageJobsModal")
+                store.commit("hideManageJobModal")
                 self.loadFormulaData();
                 self.loadJobData();
-                (self.$refs.manageJobsForm as HTMLFormElement).setFormModeView()
+                (self.$refs.manageJobForm as HTMLFormElement).setFormModeView()
             })
         },
         deleteFormula: function (formulaID: string) {

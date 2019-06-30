@@ -35,7 +35,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Base -->
               <v-spacer v-show="formulaData.basesList.length === 0">No Bases Listed</v-spacer>
@@ -73,8 +73,8 @@
               <div v-show="formMode === 'edit'">
                 <v-btn flat color="primary" v-on:click="addBaseField">Add Base</v-btn>
               </div>
-              <br>
-              <br>
+              <br />
+              <br />
 
               <!-- Colorants -->
               <v-spacer v-show="formulaData.colorantsList.length === 0">No Colorants Listed</v-spacer>
@@ -143,7 +143,7 @@
               <div v-show="formMode === 'edit'">
                 <v-btn flat color="primary" v-on:click="addColorantField">Add Colorant</v-btn>
               </div>
-              <br>
+              <br />
 
               <!-- Jobs -->
               <v-spacer v-show="formulaData.jobsList.length === 0">No Jobs Listed</v-spacer>

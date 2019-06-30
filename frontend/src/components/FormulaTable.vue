@@ -99,7 +99,7 @@ export default Vue.extend({
         modifiedFormula.number = formula.getNumber();
         modifiedFormula.created = moment(
           moment.unix(formula.getCreated())
-        ).fromNow();
+        ).format("L");
         modifiedFormula.base = "None";
 
         if (formula.getBasesList().length != 0) {

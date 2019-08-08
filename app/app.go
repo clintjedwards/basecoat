@@ -5,6 +5,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/config"
 	"github.com/clintjedwards/basecoat/frontend"
+	"github.com/clintjedwards/basecoat/metrics"
 	"github.com/clintjedwards/basecoat/service"
 )
 
@@ -19,5 +20,6 @@ func StartServices() {
 	grpcServer := service.CreateGRPCServer(api)
 
 	go frontend.InitHTTPService(config, grpcServer)
+	go metrics.InitPrometheusService(config)
 	service.InitGRPCService(config, grpcServer)
 }

@@ -32,6 +32,7 @@ type Config struct {
 	Backend     *BackendConfig
 	Database    *DatabaseConfig
 	CommandLine *CommandLineConfig
+	Metrics     *MetricsConfig
 }
 
 // FrontendConfig represents configuration for frontend basecoat
@@ -49,6 +50,11 @@ type BackendConfig struct {
 	SecretKey string `envconfig:"backend_secret_key" default:"testtoken"` // secret key used to encrypt api tokens
 	HTTPURL   string `envconfig:"backend_http_url" default:"localhost:8080"`
 	GRPCURL   string `envconfig:"backend_grpc_url" default:"localhost:8081"`
+}
+
+// MetricsConfig represents configuration for the metrics endpoint
+type MetricsConfig struct {
+	Endpoint string `envconfig:"metrics_endpoint" default:"localhost:8082"`
 }
 
 // CommandLineConfig represents configuration for cli application

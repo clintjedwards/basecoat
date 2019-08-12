@@ -6,7 +6,6 @@ import JobsPage from "./components/JobsPage.vue"
 import ManageFormulaModal from "./components/ManageFormulaModal.vue"
 import ManageJobModal from "./components/ManageJobModal.vue"
 
-
 Vue.use(VueRouter)
 
 const routes = [

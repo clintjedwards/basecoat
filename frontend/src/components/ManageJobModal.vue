@@ -202,7 +202,7 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="getJob(this.jobData.id)"
+              @click="getJob(jobData.id)"
             >Reset</v-btn>
             <v-btn
               color="blue darken-1"

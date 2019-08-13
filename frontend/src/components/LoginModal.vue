@@ -1,19 +1,19 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="$store.state.displayLoginModal" max-width="600px" persistent>
+    <v-dialog v-model="showModal" max-width="600px" persistent>
       <v-form ref="loginForm" lazy-validation>
         <v-card>
           <v-card-text>
             <!-- Banner -->
             <v-layout justify-center wrap>
-              <img class="icon center" src="images/paintbrush.svg">
+              <img class="icon center" src="images/paintbrush.svg" />
               <v-flex xs12 sm12 md12>
                 <h2 class="display-3 font-weight-light center">Basecoat</h2>
               </v-flex>
             </v-layout>
             <v-spacer></v-spacer>
-            <br>
-            <br>
+            <br />
+            <br />
 
             <v-layout wrap justify-center>
               <v-flex xs12 sm8 md8>
@@ -28,13 +28,13 @@
               <v-flex xs12 sm8 md8>
                 <v-text-field
                   label="Password"
-                  :append-icon="showPass ? 'visibility' : 'visibility_off'"
-                  :type="showPass ? 'text' : 'password'"
+                  :append-icon="showPassword ? 'visibility' : 'visibility_off'"
+                  :type="showPassword ? 'text' : 'password'"
                   :rules="passwordRules"
                   v-model="loginInfo.password"
                   outline
                   required
-                  @click:append="showPass = !showPass"
+                  @click:append="showPassword = !showPassword"
                 ></v-text-field>
               </v-flex>
             </v-layout>
@@ -44,14 +44,13 @@
               <v-spacer></v-spacer>
               <v-btn
                 color="blue darken-1"
-                :loading="$store.state.loginIsLoading"
-                :disabled="$store.state.loginIsLoading"
+                :loading="this.loading"
+                :disabled="this.loading"
                 @click="handleLogin()"
-                type="submit"
               >Login</v-btn>
             </v-card-actions>
           </v-layout>
-          <br>
+          <br />
         </v-card>
       </v-form>
     </v-dialog>
@@ -60,11 +59,17 @@
 
 <script lang="ts">
 import Vue from "vue";
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 export default Vue.extend({
   data: function() {
     return {
-      showPass: false,
+      showModal: true,
+      showPassword: false,
+      loading: false,
       loginInfo: {
         username: "",
         password: ""
@@ -90,7 +95,25 @@ export default Vue.extend({
   methods: {
     handleLogin: function() {
       if ((this.$refs.loginForm as HTMLFormElement).validate()) {
-        this.$emit("validate-login", this.loginInfo);
+        this.loading = true;
+
+        client
+          .handleLogin(this.loginInfo)
+          .then(() => {
+            this.$store.commit("updateUsername", this.loginInfo.username);
+            //Redirect user to original page if coming from another
+            if (this.$route.query.redirect) {
+              this.$router.push(this.$route.query.redirect.toString());
+            } else {
+              this.$router.push("/");
+            }
+            this.loading = false;
+          })
+          .catch(error => {
+            console.log(error);
+            this.$store.commit("showSnackBar", "Invalid Login Credentials");
+            this.loading = false;
+          });
       }
     }
   }

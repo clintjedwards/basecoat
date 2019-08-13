@@ -1,7 +1,7 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="$store.state.displayManageJobModal" max-width="600px" persistent>
-      <v-form ref="manageJobForm" lazy-validation>
+    <v-dialog v-model="showModal" max-width="600px" persistent>
+      <v-form v-if="!loading" ref="manageJobForm" lazy-validation>
         <v-card>
           <v-card-title>
             <span>ID: {{ jobData.id }}</span>
@@ -181,11 +181,7 @@
               @click="handleFormDelete()"
             >Confirm Delete</v-btn>
             <v-spacer></v-spacer>
-            <v-btn
-              color="blue darken-1"
-              flat
-              @click="$store.commit('hideManageJobModal'); setFormModeView();"
-            >Close</v-btn>
+            <v-btn color="blue darken-1" flat @click="handleCloseForm(); setFormModeView();">Close</v-btn>
             <v-btn
               color="blue darken-1"
               flat
@@ -202,13 +198,13 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="getJob(jobData.id)"
+              @click="populateFormData(jobData.id)"
             >Reset</v-btn>
             <v-btn
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="handleFormSave()"
+              @click="handleUpdateJob()"
             >Save</v-btn>
           </v-card-actions>
         </v-card>
@@ -226,8 +222,10 @@ import {
   Job,
   Formula
 } from "../basecoat_pb";
+import BasecoatClientWrapper from "../basecoatClientWrapper";
 
-import { BasecoatClient } from "../BasecoatServiceClientPb";
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 let contact: Contact.AsObject = {
   name: "",
@@ -248,12 +246,12 @@ let jobData: UpdateJobRequest.AsObject = {
 };
 
 let job: Job;
-declare var __API__: string;
-let client = new BasecoatClient(__API__, null, null);
 
 export default Vue.extend({
   data: function() {
     return {
+      showModal: true,
+      loading: true,
       formMode: "view",
       showConfirmDelete: false,
       jobData: jobData,
@@ -329,10 +327,7 @@ export default Vue.extend({
     };
   },
   mounted() {
-    if (this.$route.name === "jobModal" && Vue.cookies.isKey("token")) {
-      this.getJob(this.$route.params.id);
-      this.$store.commit("showManageJobModal");
-    }
+    this.populateFormData(this.$route.params.id);
   },
   computed: {
     formulaDataToList: function() {
@@ -376,62 +371,91 @@ export default Vue.extend({
     setFormModeView: function() {
       this.formMode = "view";
     },
-    getJob: function(jobID: string) {
-      let self = this;
-      let getJobRequest = new GetJobRequest();
-      getJobRequest.setId(jobID);
-      let metadata = { Authorization: "Bearer " + Vue.cookies.get("token") };
-      client.getJob(getJobRequest, metadata, function(err, response) {
-        if (err) {
-          console.log(err);
-          self.$store.commit("displaySnackBar", "Could not load job.");
-          return;
-        }
-        self.populateFormData(response.getJob());
-      });
+    populateFormData: function(jobID: string) {
+      client
+        .getJob(jobID)
+        .then(job => {
+          if (job == undefined) {
+            this.$store.commit("showSnackBar", "Could not load job.");
+            this.loading = false;
+            this.handleCloseForm();
+            return;
+          }
+
+          this.jobData.id = job.getId();
+          this.jobData.name = job.getName();
+          this.jobData.street = job.getStreet();
+          this.jobData.street2 = job.getStreet2();
+          this.jobData.city = job.getCity();
+          this.jobData.state = job.getState();
+          this.jobData.zipcode = job.getZipcode();
+          this.jobData.notes = job.getNotes();
+          this.jobData.formulasList = job.getFormulasList();
+
+          let contact: Contact.AsObject;
+          contact = {
+            name: "",
+            info: ""
+          };
+
+          if (job.getContact() != undefined) {
+            let currentContact = job.getContact() || new Contact();
+            contact = {
+              name: currentContact.getName(),
+              info: currentContact.getInfo()
+            };
+          }
+
+          this.jobData.contact = contact;
+          this.loading = false;
+        })
+        .catch(() => {
+          this.$store.commit("showSnackBar", "Could not load job.");
+          this.loading = false;
+          this.handleCloseForm();
+        });
     },
-    populateFormData: function(currentJob: Job | undefined) {
-      if (currentJob === undefined) {
-        console.log(
-          "could not load formula while trying to populate form data"
-        );
-        this.$store.commit("displaySnackBar", "Could not load formula.");
-        return;
-      }
-
-      this.jobData.id = currentJob.getId();
-      this.jobData.name = currentJob.getName();
-      this.jobData.street = currentJob.getStreet();
-      this.jobData.street2 = currentJob.getStreet2();
-      this.jobData.city = currentJob.getCity();
-      this.jobData.state = currentJob.getState();
-      this.jobData.zipcode = currentJob.getZipcode();
-      this.jobData.notes = currentJob.getNotes();
-      this.jobData.formulasList = currentJob.getFormulasList();
-
-      let contact: Contact.AsObject;
-      contact = {
-        name: "",
-        info: ""
-      };
-
-      if (currentJob.getContact() != undefined) {
-        let currentContact = currentJob.getContact() || new Contact();
-        contact = {
-          name: currentContact.getName(),
-          info: currentContact.getInfo()
-        };
-      }
-
-      this.jobData.contact = contact;
+    handleCloseForm: function() {
+      this.setFormModeView();
+      this.$router.push({ name: "jobs" });
     },
-    handleFormSave: function() {
+    handleUpdateJob: function() {
       if ((this.$refs.manageJobForm as HTMLFormElement).validate()) {
-        this.$emit("submit-manage-job-form", this.jobData);
+        client
+          .submitManageJobForm(this.jobData)
+          .then(() => {
+            client
+              .getJobData()
+              .then(jobs => {
+                this.$store.commit("updateJobData", jobs);
+                this.handleCloseForm();
+              })
+              .catch(() => {
+                this.handleCloseForm();
+              });
+          })
+          .catch(() => {
+            this.$store.commit("showSnackBar", "Could not update job.");
+          });
       }
     },
     handleFormDelete: function() {
-      this.$emit("delete-job", this.jobData.id);
+      client
+        .deleteJob(this.jobData.id)
+        .then(() => {
+          client
+            .getJobData()
+            .then(jobs => {
+              this.$store.commit("updateJobData", jobs);
+              this.handleCloseForm();
+            })
+            .catch(() => {
+              this.handleCloseForm();
+            });
+        })
+        .catch(() => {
+          this.$store.commit("showSnackBar", "Could not delete job.");
+        });
       this.showConfirmDelete = false;
     }
   }

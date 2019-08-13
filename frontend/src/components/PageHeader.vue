@@ -1,6 +1,6 @@
 <template>
   <v-toolbar color="#424242" height="150">
-    <img class="icon" src="images/paintbrush.svg">
+    <img class="icon" src="/images/paintbrush.svg" />
     <v-toolbar-title class="page-header-text-title font-weight-thin display-3">
       <slot></slot>
     </v-toolbar-title>
@@ -16,11 +16,16 @@
 
 <script lang="ts">
 import Vue from "vue";
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 export default Vue.extend({
   methods: {
     handleLogout: function() {
-      this.$emit("logout");
+      client.handleLogout();
+      this.$router.push("/login");
     }
   }
 });

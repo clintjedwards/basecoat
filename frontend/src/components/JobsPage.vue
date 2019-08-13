@@ -18,8 +18,7 @@ export default Vue.extend({
   },
   data: function() {
     return {};
-  },
-  computed: {}
+  }
 });
 </script>
 

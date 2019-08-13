@@ -1,7 +1,7 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="$store.state.displayAddJobModal" max-width="600px" persistent>
-      <v-form ref="addJobForm" lazy-validation>
+    <v-dialog v-model="showModal" max-width="600px" persistent>
+      <v-form ref="createJobForm" lazy-validation>
         <v-card>
           <v-card-title>
             <span class="headline">
@@ -35,7 +35,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Address -->
               <v-spacer>Address Information</v-spacer>
@@ -61,7 +61,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Notes -->
               <v-spacer>Miscellaneous Information</v-spacer>
@@ -76,8 +76,8 @@
           <!-- Buttons -->
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" flat v-on:click="$store.commit('hideAddJobModal')">Close</v-btn>
-            <v-btn color="blue darken-1" flat v-on:click="handleFormSave()">Save</v-btn>
+            <v-btn color="blue darken-1" flat v-on:click="handleCloseForm()">Close</v-btn>
+            <v-btn color="blue darken-1" flat v-on:click="handleCreateJob()">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-form>
@@ -88,6 +88,10 @@
 <script lang="ts">
 import Vue from "vue";
 import { Contact, CreateJobRequest } from "../basecoat_pb";
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 let contact: Contact.AsObject = { name: "", info: "" };
 let formulaList: string[] = [];
@@ -107,6 +111,7 @@ let jobData: CreateJobRequest.AsObject = {
 export default Vue.extend({
   data: function() {
     return {
+      showModal: true,
       jobData: jobData,
       states: [
         "Alabama",
@@ -181,11 +186,32 @@ export default Vue.extend({
   },
   methods: {
     clearForm: function() {
-      (this.$refs.addJobForm as HTMLFormElement).reset();
+      (this.$refs.createJobForm as HTMLFormElement).reset();
     },
-    handleFormSave: function() {
-      if ((this.$refs.addJobForm as HTMLFormElement).validate()) {
-        this.$emit("submit-add-job-form", this.jobData);
+    handleCloseForm: function() {
+      this.$router.push({ name: "jobs" });
+    },
+    handleCreateJob: function() {
+      if ((this.$refs.createJobForm as HTMLFormElement).validate()) {
+        client
+          .submitCreateJobForm(this.jobData)
+          .then(() => {
+            client
+              .getJobData()
+              .then(jobs => {
+                this.$store.commit("updateJobData", jobs);
+                this.clearForm();
+                this.$router.push({ name: "jobs" });
+              })
+              .catch(() => {
+                this.$store.commit("showSnackBar", "Could not load jobs.");
+                this.clearForm();
+                this.$router.push({ name: "jobs" });
+              });
+          })
+          .catch(() => {
+            this.$store.commit("showSnackBar", "Could not create job.");
+          });
       }
     }
   }

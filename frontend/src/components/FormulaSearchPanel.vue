@@ -2,7 +2,7 @@
   <div>
     <span>
       <v-badge color="#ff5252">
-        <template v-slot:badge>{{ $store.state.totalFormulas }}</template>
+        <template v-slot:badge>{{ Object.keys($store.state.formulaData).length }}</template>
         <span class="display-3 font-weight-light search-panel-text">Formulas</span>
       </v-badge>
     </span>
@@ -15,7 +15,7 @@
       ></v-text-field>
     </span>
     <span style="margin-left: 4em;">
-      <v-btn color="primary" v-on:click="$store.commit('showCreateFormulaModal')">
+      <v-btn color="primary" v-on:click="showCreateFormulaModal()">
         <v-icon>create</v-icon>Create Formula
       </v-btn>
     </span>
@@ -23,7 +23,18 @@
 </template>
 
 <script lang="ts">
-export default {};
+import Vue from "vue";
+
+export default Vue.extend({
+  data: function() {
+    return {};
+  },
+  methods: {
+    showCreateFormulaModal: function() {
+      this.$router.push({ name: "createFormulaModal" });
+    }
+  }
+});
 </script>
 
 <style scoped>

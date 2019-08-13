@@ -28,6 +28,11 @@
 import Vue from "vue";
 import { Job, Contact } from "../basecoat_pb";
 
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
+
 export default Vue.extend({
   data: function() {
     return {
@@ -48,10 +53,8 @@ export default Vue.extend({
       ]
     };
   },
-  methods: {
-    navigateToJob: function(jobID: string) {
-      this.$router.push("/jobs/" + jobID);
-    }
+  mounted() {
+    this.loadJobData();
   },
   computed: {
     jobDataToList: function() {
@@ -103,6 +106,16 @@ export default Vue.extend({
       }
 
       return modifiedJobList;
+    }
+  },
+  methods: {
+    navigateToJob: function(jobID: string) {
+      this.$router.push("/jobs/" + jobID);
+    },
+    loadJobData: function() {
+      client.getJobData().then(jobs => {
+        this.$store.commit("updateJobData", jobs);
+      });
     }
   }
 });

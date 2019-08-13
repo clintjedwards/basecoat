@@ -1,7 +1,7 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="$store.state.displayManageFormulaModal" max-width="600px" persistent>
-      <v-form ref="manageFormulaForm" lazy-validation>
+    <v-dialog v-model="showModal" max-width="600px" persistent>
+      <v-form v-if="!loading" ref="manageFormulaForm" lazy-validation>
         <v-card>
           <v-card-title>
             <span>ID: {{ formulaData.id }}</span>
@@ -222,11 +222,7 @@
               @click="handleFormDelete()"
             >Confirm Delete</v-btn>
             <v-spacer></v-spacer>
-            <v-btn
-              color="blue darken-1"
-              flat
-              @click="$store.commit('hideManageFormulaModal'); setFormModeView();"
-            >Close</v-btn>
+            <v-btn color="blue darken-1" flat @click="handleCloseForm(); setFormModeView();">Close</v-btn>
             <v-btn
               color="blue darken-1"
               flat
@@ -243,13 +239,13 @@
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="getFormula(this.formulaData.id); parseColorantListForSameType();"
+              @click="populateFormData(formulaData.id); parseColorantListForSameType();"
             >Reset</v-btn>
             <v-btn
               color="blue darken-1"
               flat
               v-show="formMode === 'edit'"
-              @click="handleFormSave(); parseColorantListForSameType();"
+              @click="handleUpdateFormula(); parseColorantListForSameType();"
             >Save</v-btn>
           </v-card-actions>
         </v-card>
@@ -268,9 +264,12 @@ import {
   Job,
   Formula
 } from "../basecoat_pb";
+import BasecoatClientWrapper from "../basecoatClientWrapper";
 
-import { BasecoatClient } from "../BasecoatServiceClientPb";
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
+let formula: Formula;
 let baseList: Base.AsObject[] = [];
 let colorantList: Colorant.AsObject[] = [];
 
@@ -284,16 +283,32 @@ let formulaData: UpdateFormulaRequest.AsObject = {
   notes: ""
 };
 
-let formula: Formula;
-declare var __API__: string;
-let client = new BasecoatClient(__API__, null, null);
+interface modifiedJob {
+  id: string;
+  name: string;
+  contact_name: string;
+  contact_info: string;
+  street: string;
+  city: string;
+  state: string;
+  zipcode: string;
+}
+
+interface jobMap {
+  [key: string]: modifiedJob;
+}
+
+let jobMap: jobMap = {};
 
 export default Vue.extend({
   data: function() {
     return {
+      showModal: true,
+      loading: true,
       formMode: "view",
       showConfirmDelete: false,
       formulaData: formulaData,
+      jobMap: jobMap,
       colorantOverallTypeSet: false,
       colorantTypeInfo: {},
       currentColorantType: "",
@@ -308,10 +323,7 @@ export default Vue.extend({
     };
   },
   mounted() {
-    if (this.$route.name === "formulaModal" && Vue.cookies.isKey("token")) {
-      this.getFormula(this.$route.params.id);
-      this.$store.commit("showManageFormulaModal");
-    }
+    this.populateFormData(this.$route.params.id);
   },
   watch: {
     "formulaData.colorantsList": function() {
@@ -372,67 +384,59 @@ export default Vue.extend({
     setFormModeView: function() {
       this.formMode = "view";
     },
-    getFormula: function(formulaID: string) {
-      let self = this;
-      let getFormulaRequest = new GetFormulaRequest();
-      getFormulaRequest.setId(formulaID);
-      let metadata = { Authorization: "Bearer " + Vue.cookies.get("token") };
-      client.getFormula(getFormulaRequest, metadata, function(err, response) {
-        if (err) {
-          console.log(err);
-          self.$store.commit("displaySnackBar", "Could not load formula.");
-          return;
-        }
-        self.populateFormData(response.getFormula());
-      });
-    },
-    populateFormData: function(currentFormula: Formula | undefined) {
-      if (currentFormula === undefined) {
-        console.log(
-          "could not load formula while trying to populate form data"
-        );
-        this.$store.commit("displaySnackBar", "Could not load formula.");
-        return;
-      }
+    populateFormData: function(formulaID: string) {
+      client
+        .getFormula(formulaID)
+        .then(formula => {
+          if (formula == undefined) {
+            this.$store.commit("showSnackBar", "Could not load formula.");
+            this.loading = false;
+            this.handleCloseForm();
+            return;
+          }
+          this.formulaData.id = formula.getId();
+          this.formulaData.name = formula.getName();
+          this.formulaData.number = formula.getNumber();
+          this.formulaData.notes = formula.getNotes();
+          this.formulaData.jobsList = formula.getJobsList();
 
-      this.formulaData.id = currentFormula.getId();
-      this.formulaData.name = currentFormula.getName();
-      this.formulaData.number = currentFormula.getNumber();
-      this.formulaData.notes = currentFormula.getNotes();
-      this.formulaData.jobsList = currentFormula.getJobsList();
+          //We need to format this as an object because the protomessage type resoves as a weird array
+          let basesList: Base.AsObject[] = [];
+          formula.getBasesList().forEach(function(item: Base, index: number) {
+            let newBase: Base.AsObject;
+            newBase = {
+              type: item.getType(),
+              name: item.getName(),
+              amount: item.getAmount()
+            };
 
-      //We need to format this as an object because the protomessage type resoves as a weird array
-      let basesList: Base.AsObject[] = [];
-      currentFormula
-        .getBasesList()
-        .forEach(function(item: Base, index: number) {
-          let newBase: Base.AsObject;
-          newBase = {
-            type: item.getType(),
-            name: item.getName(),
-            amount: item.getAmount()
-          };
+            basesList.push(newBase);
+          });
 
-          basesList.push(newBase);
+          //We need to format this as an object because the protomessage type resoves as a weird array
+          let colorantsList: Colorant.AsObject[] = [];
+          formula
+            .getColorantsList()
+            .forEach(function(item: Colorant, index: number) {
+              let newColorant: Colorant.AsObject;
+              newColorant = {
+                type: item.getType(),
+                name: item.getName(),
+                amount: item.getAmount()
+              };
+
+              colorantsList.push(newColorant);
+            });
+
+          this.formulaData.basesList = basesList;
+          this.formulaData.colorantsList = colorantsList;
+          this.loading = false;
+        })
+        .catch(() => {
+          this.$store.commit("showSnackBar", "Could not load formula.");
+          this.loading = false;
+          this.handleCloseForm();
         });
-
-      //We need to format this as an object because the protomessage type resoves as a weird array
-      let colorantsList: Colorant.AsObject[] = [];
-      currentFormula
-        .getColorantsList()
-        .forEach(function(item: Colorant, index: number) {
-          let newColorant: Colorant.AsObject;
-          newColorant = {
-            type: item.getType(),
-            name: item.getName(),
-            amount: item.getAmount()
-          };
-
-          colorantsList.push(newColorant);
-        });
-
-      this.formulaData.basesList = basesList;
-      this.formulaData.colorantsList = colorantsList;
     },
     parseColorantListForSameType: function() {
       let self = this;
@@ -505,13 +509,47 @@ export default Vue.extend({
       this.formulaData.basesList = [{ type: "", name: "", amount: "" }];
       this.formulaData.colorantsList = [{ type: "", name: "", amount: "" }];
     },
-    handleFormSave: function() {
+    handleCloseForm: function() {
+      this.setFormModeView();
+      this.$router.push({ name: "formulas" });
+    },
+    handleUpdateFormula: function() {
       if ((this.$refs.manageFormulaForm as HTMLFormElement).validate()) {
-        this.$emit("submit-manage-formula-form", this.formulaData);
+        client
+          .submitManageFormulaForm(this.formulaData)
+          .then(() => {
+            client
+              .getFormulaData()
+              .then(formulas => {
+                this.$store.commit("updateFormulaData", formulas);
+                this.handleCloseForm();
+              })
+              .catch(() => {
+                this.handleCloseForm();
+              });
+          })
+          .catch(() => {
+            this.$store.commit("showSnackBar", "Could not update formula.");
+          });
       }
     },
     handleFormDelete: function() {
-      this.$emit("delete-formula", this.formulaData.id);
+      client
+        .deleteFormula(this.formulaData.id)
+        .then(() => {
+          client
+            .getFormulaData()
+            .then(formulas => {
+              this.$store.commit("updateFormulaData", formulas);
+              this.handleCloseForm();
+            })
+            .catch(() => {
+              this.handleCloseForm();
+            });
+        })
+        .catch(() => {
+          this.$store.commit("showSnackBar", "Could not delete formula.");
+        });
       this.showConfirmDelete = false;
     }
   }

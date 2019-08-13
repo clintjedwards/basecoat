@@ -1,186 +1,46 @@
 import Vue from 'vue'
-import Vuex, { MutationTree } from 'vuex'
 import Vuetify from 'vuetify'
-import VueCookies from 'vue-cookies'
 
-import router from './router'
+import Cookies from 'js-cookie'
 
 import PageHeader from "./components/PageHeader.vue"
-import FormulaSearchPanel from "./components/FormulaSearchPanel.vue"
-import JobSearchPanel from "./components/JobSearchPanel.vue"
-import FormulaTable from "./components/FormulaTable.vue"
-import JobTable from "./components/JobTable.vue"
-import CreateFormulaModal from "./components/CreateFormulaModal.vue"
-import AddJobModal from "./components/AddJobModal.vue"
-import ManageFormulaModal from "./components/ManageFormulaModal.vue"
-import ManageJobModal from "./components/ManageJobModal.vue"
-import LoginModal from "./components/LoginModal.vue"
 
-import { BasecoatClient } from "./BasecoatServiceClientPb"
-import {
-    CreateAPITokenRequest,
-    ListFormulasRequest,
-    Formula, Job,
-    ListJobsRequest,
-    CreateFormulaRequest,
-    CreateJobRequest,
-    UpdateFormulaRequest,
-    UpdateJobRequest,
-    DeleteFormulaRequest,
-    DeleteJobRequest,
-    Base,
-    Colorant,
-    Contact
-} from "./basecoat_pb"
+import BasecoatClientWrapper from './basecoatClientWrapper';
 
-Vue.use(Vuex)
+import store from './store'
+import router from './router'
+
 Vue.use(Vuetify)
-Vue.use(VueCookies)
 
-declare var __API__: string;
+let client: BasecoatClientWrapper
+client = new BasecoatClientWrapper()
 
-interface LoginInfo {
-    username: string;
-    password: string;
-}
+router.beforeEach((to, from, next) => {
 
-interface FormulaMap {
-    [key: string]: Formula;
-}
-
-interface JobMap {
-    [key: string]: Job;
-}
-
-interface colorantType {
-    imageURL: string
-    userMessage: string
-}
-
-interface colorantTypeMap {
-    [key: string]: colorantType;
-}
-
-interface RootState {
-    formulaData: FormulaMap,
-    jobData: JobMap,
-    totalFormulas: number,
-    totalJobs: number,
-    formulaTableSearchTerm: string,
-    jobTableSearchTerm: string,
-    username: string,
-    displayCreateFormulaModal: boolean,
-    displayAddJobModal: boolean,
-    displayManageFormulaModal: boolean,
-    displayManageJobModal: boolean,
-    displayLoginModal: boolean,
-    currentTab: string,
-    isLoggedIn: boolean,
-    loginIsLoading: boolean,
-    displaySnackBar: boolean,
-    snackBarText: string,
-    colorantTypes: colorantTypeMap
-}
-
-const state: RootState = {
-    formulaData: {},
-    jobData: {},
-    totalFormulas: 0,
-    totalJobs: 0,
-    formulaTableSearchTerm: "",
-    jobTableSearchTerm: "",
-    username: "Unknown",
-    displayCreateFormulaModal: false,
-    displayAddJobModal: false,
-    displayManageFormulaModal: false,
-    displayManageJobModal: false,
-    displayLoginModal: false,
-    currentTab: "formulas",
-    isLoggedIn: false,
-    loginIsLoading: false,
-    displaySnackBar: false,
-    snackBarText: "",
-    colorantTypes: {
-        "Benjamin Moore": { imageURL: "/images/benjamin-moore.png", userMessage: "Use Benjamin Moore Colorant Only" },
-        "PPG Pittsburgh Paints": { imageURL: "/images/ppg.png", userMessage: "Use PPG Colorant Only" }
+    if (to.path === '/login') {
+        next()
+        return
     }
-}
-
-const mutations: MutationTree<RootState> = {
-    showCreateFormulaModal(state) {
-        state.displayCreateFormulaModal = true
-    },
-    hideCreateFormulaModal(state) {
-        state.displayCreateFormulaModal = false
-    },
-    showAddJobModal(state) {
-        state.displayAddJobModal = true
-    },
-    hideAddJobModal(state) {
-        state.displayAddJobModal = false
-    },
-    showManageFormulaModal(state) {
-        state.displayManageFormulaModal = true;
-    },
-    hideManageFormulaModal(state) {
-        state.displayManageFormulaModal = false
-        app.$router.push('/formulas')
-    },
-    showManageJobModal(state) {
-        state.displayManageJobModal = true
-    },
-    hideManageJobModal(state) {
-        state.displayManageJobModal = false
-        app.$router.push('/jobs')
-    },
-    updateTotalFormulas(state) {
-        state.totalFormulas = Object.keys(state.formulaData).length
-    },
-    updateTotalJobs(state) {
-        state.totalJobs = Object.keys(state.jobData).length
-    },
-    updateUsername(state, username: string) {
-        state.username = username
-    },
-    updateFormulaTableSearchTerm(state, searchTerm: string) {
-        state.formulaTableSearchTerm = searchTerm
-    },
-    updateJobTableSearchTerm(state, searchTerm: string) {
-        state.jobTableSearchTerm = searchTerm
-    },
-    updateFormulaData(state, formulaData: FormulaMap) {
-        state.formulaData = formulaData
-    },
-    updateJobData(state, jobData: JobMap) {
-        state.jobData = jobData
-    },
-    updateCurrentTab(state, tabName: string) {
-        state.currentTab = tabName
-    },
-    displaySnackBar(state, text: string) {
-        state.snackBarText = text
-        state.displaySnackBar = true
-    },
-    updateLoginIsLoading(state, isLoading: boolean) {
-        state.loginIsLoading = isLoading
-    },
-    updateLoginState(state, isLoggedIn: boolean) {
-        state.isLoggedIn = isLoggedIn
-        if (!isLoggedIn) {
-            state.displayLoginModal = true
-            return
-        }
-
-        state.displayLoginModal = false
+    if (!client.isUserLoggedIn()) {
+        next({ name: "login", query: { redirect: to.path } })
+        return
     }
-}
+    if (store.state.isInitialized) {
+        next()
+        return
+    }
 
-const store = new Vuex.Store<RootState>({
-    state,
-    mutations
+    var formulaPromise = client.getFormulaData()
+    var jobsPromise = client.getJobData()
+
+    Promise.all([formulaPromise, jobsPromise]).then((values) => {
+        store.commit("updateFormulaData", values[0])
+        store.commit("updateJobData", values[1])
+        store.commit("setIsInitialized")
+        next()
+        return
+    })
 })
-
-let client: BasecoatClient
 
 const app = new Vue({
     el: '#app',
@@ -188,309 +48,17 @@ const app = new Vue({
     router,
     components: {
         PageHeader,
-        FormulaSearchPanel,
-        JobSearchPanel,
-        FormulaTable,
-        JobTable,
-        CreateFormulaModal,
-        AddJobModal,
-        ManageFormulaModal,
-        ManageJobModal,
-        LoginModal
-    },
-    created: function () {
-        client = new BasecoatClient(__API__, null, null);
-    },
-    methods: {
-        navigateToFormulas() {
-            this.$router.push('/formulas')
-        },
-        navigateToJobs() {
-            this.$router.push('/jobs')
-        },
-        checkLogin: function () {
-            if (!this.$cookies.isKey('username') || !this.$cookies.isKey('token')) {
-                store.commit('updateLoginState', false)
-                return
-            }
-
-            store.commit('updateUsername', this.$cookies.get('username'))
-            store.commit('updateLoginState', true)
-            this.loadFormulaData();
-            this.loadJobData();
-        },
-        validateLogin: function (loginInfo: LoginInfo) {
-            let self = this
-            store.commit('updateLoginIsLoading', true)
-
-            let tokenRequest = new CreateAPITokenRequest();
-            tokenRequest.setUser(loginInfo.username);
-            tokenRequest.setPassword(loginInfo.password);
-            tokenRequest.setDuration(10368000);
-            client.createAPIToken(tokenRequest, {}, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Invalid Login Credentials")
-                    store.commit('updateLoginState', false)
-                    store.commit('updateLoginIsLoading', false)
-                    return
-                }
-                self.$cookies.set('username', loginInfo.username, "4m", undefined, undefined, true)
-                self.$cookies.set('token', response.getKey(), "4m", undefined, undefined, true)
-                store.commit('updateUsername', loginInfo.username)
-                store.commit('updateLoginState', true)
-                store.commit('updateLoginIsLoading', false)
-                self.loadFormulaData();
-                self.loadJobData();
-            })
-        },
-        handleLogout: function () {
-            let self = this
-            self.$cookies.remove('username')
-            self.$cookies.remove('token')
-            this.checkLogin()
-        },
-        loadFormulaData: function () {
-            let listFormulasRequest = new ListFormulasRequest();
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.listFormulas(listFormulasRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not load current formulas.")
-                    return
-                }
-
-                let formulaMap: { [key: string]: Formula } = {}
-                response.getFormulasMap().forEach(function (value, key) {
-                    formulaMap[key] = value
-                })
-                store.commit('updateFormulaData', formulaMap)
-                store.commit('updateTotalFormulas')
-            })
-        },
-        loadJobData: function () {
-            let listJobsRequest = new ListJobsRequest();
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.listJobs(listJobsRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not load current jobs.")
-                    return
-                }
-
-                let jobMap: { [key: string]: Job } = {}
-                response.getJobsMap().forEach(function (value, key) {
-                    jobMap[key] = value
-                })
-                store.commit('updateJobData', jobMap)
-                store.commit('updateTotalJobs')
-            })
-        },
-        submitCreateForm: function (formulaData: CreateFormulaRequest.AsObject) {
-            let self = this
-            let createFormulaRequest = new CreateFormulaRequest();
-            createFormulaRequest.setName(formulaData.name);
-            createFormulaRequest.setNumber(formulaData.number);
-            createFormulaRequest.setNotes(formulaData.notes);
-            createFormulaRequest.setJobsList(formulaData.jobsList);
-
-            let basesList: Base[] = []
-            formulaData.basesList.forEach(function (item, index) {
-                let newBase = new Base();
-                newBase.setType(item.type)
-                newBase.setName(item.name)
-                newBase.setAmount(item.amount)
-
-                basesList.push(newBase)
-            });
-
-            createFormulaRequest.setBasesList(basesList);
-
-            let colorantsList: Colorant[] = []
-            formulaData.colorantsList.forEach(function (item, index) {
-                let newColorant = new Colorant();
-                newColorant.setType(item.type)
-                newColorant.setName(item.name)
-                newColorant.setAmount(item.amount)
-
-                colorantsList.push(newColorant)
-            })
-            createFormulaRequest.setColorantsList(colorantsList);
-
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.createFormula(createFormulaRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    // If formula already exists return helpful error
-                    if (err.code == 6) {
-                        store.commit('displaySnackBar', "Could not create formula. Please make sure formula name is unique.")
-                        return
-                    }
-                    store.commit('displaySnackBar', "Could not create formula.")
-                    return
-                }
-                store.commit("hideCreateFormulaModal")
-                self.loadFormulaData();
-                self.loadJobData();
-                (self.$refs.createFormulaForm as HTMLFormElement).clearForm();
-            })
-        },
-        submitAddJobForm: function (jobData: CreateJobRequest.AsObject) {
-            let self = this
-            let createJobRequest = new CreateJobRequest();
-            createJobRequest.setName(jobData.name);
-            createJobRequest.setStreet(jobData.street)
-            createJobRequest.setStreet2(jobData.street2)
-            createJobRequest.setCity(jobData.city)
-            createJobRequest.setState(jobData.state)
-            createJobRequest.setZipcode(jobData.zipcode)
-            createJobRequest.setNotes(jobData.notes)
-            createJobRequest.setFormulasList(jobData.formulasList)
-
-            if (jobData.contact != undefined) {
-                let contact = new Contact();
-                contact.setName(jobData.contact.name)
-                contact.setInfo(jobData.contact.info)
-                createJobRequest.setContact(contact)
-            }
-
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.createJob(createJobRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not create job.")
-                    return
-                }
-                store.commit("hideAddJobModal")
-                self.loadFormulaData();
-                self.loadJobData();
-                (self.$refs.addJobForm as HTMLFormElement).clearForm();
-            })
-        },
-        submitManageFormulaForm: function (formulaData: UpdateFormulaRequest.AsObject) {
-            let self = this
-            let updateFormulaRequest = new UpdateFormulaRequest();
-            updateFormulaRequest.setId(formulaData.id)
-            updateFormulaRequest.setName(formulaData.name)
-            updateFormulaRequest.setNumber(formulaData.number)
-            updateFormulaRequest.setNotes(formulaData.notes)
-            updateFormulaRequest.setJobsList(formulaData.jobsList)
-
-            let basesList: Base[] = []
-            formulaData.basesList.forEach(function (item, index) {
-                let newBase = new Base();
-                newBase.setType(item.type)
-                newBase.setName(item.name)
-                newBase.setAmount(item.amount)
-
-                basesList.push(newBase)
-            });
-
-            updateFormulaRequest.setBasesList(basesList);
-
-            let colorantsList: Colorant[] = []
-            formulaData.colorantsList.forEach(function (item, index) {
-                let newColorant = new Colorant();
-                newColorant.setType(item.type)
-                newColorant.setName(item.name)
-                newColorant.setAmount(item.amount)
-
-                colorantsList.push(newColorant)
-            })
-            updateFormulaRequest.setColorantsList(colorantsList);
-
-
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.updateFormula(updateFormulaRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not update formula")
-                    return
-                }
-                store.commit("hideManageFormulaModal")
-                self.loadFormulaData();
-                self.loadJobData();
-                (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView();
-            })
-        },
-        submitManageJobForm: function (jobData: UpdateJobRequest.AsObject) {
-            let self = this
-            let updateJobRequest = new UpdateJobRequest();
-            updateJobRequest.setId(jobData.id)
-            updateJobRequest.setName(jobData.name)
-            updateJobRequest.setStreet(jobData.street)
-            updateJobRequest.setStreet2(jobData.street2)
-            updateJobRequest.setCity(jobData.city)
-            updateJobRequest.setState(jobData.state)
-            updateJobRequest.setZipcode(jobData.zipcode)
-            updateJobRequest.setNotes(jobData.notes)
-            updateJobRequest.setFormulasList(jobData.formulasList)
-
-            if (jobData.contact != undefined) {
-                let contact = new Contact();
-                contact.setName(jobData.contact.name)
-                contact.setInfo(jobData.contact.info)
-                updateJobRequest.setContact(contact)
-            }
-
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.updateJob(updateJobRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not update job")
-                    return
-                }
-                self.loadFormulaData();
-                self.loadJobData();
-                store.commit("hideManageJobModal");
-                (self.$refs.manageJobForm as HTMLFormElement).setFormModeView();
-            })
-        },
-        deleteJob: function (jobID: string) {
-            let self = this
-            let deleteJobRequest = new DeleteJobRequest();
-            deleteJobRequest.setId(jobID)
-
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.deleteJob(deleteJobRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not delete job")
-                    return
-                }
-                store.commit("hideManageJobModal")
-                self.loadFormulaData();
-                self.loadJobData();
-                (self.$refs.manageJobForm as HTMLFormElement).setFormModeView()
-            })
-        },
-        deleteFormula: function (formulaID: string) {
-            let self = this
-            let deleteFormulaRequest = new DeleteFormulaRequest();
-            deleteFormulaRequest.setId(formulaID)
-
-            let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-            client.deleteFormula(deleteFormulaRequest, metadata, function (err, response) {
-                if (err) {
-                    console.log(err)
-                    store.commit('displaySnackBar', "Could not delete formula")
-                    return
-                }
-                store.commit("hideManageFormulaModal")
-                self.loadFormulaData();
-                self.loadJobData();
-                (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView()
-            })
-        },
     },
     mounted() {
-        this.checkLogin();
-
         setInterval(() => {
-            if (this.$store.state.isLoggedIn) {
-                this.loadFormulaData();
-                this.loadJobData();
-            }
+            client.getFormulaData().then((formulas) => {
+                store.commit("updateFormulaData", formulas)
+            })
+            client.getJobData().then((jobs) => {
+                store.commit("updateJobData", jobs)
+            })
         }, 180000); //3mins
-    }
+
+        store.commit("updateUsername", Cookies.get('username'));
+    },
 })

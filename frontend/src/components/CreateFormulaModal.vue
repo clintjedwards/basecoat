@@ -1,6 +1,6 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="$store.state.displayCreateFormulaModal" max-width="600px" persistent>
+    <v-dialog v-model="showModal" max-width="600px" persistent>
       <v-form ref="createFormulaForm" lazy-validation>
         <v-card>
           <v-card-title>
@@ -32,7 +32,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Base -->
               <v-spacer>Base</v-spacer>
@@ -56,7 +56,7 @@
               </v-layout>
               <v-btn flat color="primary" v-on:click="addBaseField">Add Base</v-btn>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Colorants -->
               <v-spacer>Colorants</v-spacer>
@@ -92,7 +92,7 @@
               </v-layout>
               <v-btn flat color="primary" v-on:click="addColorantField">Add Colorant</v-btn>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Jobs -->
               <v-spacer>Jobs</v-spacer>
@@ -132,12 +132,8 @@
           <!-- Buttons -->
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn
-              color="blue darken-1"
-              flat
-              v-on:click="$store.commit('hideCreateFormulaModal')"
-            >Close</v-btn>
-            <v-btn color="blue darken-1" flat v-on:click="handleFormSave()">Save</v-btn>
+            <v-btn color="blue darken-1" flat v-on:click="handleCloseForm()">Close</v-btn>
+            <v-btn color="blue darken-1" flat v-on:click="handleCreateFormula()">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-form>
@@ -154,6 +150,10 @@ import {
   CreateFormulaRequest,
   Job
 } from "../basecoat_pb";
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 let baseList: Base.AsObject[] = [];
 let colorantList: Colorant.AsObject[] = [];
@@ -176,6 +176,7 @@ interface modifiedJob {
 export default Vue.extend({
   data: function() {
     return {
+      showModal: true,
       formulaData: formulaData,
       currentColorantType: "",
       nameRules: [
@@ -192,7 +193,6 @@ export default Vue.extend({
     jobDataToList(): modifiedJob[] {
       let jobDataMap: { [key: string]: Job } = this.$store.state.jobData;
       let jobDataList: modifiedJob[] = [];
-
       for (const [key, value] of Object.entries(jobDataMap)) {
         let job: modifiedJob;
         job = {
@@ -252,16 +252,35 @@ export default Vue.extend({
     },
     clearForm: function() {
       (this.$refs.createFormulaForm as HTMLFormElement).reset();
-      this.formulaData.basesList = [{ type: "", name: "", amount: "" }];
-      this.formulaData.colorantsList = [{ type: "", name: "", amount: "" }];
+      this.formulaData.basesList = [];
+      this.formulaData.colorantsList = [];
     },
-    handleFormSave: function() {
+    handleCloseForm: function() {
+      this.$router.push({ name: "formulas" });
+    },
+    handleCreateFormula: function() {
       if ((this.$refs.createFormulaForm as HTMLFormElement).validate()) {
-        this.$emit("submit-create-form", this.formulaData);
+        client
+          .submitCreateFormulaForm(this.formulaData)
+          .then(() => {
+            client
+              .getFormulaData()
+              .then(formulas => {
+                this.$store.commit("updateFormulaData", formulas);
+                this.clearForm();
+                this.$router.push({ name: "formulas" });
+              })
+              .catch(() => {
+                this.$store.commit("showSnackBar", "Could not load formulas.");
+                this.clearForm();
+                this.$router.push({ name: "formulas" });
+              });
+          })
+          .catch(() => {
+            this.$store.commit("showSnackBar", "Could not create formula.");
+          });
       }
     }
   }
 });
 </script>
-
-

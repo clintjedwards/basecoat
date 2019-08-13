@@ -27,6 +27,11 @@ import Vue from "vue";
 import { Formula } from "../basecoat_pb";
 import * as moment from "moment";
 
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
+
 interface modifiedFormula {
   id: string;
   name: string;
@@ -64,6 +69,9 @@ export default Vue.extend({
         }
       ]
     };
+  },
+  mounted() {
+    this.loadFormulaData();
   },
   computed: {
     // This makes it so that the formula table is sortable.
@@ -113,6 +121,11 @@ export default Vue.extend({
   methods: {
     navigateToFormula: function(formulaID: string) {
       this.$router.push("/formulas/" + formulaID);
+    },
+    loadFormulaData: function() {
+      client.getFormulaData().then(formulas => {
+        this.$store.commit("updateFormulaData", formulas);
+      });
     }
   }
 });

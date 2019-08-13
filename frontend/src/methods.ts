@@ -25,12 +25,14 @@ interface LoginInfo {
 
 declare var __API__: string;
 
-class BasecoatFunctions {
+class BasecoatClientWrapper {
 
     client: BasecoatClient
+    metadata: { 'Authorization': string }
 
     constructor() {
         this.client = new BasecoatClient(__API__, null, null);
+        this.metadata = { 'Authorization': 'Bearer ' + Cookies.get('token') }
     }
 
     checkLogin() {
@@ -46,7 +48,6 @@ class BasecoatFunctions {
     }
 
     handleLogout() {
-        let self = this
         Cookies.remove('username')
         Cookies.remove('token')
         this.checkLogin()
@@ -80,8 +81,7 @@ class BasecoatFunctions {
 
     loadFormulaData() {
         let listFormulasRequest = new ListFormulasRequest();
-        let metadata = { 'Authorization': 'Bearer ' + Cookies.get('token') }
-        this.client.listFormulas(listFormulasRequest, metadata, function (err, response) {
+        this.client.listFormulas(listFormulasRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not load current formulas.")
@@ -100,8 +100,7 @@ class BasecoatFunctions {
     loadJobData() {
         let client = new BasecoatClient(__API__, null, null);
         let listJobsRequest = new ListJobsRequest();
-        let metadata = { 'Authorization': 'Bearer ' + Cookies.get('token') }
-        client.listJobs(listJobsRequest, metadata, function (err, response) {
+        client.listJobs(listJobsRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not load current jobs.")
@@ -148,8 +147,7 @@ class BasecoatFunctions {
         })
         createFormulaRequest.setColorantsList(colorantsList);
 
-        let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-        this.client.createFormula(createFormulaRequest, metadata, function (err, response) {
+        this.client.createFormula(createFormulaRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 // If formula already exists return helpful error
@@ -163,7 +161,7 @@ class BasecoatFunctions {
             store.commit("hideCreateFormulaModal")
             self.loadFormulaData();
             self.loadJobData();
-            (self.$refs.createFormulaForm as HTMLFormElement).clearForm();
+            //(self.$refs.createFormulaForm as HTMLFormElement).clearForm();
         })
     }
 
@@ -186,8 +184,7 @@ class BasecoatFunctions {
             createJobRequest.setContact(contact)
         }
 
-        let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-        this.client.createJob(createJobRequest, metadata, function (err, response) {
+        this.client.createJob(createJobRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not create job.")
@@ -196,7 +193,7 @@ class BasecoatFunctions {
             store.commit("hideAddJobModal")
             self.loadFormulaData();
             self.loadJobData();
-            (self.$refs.addJobForm as HTMLFormElement).clearForm();
+            //(self.$refs.addJobForm as HTMLFormElement).clearForm();
         })
     }
 
@@ -233,8 +230,7 @@ class BasecoatFunctions {
         updateFormulaRequest.setColorantsList(colorantsList);
 
 
-        let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-        this.client.updateFormula(updateFormulaRequest, metadata, function (err, response) {
+        this.client.updateFormula(updateFormulaRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not update formula")
@@ -243,7 +239,7 @@ class BasecoatFunctions {
             store.commit("hideManageFormulaModal")
             self.loadFormulaData();
             self.loadJobData();
-            (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView();
+            //(self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView();
         })
     }
 
@@ -267,8 +263,7 @@ class BasecoatFunctions {
             updateJobRequest.setContact(contact)
         }
 
-        let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-        this.client.updateJob(updateJobRequest, metadata, function (err, response) {
+        this.client.updateJob(updateJobRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not update job")
@@ -277,7 +272,7 @@ class BasecoatFunctions {
             self.loadFormulaData();
             self.loadJobData();
             store.commit("hideManageJobModal");
-            (self.$refs.manageJobForm as HTMLFormElement).setFormModeView();
+            //(self.$refs.manageJobForm as HTMLFormElement).setFormModeView();
         })
     }
 
@@ -286,8 +281,7 @@ class BasecoatFunctions {
         let deleteJobRequest = new DeleteJobRequest();
         deleteJobRequest.setId(jobID)
 
-        let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-        this.client.deleteJob(deleteJobRequest, metadata, function (err, response) {
+        this.client.deleteJob(deleteJobRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not delete job")
@@ -296,7 +290,7 @@ class BasecoatFunctions {
             store.commit("hideManageJobModal")
             self.loadFormulaData();
             self.loadJobData();
-            (self.$refs.manageJobForm as HTMLFormElement).setFormModeView()
+            //(self.$refs.manageJobForm as HTMLFormElement).setFormModeView()
         })
     }
 
@@ -305,8 +299,7 @@ class BasecoatFunctions {
         let deleteFormulaRequest = new DeleteFormulaRequest();
         deleteFormulaRequest.setId(formulaID)
 
-        let metadata = { 'Authorization': 'Bearer ' + this.$cookies.get('token') }
-        this.client.deleteFormula(deleteFormulaRequest, metadata, function (err, response) {
+        this.client.deleteFormula(deleteFormulaRequest, this.metadata, function (err, response) {
             if (err) {
                 console.log(err)
                 store.commit('displaySnackBar', "Could not delete formula")
@@ -315,9 +308,9 @@ class BasecoatFunctions {
             store.commit("hideManageFormulaModal")
             self.loadFormulaData();
             self.loadJobData();
-            (self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView()
+            //(self.$refs.manageFormulaForm as HTMLFormElement).setFormModeView()
         })
     }
 }
 
-export default BasecoatFunctions
+export default BasecoatClientWrapper

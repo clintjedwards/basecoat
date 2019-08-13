@@ -14,29 +14,12 @@ import CreateFormulaModal from "./components/CreateFormulaModal.vue"
 import AddJobModal from "./components/AddJobModal.vue"
 import LoginModal from "./components/LoginModal.vue"
 
-import { BasecoatClient } from "./BasecoatServiceClientPb"
-import {
-    CreateAPITokenRequest,
-    ListFormulasRequest,
-    Formula, Job,
-    ListJobsRequest,
-    CreateFormulaRequest,
-    CreateJobRequest,
-    UpdateFormulaRequest,
-    UpdateJobRequest,
-    DeleteFormulaRequest,
-    DeleteJobRequest,
-    Base,
-    Colorant,
-    Contact
-} from "./basecoat_pb"
+import BasecoatClientWrapper from './methods';
 
 Vue.use(Vuetify)
 Vue.use(VueCookies)
 
-declare var __API__: string;
-
-let client: BasecoatClient
+let client: BasecoatClientWrapper
 
 const app = new Vue({
     el: '#app',
@@ -53,15 +36,15 @@ const app = new Vue({
         LoginModal
     },
     created: function () {
-        client = new BasecoatClient(__API__, null, null);
+        client = new BasecoatClientWrapper()
     },
     mounted() {
-        this.checkLogin();
+        client.checkLogin()
 
         setInterval(() => {
             if (this.$store.state.isLoggedIn) {
-                this.loadFormulaData();
-                this.loadJobData();
+                client.loadFormulaData();
+                client.loadJobData();
             }
         }, 180000); //3mins
     }

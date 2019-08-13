@@ -84,14 +84,14 @@ const mutations: MutationTree<RootState> = {
     },
     hideManageFormulaModal(state) {
         state.displayManageFormulaModal = false
-        app.$router.push('/formulas')
+        //app.$router.push('/formulas')
     },
     showManageJobModal(state) {
         state.displayManageJobModal = true
     },
     hideManageJobModal(state) {
         state.displayManageJobModal = false
-        app.$router.push('/jobs')
+        //app.$router.push('/jobs')
     },
     updateTotalFormulas(state) {
         state.totalFormulas = Object.keys(state.formulaData).length

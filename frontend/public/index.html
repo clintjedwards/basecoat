@@ -18,7 +18,7 @@
 <body>
     <div id="app" v-cloak>
         <v-app>
-            <page-header @logout="handleLogout">Basecoat</page-header>
+            <page-header>Basecoat</page-header>
 
             <!-- Tabs -->
             <v-tabs centered icons-and-text color="transparent">
@@ -36,18 +36,13 @@
             <router-view></router-view>
 
             <!-- Modals-->
-            <create-formula-modal ref="createFormulaForm" @submit-create-form="submitCreateForm">
+            <create-formula-modal ref="createFormulaForm">
                 <template slot="heading">Create Formula</template>
             </create-formula-modal>
-            <add-job-modal ref="addJobForm" @submit-add-job-form="submitAddJobForm">
+            <add-job-modal ref="addJobForm">
                 <template slot="heading">Add Job</template>
             </add-job-modal>
-            <manage-formula-modal ref="manageFormulaForm" @submit-manage-formula-form="submitManageFormulaForm"
-                @delete-formula="deleteFormula">
-            </manage-formula-modal>
-            <manage-job-modal ref="manageJobForm" @submit-manage-job-form="submitManageJobForm" @delete-job="deleteJob">
-            </manage-job-modal>
-            <login-modal ref="loginForm" @validate-login="validateLogin"></login-modal>
+            <login-modal ref="loginForm"></login-modal>
 
             <!-- Notifications-->
             <v-snackbar v-model="$store.state.displaySnackBar" color="error" :timeout="3000" auto-height top>

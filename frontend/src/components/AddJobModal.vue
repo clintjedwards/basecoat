@@ -35,7 +35,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Address -->
               <v-spacer>Address Information</v-spacer>
@@ -61,7 +61,7 @@
                 </v-flex>
               </v-layout>
               <v-divider></v-divider>
-              <br>
+              <br />
 
               <!-- Notes -->
               <v-spacer>Miscellaneous Information</v-spacer>
@@ -88,6 +88,10 @@
 <script lang="ts">
 import Vue from "vue";
 import { Contact, CreateJobRequest } from "../basecoat_pb";
+import BasecoatClientWrapper from "../methods";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 let contact: Contact.AsObject = { name: "", info: "" };
 let formulaList: string[] = [];
@@ -185,7 +189,7 @@ export default Vue.extend({
     },
     handleFormSave: function() {
       if ((this.$refs.addJobForm as HTMLFormElement).validate()) {
-        this.$emit("submit-add-job-form", this.jobData);
+        client.submitAddJobForm(this.jobData);
       }
     }
   }

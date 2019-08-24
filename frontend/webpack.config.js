@@ -1,5 +1,6 @@
 const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+//const CompressionPlugin = require('compression-webpack-plugin');
 const webpack = require('webpack')
 
 module.exports = {
@@ -11,30 +12,29 @@ module.exports = {
     },
     module: {
         rules: [{
-                test: /\.vue$/,
-                loader: 'vue-loader',
-            },
-            {
-                test: /\.tsx?$/,
-                loader: 'ts-loader',
-                exclude: /node_modules/,
-                options: {
-                    appendTsSuffixTo: [/\.vue$/],
-                }
-            },
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader'
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    'vue-style-loader',
-                    'css-loader'
-                ]
+            test: /\.vue$/,
+            loader: 'vue-loader',
+        },
+        {
+            test: /\.tsx?$/,
+            loader: 'ts-loader',
+            exclude: /node_modules/,
+            options: {
+                appendTsSuffixTo: [/\.vue$/],
             }
-        ]
+        },
+        {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: 'babel-loader'
+        },
+        {
+            test: /\.css$/,
+            use: [
+                'vue-style-loader',
+                'css-loader'
+            ]
+        }]
     },
     resolve: {
         extensions: ['.ts', '.js', '.vue', '.json'],
@@ -46,6 +46,8 @@ module.exports = {
         new VueLoaderPlugin(),
         new webpack.DefinePlugin({
             __API__: process.env.FRONTEND_API_HOST
-        })
+        }),
+        // Ignore all locale files of moment.js
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
     ]
 };

@@ -52,7 +52,7 @@ class BasecoatClientWrapper {
         let tokenRequest = new CreateAPITokenRequest();
         tokenRequest.setUser(loginInfo.username);
         tokenRequest.setPassword(loginInfo.password);
-        tokenRequest.setDuration(10368000);
+        tokenRequest.setDuration(10368000); // Four months
 
         return new Promise((resolve, reject) => {
             this.client.createAPIToken(tokenRequest, {}, function (err, response) {

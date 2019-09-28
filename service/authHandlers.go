@@ -28,6 +28,11 @@ func (basecoat *API) CreateAPIToken(context context.Context, request *api.Create
 		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "password required")
 	}
 
+	// Limit length of duration requests; 946708560 = 30 years
+	if request.Duration > 946708560 {
+		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "duration request is too long; greater than 30 years")
+	}
+
 	user, err := basecoat.storage.GetUser(request.User)
 	if err != nil {
 		if err == utils.ErrUserNotFound {

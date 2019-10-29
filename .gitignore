@@ -23,3 +23,6 @@ main.js
 #localhost cert files
 *.crt
 *.key
+
+#ignore shitty packr file that wont go away
+a_frontend-packr.go

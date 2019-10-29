@@ -37,6 +37,8 @@ func (db *googleDatastore) Init(config *config.Config) error {
 	return nil
 }
 
+// CreateParentKeys creates the initial account string key in all buckets so that assets
+// can be seperated by account
 func (db *googleDatastore) CreateParentKeys(account string) error {
 	newFormulaParentKey := datastore.NameKey(string(FormulasBucket), account, nil)
 	newJobParentKey := datastore.NameKey(string(JobsBucket), account, nil)
@@ -75,6 +77,27 @@ func (db *googleDatastore) CreateParentKeys(account string) error {
 	}
 
 	return nil
+}
+
+func (db *googleDatastore) GetAllUsers() (map[string]*api.User, error) {
+
+	tctx, cancel := context.WithTimeout(context.Background(), db.timeout)
+	defer cancel()
+
+	var rawUsers []*api.User
+	query := datastore.NewQuery(string(UsersBucket))
+	keys, err := db.client.GetAll(tctx, query, &rawUsers)
+	if err != nil {
+		utils.StructuredLog(utils.LogLevelError, "could not retrieve users from database", err)
+		return nil, err
+	}
+
+	users := map[string]*api.User{}
+	for index, key := range keys {
+		users[key.Name] = rawUsers[index]
+	}
+
+	return users, nil
 }
 
 func (db *googleDatastore) GetUser(name string) (*api.User, error) {

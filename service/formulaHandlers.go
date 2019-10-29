@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/clintjedwards/basecoat/api"
@@ -31,6 +32,26 @@ func (basecoat *API) GetFormula(context context.Context, request *api.GetFormula
 	}
 
 	return &api.GetFormulaResponse{Formula: formula}, nil
+}
+
+// SearchFormulas takes in a search term and returns formulas that might match
+func (basecoat *API) SearchFormulas(context context.Context, request *api.SearchFormulasRequest) (*api.SearchFormulasResponse, error) {
+
+	account, present := getAccountFromContext(context)
+	if !present {
+		return &api.SearchFormulasResponse{}, status.Error(codes.FailedPrecondition, "account required")
+	}
+
+	if request.Term == "" {
+		return &api.SearchFormulasResponse{}, status.Error(codes.FailedPrecondition, "search term required")
+	}
+
+	searchResults, err := basecoat.search.SearchFormulas(account, request.Term)
+	if err != nil {
+		return &api.SearchFormulasResponse{}, status.Error(codes.Internal, fmt.Sprintf("a search error occurred: %v", err))
+	}
+
+	return &api.SearchFormulasResponse{Results: searchResults}, nil
 }
 
 // ListFormulas returns a list of all formulas on basecoat service
@@ -118,6 +139,8 @@ func (basecoat *API) CreateFormula(context context.Context, request *api.CreateF
 		}
 	}
 
+	basecoat.search.UpdateFormulaIndex(account, newFormula)
+
 	utils.StructuredLog(utils.LogLevelInfo, "formula created", newFormula)
 
 	return &api.CreateFormulaResponse{Id: newFormula.Id}, nil
@@ -193,6 +216,8 @@ func (basecoat *API) UpdateFormula(context context.Context, request *api.UpdateF
 		}
 	}
 
+	basecoat.search.UpdateFormulaIndex(account, updatedFormula)
+
 	utils.StructuredLog(utils.LogLevelInfo, "formula updated", updatedFormula)
 
 	return &api.UpdateFormulaResponse{}, nil
@@ -237,6 +262,8 @@ func (basecoat *API) DeleteFormula(context context.Context, request *api.DeleteF
 		utils.StructuredLog(utils.LogLevelError, "could not delete formula", err)
 		return &api.DeleteFormulaResponse{}, status.Error(codes.Internal, "could not delete formula")
 	}
+
+	basecoat.search.DeleteFormulaIndex(account, request.Id)
 
 	utils.StructuredLog(utils.LogLevelInfo, "formula deleted", request.Id)
 

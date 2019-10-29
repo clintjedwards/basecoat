@@ -6,6 +6,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
+	"github.com/clintjedwards/basecoat/search"
 	"github.com/clintjedwards/basecoat/storage"
 	"github.com/clintjedwards/basecoat/utils"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -20,6 +21,7 @@ import (
 type API struct {
 	storage storage.Engine
 	config  *config.Config
+	search  *search.Search
 }
 
 // NewBasecoatAPI inits a grpc basecoat api service
@@ -31,8 +33,16 @@ func NewBasecoatAPI(config *config.Config) *API {
 		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize storage", err)
 	}
 
+	searchIndex, err := search.InitSearch()
+	if err != nil {
+		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize search functions", err)
+	}
+
+	go searchIndex.BuildIndex()
+
 	basecoatAPI.config = config
 	basecoatAPI.storage = storage
+	basecoatAPI.search = searchIndex
 
 	return &basecoatAPI
 }

@@ -30,6 +30,11 @@ run:
 	npm run --prefix ./frontend build:development
 	packr build -ldflags $(GO_LDFLAGS) -o /tmp/basecoat && /tmp/basecoat server
 
+run-backend:
+	protoc --go_out=plugins=grpc:. api/*.proto
+	go mod tidy
+	packr build -ldflags $(GO_LDFLAGS) -o /tmp/basecoat && /tmp/basecoat server
+
 install:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	go mod tidy

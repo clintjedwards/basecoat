@@ -4,7 +4,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// RemoveStringFromList removes an element form an array of ints
+// RemoveStringFromList removes an element from an array of string
 // does not preserve list order
 func RemoveStringFromList(list []string, value string) []string {
 	for index, item := range list {

@@ -1,11 +1,6 @@
 
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="formulaDataToList"
-    :search="$store.state.formulaTableSearchTerm"
-    hide-actions
-  >
+  <v-data-table :headers="headers" :items="formulaDataToList" hide-actions disable-filtering>
     <template v-slot:items="props">
       <tr
         style="cursor: pointer;"
@@ -79,12 +74,20 @@ export default Vue.extend({
     // you pass it. So you have to pass it a data structure with
     // correct types in order of it to sort properly
     formulaDataToList(): modifiedFormula[] {
+      let filteredIDs: string[] = this.$store.state.formulaDataFilter;
+
       let formulaDataMap: { [key: string]: Formula } = this.$store.state
         .formulaData;
       let formulaDataList: Formula[] = [];
 
       for (const [key, value] of Object.entries(formulaDataMap)) {
-        formulaDataList.push(value);
+        if (filteredIDs && filteredIDs.length) {
+          if (filteredIDs.includes(key)) {
+            formulaDataList.push(value);
+          }
+        } else {
+          formulaDataList.push(value);
+        }
       }
 
       let modifiedFormulaList: modifiedFormula[] = [];

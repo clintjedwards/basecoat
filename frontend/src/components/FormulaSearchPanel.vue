@@ -11,7 +11,7 @@
         label="Search"
         prepend-icon="search"
         hint="Search for formula data of any kind"
-        v-on:input="$store.commit('updateFormulaTableSearchTerm', $event)"
+        v-on:input="debounceInput($event);"
       ></v-text-field>
     </span>
     <span style="margin-left: 4em;">
@@ -24,6 +24,12 @@
 
 <script lang="ts">
 import Vue from "vue";
+import _ from "lodash";
+
+import BasecoatClientWrapper from "../basecoatClientWrapper";
+
+let client: BasecoatClientWrapper;
+client = new BasecoatClientWrapper();
 
 export default Vue.extend({
   data: function() {
@@ -32,7 +38,21 @@ export default Vue.extend({
   methods: {
     showCreateFormulaModal: function() {
       this.$router.push({ name: "createFormulaModal" });
-    }
+    },
+    debounceInput: _.debounce(function(this: any, searchTerm) {
+      if (!searchTerm) {
+        this.$store.commit("updateFormulaDataFilter", []);
+        return;
+      }
+      client.searchFormulas(searchTerm).then(hits => {
+        if (hits != undefined) {
+          this.$store.commit("updateFormulaDataFilter", hits);
+          return;
+        }
+        this.$store.commit("updateFormulaDataFilter", []);
+        return;
+      });
+    }, 625)
   }
 });
 </script>

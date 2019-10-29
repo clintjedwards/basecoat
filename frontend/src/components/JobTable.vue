@@ -1,11 +1,6 @@
 
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="jobDataToList"
-    :search="$store.state.jobTableSearchTerm"
-    hide-actions
-  >
+  <v-data-table :headers="headers" :items="jobDataToList" hide-actions disable-filtering>
     <template v-slot:items="props">
       <tr style="cursor: pointer;" :ripple="{ center: true }" @click="navigateToJob(props.item.id)">
         <td class="text-capitalize">{{ props.item.name }}</td>
@@ -33,6 +28,17 @@ import BasecoatClientWrapper from "../basecoatClientWrapper";
 let client: BasecoatClientWrapper;
 client = new BasecoatClientWrapper();
 
+interface modifiedJob {
+  id: string;
+  name: string;
+  contact_name: string;
+  contact_info: string;
+  street: string;
+  city: string;
+  state: string;
+  zipcode: string;
+}
+
 export default Vue.extend({
   data: function() {
     return {
@@ -58,23 +64,21 @@ export default Vue.extend({
   },
   computed: {
     jobDataToList: function() {
-      interface modifiedJob {
-        id: string;
-        name: string;
-        contact_name: string;
-        contact_info: string;
-        street: string;
-        city: string;
-        state: string;
-        zipcode: string;
-      }
+      let filteredIDs: string[] = this.$store.state.jobDataFilter;
 
       let jobDataMap: { [key: string]: Job } = this.$store.state.jobData;
       let jobDataList: Job[] = [];
 
       for (const [key, value] of Object.entries(jobDataMap)) {
-        jobDataList.push(value);
+        if (filteredIDs && filteredIDs.length) {
+          if (filteredIDs.includes(key)) {
+            jobDataList.push(value);
+          }
+        } else {
+          jobDataList.push(value);
+        }
       }
+
       let modifiedJobList: modifiedJob[] = [];
       let job: Job;
 

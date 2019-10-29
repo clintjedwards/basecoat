@@ -36,6 +36,7 @@ const (
 // Engine represents backend storage implementations where items can be persisted
 type Engine interface {
 	Init(config *config.Config) error
+	GetAllUsers() (map[string]*api.User, error)
 	GetUser(name string) (*api.User, error)
 	CreateUser(name string, user *api.User) error
 	GetAllFormulas(account string) (map[string]*api.Formula, error)

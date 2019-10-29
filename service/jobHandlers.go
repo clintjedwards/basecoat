@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/clintjedwards/basecoat/api"
@@ -27,6 +28,26 @@ func (basecoat *API) GetJob(context context.Context, request *api.GetJobRequest)
 	}
 
 	return &api.GetJobResponse{Job: job}, nil
+}
+
+// SearchJobs takes in a search term and returns jobs that might match
+func (basecoat *API) SearchJobs(context context.Context, request *api.SearchJobsRequest) (*api.SearchJobsResponse, error) {
+
+	account, present := getAccountFromContext(context)
+	if !present {
+		return &api.SearchJobsResponse{}, status.Error(codes.FailedPrecondition, "account required")
+	}
+
+	if request.Term == "" {
+		return &api.SearchJobsResponse{}, status.Error(codes.FailedPrecondition, "search term required")
+	}
+
+	searchResults, err := basecoat.search.SearchJobs(account, request.Term)
+	if err != nil {
+		return &api.SearchJobsResponse{}, status.Error(codes.Internal, fmt.Sprintf("a search error occurred: %v", err))
+	}
+
+	return &api.SearchJobsResponse{Results: searchResults}, nil
 }
 
 // ListJobs returns a list of all jobs on basecoat service
@@ -99,6 +120,8 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 			}
 		}
 	}
+
+	basecoat.search.UpdateJobIndex(account, newJob)
 
 	utils.StructuredLog(utils.LogLevelInfo, "job created", newJob)
 
@@ -178,6 +201,8 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 		}
 	}
 
+	basecoat.search.UpdateJobIndex(account, updatedJob)
+
 	utils.StructuredLog(utils.LogLevelInfo, "job updated", updatedJob)
 
 	return &api.UpdateJobResponse{}, nil
@@ -221,6 +246,8 @@ func (basecoat *API) DeleteJob(context context.Context, request *api.DeleteJobRe
 		utils.StructuredLog(utils.LogLevelError, "could not delete job", err)
 		return &api.DeleteJobResponse{}, status.Error(codes.Internal, "could not delete job")
 	}
+
+	basecoat.search.DeleteJobIndex(account, request.Id)
 
 	utils.StructuredLog(utils.LogLevelInfo, "job deleted", request.Id)
 

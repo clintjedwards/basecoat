@@ -3,6 +3,9 @@ VERSION=$(shell date +%s)
 
 GO_LDFLAGS := '-X "github.com/clintjedwards/basecoat/cmd.appVersion=$(VERSION)"'
 
+build-protos:
+	protoc --go_out=plugins=grpc:. api/*.proto
+
 build-dev:
 	npx webpack --config="./frontend/webpack.config.js" --mode="development"
 	packr build -ldflags $(GO_LDFLAGS) -o $(path)

@@ -6,7 +6,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/utils"
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -66,6 +66,11 @@ func (basecoat *API) authenticate(ctx context.Context) (context.Context, error) 
 	// Exclude the route to get the API token
 	method, _ := grpc.Method(ctx)
 	if method == "/api.Basecoat/CreateAPIToken" {
+		return ctx, nil
+	}
+
+	// Exclude the route to get system information
+	if method == "/api.Basecoat/GetSystemInfo" {
 		return ctx, nil
 	}
 

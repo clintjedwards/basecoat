@@ -1,10 +1,14 @@
 SHELL = /bin/bash
 VERSION=$(shell date +%s)
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
 
-GO_LDFLAGS := '-X "github.com/clintjedwards/basecoat/cmd.appVersion=$(VERSION)"'
+
+GO_LDFLAGS := '-X "github.com/clintjedwards/basecoat/cmd.appVersion=$(VERSION) $(GIT_COMMIT)" \
+			   -X "github.com/clintjedwards/basecoat/service.appVersion=$(VERSION) $(GIT_COMMIT)"'
 
 build-protos:
 	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 
 build-dev:
 	npx webpack --config="./frontend/webpack.config.js" --mode="development"

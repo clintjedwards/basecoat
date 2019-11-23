@@ -64,19 +64,27 @@ message User {
 }
 
 service Basecoat {
-  rpc CreateAPIToken(CreateAPITokenRequest) returns (CreateAPITokenResponse) {}
-  rpc GetFormula(GetFormulaRequest) returns (GetFormulaResponse) {}
-  rpc SearchFormulas(SearchFormulasRequest) returns (SearchFormulasResponse) {}
-  rpc ListFormulas(ListFormulasRequest) returns (ListFormulasResponse) {}
-  rpc CreateFormula(CreateFormulaRequest) returns (CreateFormulaResponse) {}
-  rpc UpdateFormula(UpdateFormulaRequest) returns (UpdateFormulaResponse) {}
-  rpc DeleteFormula(DeleteFormulaRequest) returns (DeleteFormulaResponse) {}
-  rpc GetJob(GetJobRequest) returns (GetJobResponse) {}
-  rpc SearchJobs(SearchJobsRequest) returns (SearchJobsResponse) {}
-  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {}
-  rpc CreateJob(CreateJobRequest) returns (CreateJobResponse) {}
-  rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse) {}
-  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse) {}
+  // Authentication routes
+  rpc CreateAPIToken(CreateAPITokenRequest) returns (CreateAPITokenResponse);
+
+  // System routes
+  rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse);
+
+  // Formula routes
+  rpc GetFormula(GetFormulaRequest) returns (GetFormulaResponse);
+  rpc SearchFormulas(SearchFormulasRequest) returns (SearchFormulasResponse);
+  rpc ListFormulas(ListFormulasRequest) returns (ListFormulasResponse);
+  rpc CreateFormula(CreateFormulaRequest) returns (CreateFormulaResponse);
+  rpc UpdateFormula(UpdateFormulaRequest) returns (UpdateFormulaResponse);
+  rpc DeleteFormula(DeleteFormulaRequest) returns (DeleteFormulaResponse);
+
+  // Job routes
+  rpc GetJob(GetJobRequest) returns (GetJobResponse);
+  rpc SearchJobs(SearchJobsRequest) returns (SearchJobsResponse);
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+  rpc CreateJob(CreateJobRequest) returns (CreateJobResponse);
+  rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse);
+  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
 }
 
 message CreateAPITokenRequest {
@@ -87,6 +95,15 @@ message CreateAPITokenRequest {
 }
 
 message CreateAPITokenResponse { string key = 1; }
+
+message GetSystemInfoRequest {}
+message GetSystemInfoResponse {
+  bool debug_enabled = 1;
+  bool frontend_enabled = 2;
+  string commit = 3;
+  string version = 4;
+  string database_engine = 5;
+}
 
 message GetFormulaRequest { string id = 1; }
 message GetFormulaResponse { Formula formula = 1; }

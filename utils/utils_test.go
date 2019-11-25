@@ -6,6 +6,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func TestFindListDifference(t *testing.T) {
+	testListA := []string{"1", "2", "3", "4"}
+	testListB := []string{"1", "3"}
+	returnedList := FindListDifference(testListA, testListB)
+
+	expectedDifference := []string{"2", "4"}
+
+	if !cmp.Equal(returnedList, expectedDifference) {
+		t.Errorf("List does not contain correct difference: Diff below: \n%v", cmp.Diff(returnedList, expectedDifference))
+	}
+}
+
 func TestRemoveStringFromList(t *testing.T) {
 
 	testList := []string{"1", "2", "3", "4"}

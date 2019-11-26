@@ -25,7 +25,7 @@ func (basecoat *API) GetFormula(context context.Context, request *api.GetFormula
 
 	formula, err := basecoat.storage.GetFormula(account, request.Id)
 	if err != nil {
-		if err == utils.ErrFormulaNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.GetFormulaResponse{}, status.Error(codes.NotFound, "formula requested not found")
 		}
 		return &api.GetFormulaResponse{}, status.Error(codes.Internal, "failed to retrieve formula from database")
@@ -113,7 +113,7 @@ func (basecoat *API) CreateFormula(context context.Context, request *api.CreateF
 
 	err := basecoat.storage.AddFormula(account, newFormula.Id, &newFormula)
 	if err != nil {
-		if err == utils.ErrFormulaExists {
+		if err == utils.ErrEntityExists {
 			return &api.CreateFormulaResponse{}, status.Error(codes.AlreadyExists, "could not save formula; formula already exists")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not save formula", err)
@@ -174,7 +174,7 @@ func (basecoat *API) UpdateFormula(context context.Context, request *api.UpdateF
 
 	err := basecoat.storage.UpdateFormula(account, request.Id, &updatedFormula)
 	if err != nil {
-		if err == utils.ErrFormulaNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.UpdateFormulaResponse{}, status.Error(codes.NotFound, "could not update formula; formula key not found")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not update formula", err)
@@ -256,7 +256,7 @@ func (basecoat *API) DeleteFormula(context context.Context, request *api.DeleteF
 
 	err := basecoat.storage.DeleteFormula(account, request.Id)
 	if err != nil {
-		if err == utils.ErrFormulaNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.DeleteFormulaResponse{}, status.Error(codes.NotFound, "could not delete formula; formula key not found")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not delete formula", err)

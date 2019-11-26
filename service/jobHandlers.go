@@ -21,7 +21,7 @@ func (basecoat *API) GetJob(context context.Context, request *api.GetJobRequest)
 
 	job, err := basecoat.storage.GetJob(account, request.Id)
 	if err != nil {
-		if err == utils.ErrJobNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.GetJobResponse{}, status.Error(codes.NotFound, "job requested not found")
 		}
 		return &api.GetJobResponse{}, status.Error(codes.Internal, "failed to retrieve job from database")
@@ -95,7 +95,7 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 
 	err := basecoat.storage.AddJob(account, newJob.Id, &newJob)
 	if err != nil {
-		if err == utils.ErrJobExists {
+		if err == utils.ErrEntityExists {
 			return &api.CreateJobResponse{}, status.Error(codes.AlreadyExists, "could not save job; job already exists")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not save job", err)
@@ -159,7 +159,7 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 
 	err := basecoat.storage.UpdateJob(account, request.Id, &updatedJob)
 	if err != nil {
-		if err == utils.ErrJobNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.UpdateJobResponse{}, status.Error(codes.NotFound, "could not update job; job key not found")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not update job", err)
@@ -240,7 +240,7 @@ func (basecoat *API) DeleteJob(context context.Context, request *api.DeleteJobRe
 
 	err := basecoat.storage.DeleteJob(account, request.Id)
 	if err != nil {
-		if err == utils.ErrJobNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.DeleteJobResponse{}, status.Error(codes.NotFound, "could not delete job; job key not found")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not delete job", err)

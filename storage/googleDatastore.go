@@ -111,7 +111,7 @@ func (db *googleDatastore) GetUser(name string) (*api.User, error) {
 	err := db.client.Get(tctx, getUser, &user)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			return nil, utils.ErrUserNotFound
+			return nil, utils.ErrEntityNotFound
 		}
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (db *googleDatastore) CreateUser(name string, newUser *api.User) error {
 		var user api.User
 		err := tx.Get(newKey, &user)
 		if err != datastore.ErrNoSuchEntity {
-			return utils.ErrUserExists
+			return utils.ErrEntityExists
 		}
 
 		_, err = tx.Put(newKey, newUser)
@@ -185,7 +185,7 @@ func (db *googleDatastore) GetFormula(account, key string) (*api.Formula, error)
 	err := db.client.Get(tctx, getKey, &formula)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			return nil, utils.ErrFormulaNotFound
+			return nil, utils.ErrEntityNotFound
 		}
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (db *googleDatastore) AddFormula(account, key string, newFormula *api.Formu
 		var formula api.Formula
 		err := tx.Get(newKey, &formula)
 		if err != datastore.ErrNoSuchEntity {
-			return utils.ErrFormulaExists
+			return utils.ErrEntityExists
 		}
 
 		_, err = tx.Put(newKey, newFormula)
@@ -233,7 +233,7 @@ func (db *googleDatastore) UpdateFormula(account, key string, updatedFormula *ap
 		err := tx.Get(updateKey, &formula)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
-				return utils.ErrFormulaNotFound
+				return utils.ErrEntityNotFound
 			}
 			return err
 		}
@@ -263,7 +263,7 @@ func (db *googleDatastore) DeleteFormula(account, key string) error {
 		err := tx.Get(deleteKey, &formula)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
-				return utils.ErrFormulaNotFound
+				return utils.ErrEntityNotFound
 			}
 			return err
 		}
@@ -315,7 +315,7 @@ func (db *googleDatastore) GetJob(account, key string) (*api.Job, error) {
 	err := db.client.Get(tctx, getKey, &job)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			return nil, utils.ErrJobNotFound
+			return nil, utils.ErrEntityNotFound
 		}
 		return nil, err
 	}
@@ -335,7 +335,7 @@ func (db *googleDatastore) AddJob(account, key string, newJob *api.Job) error {
 		var job api.Job
 		err := tx.Get(newKey, &job)
 		if err != datastore.ErrNoSuchEntity {
-			return utils.ErrJobExists
+			return utils.ErrEntityExists
 		}
 
 		_, err = tx.Put(newKey, newJob)
@@ -362,7 +362,7 @@ func (db *googleDatastore) UpdateJob(account, key string, updatedJob *api.Job) e
 		err := tx.Get(updateKey, &job)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
-				return utils.ErrJobNotFound
+				return utils.ErrEntityNotFound
 			}
 			return err
 		}
@@ -391,7 +391,7 @@ func (db *googleDatastore) DeleteJob(account, key string) error {
 		err := tx.Get(deleteKey, &job)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
-				return utils.ErrJobNotFound
+				return utils.ErrEntityNotFound
 			}
 			return err
 		}

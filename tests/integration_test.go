@@ -46,7 +46,7 @@ func init() {
 		Hash: string(hash),
 	})
 	if err != nil {
-		if err == utils.ErrUserExists {
+		if err == utils.ErrEntityExists {
 			log.Printf("could not create user: %v\n", err)
 			return
 		}

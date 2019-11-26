@@ -35,7 +35,7 @@ func (basecoat *API) CreateAPIToken(context context.Context, request *api.Create
 
 	user, err := basecoat.storage.GetUser(request.User)
 	if err != nil {
-		if err == utils.ErrUserNotFound {
+		if err == utils.ErrEntityNotFound {
 			return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate user")
 		}
 		utils.StructuredLog(utils.LogLevelError, "could not authenticate user", err)

@@ -38,7 +38,7 @@ func (db *googleDatastore) Init(config *config.Config) error {
 }
 
 // CreateParentKeys creates the initial account string key in all buckets so that assets
-// can be seperated by account
+// can be separated by account
 func (db *googleDatastore) CreateParentKeys(account string) error {
 	newFormulaParentKey := datastore.NameKey(string(FormulasBucket), account, nil)
 	newJobParentKey := datastore.NameKey(string(JobsBucket), account, nil)

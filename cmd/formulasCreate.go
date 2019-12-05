@@ -80,7 +80,7 @@ func init() {
 	cmdFormulasCreate.Flags().StringVarP(&notes, "notes", "o", "", "any additional notes for the formula")
 
 	var jobs []string
-	cmdFormulasCreate.Flags().StringSliceVarP(&jobs, "jobs", "j", []string{}, "comma seperated list of jobs by id in which this formula has been used")
+	cmdFormulasCreate.Flags().StringSliceVarP(&jobs, "jobs", "j", []string{}, "comma separated list of jobs by id in which this formula has been used")
 
 	cmdFormulas.AddCommand(cmdFormulasCreate)
 }

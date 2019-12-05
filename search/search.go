@@ -162,7 +162,7 @@ func (searchIndex *Search) SearchJobs(account, searchPhrase string) ([]string, e
 
 // queryIndex runs the actual search query against the index
 // It uses the boolean query is a type of query builder
-// The search phrase given is seperated into seperate search terms, made into a wildcard query
+// The search phrase given is separated into separate search terms, made into a wildcard query
 // and then passed to the boolean query. The boolean query checks that all terms are found in any hits
 // it returns.
 func queryIndex(index bleve.Index, searchPhrase string) ([]string, error) {

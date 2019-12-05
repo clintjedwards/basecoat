@@ -206,19 +206,19 @@ func createFormula() {
 		Notes:  fake.EmailBody(),
 		Jobs:   []string{JobIDs[randJob]},
 		Bases: []*api.Base{
-			&api.Base{
+			{
 				Type:   fake.Company(),
 				Name:   generateColor(),
 				Amount: fake.DigitsN(2),
 			},
 		},
 		Colorants: []*api.Colorant{
-			&api.Colorant{
+			{
 				Type:   fake.Company(),
 				Name:   generateColor(),
 				Amount: fake.DigitsN(2),
 			},
-			&api.Colorant{
+			{
 				Type:   fake.Company(),
 				Name:   generateColor(),
 				Amount: fake.DigitsN(2),

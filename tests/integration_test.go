@@ -112,6 +112,9 @@ func TestCreateJob(t *testing.T) {
 	getResponse, err := basecoatClient.GetJob(ctx, &api.GetJobRequest{
 		Id: createResponse.Id,
 	})
+	if err != nil {
+		t.Fatalf("could not get Job: %v", err)
+	}
 
 	newJob := getResponse.Job
 	if newJob.Id == "" {
@@ -156,6 +159,9 @@ func TestUpdateJob(t *testing.T) {
 	getResponse, err := basecoatClient.GetJob(ctx, &api.GetJobRequest{
 		Id: JobID,
 	})
+	if err != nil {
+		t.Fatalf("could not get Job: %v", err)
+	}
 
 	updatedJob := getResponse.Job
 	if updatedJob.Street2 != updateJobRequest.Street2 {
@@ -206,6 +212,9 @@ func TestCreateFormula(t *testing.T) {
 	getResponse, err := basecoatClient.GetFormula(ctx, &api.GetFormulaRequest{
 		Id: createResponse.Id,
 	})
+	if err != nil {
+		t.Fatalf("could not get Formula: %v", err)
+	}
 
 	newFormula := getResponse.Formula
 	if newFormula.Id == "" {
@@ -259,6 +268,9 @@ func TestUpdateFormula(t *testing.T) {
 	getResponse, err := basecoatClient.GetFormula(ctx, &api.GetFormulaRequest{
 		Id: FormulaID,
 	})
+	if err != nil {
+		t.Fatalf("could not get formula: %v", err)
+	}
 
 	updatedFormula := getResponse.Formula
 	if updatedFormula.Id == "" {

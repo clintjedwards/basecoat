@@ -34,7 +34,7 @@ func InitSearch() (*Search, error) {
 
 // BuildIndex will query basecoat's database and populate the search index
 func (searchIndex *Search) BuildIndex() {
-	//Log how long it took to build the index in prometheus
+	// Log how long it took to build the index in prometheus
 	start := time.Now()
 
 	storage, err := storage.InitStorage()
@@ -58,6 +58,9 @@ func (searchIndex *Search) BuildIndex() {
 
 // UpdateFormulaIndex updates an already loaded formula index
 func (searchIndex *Search) UpdateFormulaIndex(account string, formula api.Formula) {
+	if _, ok := searchIndex.formulaIndex[account]; !ok {
+		searchIndex.formulaIndex[account] = createNewIndex()
+	}
 	index := searchIndex.formulaIndex[account]
 	index.Index(formula.Id, formula)
 	return
@@ -65,6 +68,9 @@ func (searchIndex *Search) UpdateFormulaIndex(account string, formula api.Formul
 
 // UpdateJobIndex updates an already loaded job index
 func (searchIndex *Search) UpdateJobIndex(account string, job api.Job) {
+	if _, ok := searchIndex.jobIndex[account]; !ok {
+		searchIndex.jobIndex[account] = createNewIndex()
+	}
 	index := searchIndex.jobIndex[account]
 	index.Index(job.Id, job)
 	return
@@ -84,6 +90,33 @@ func (searchIndex *Search) DeleteJobIndex(account string, jobID string) {
 	return
 }
 
+// createNewIndex creates a new empty bleve index
+func createNewIndex() bleve.Index {
+	indexMapping := bleve.NewIndexMapping()
+	index, err := bleve.NewMemOnly(indexMapping)
+	if err != nil {
+		utils.StructuredLog(utils.LogLevelError, "failed to create search index", err)
+	}
+
+	return index
+}
+
+// newAccountIndex populates a new account with blank indexes;
+// will only create if index has not been created yet
+func newAccountIndex(account string, searchIndex *Search) {
+
+	formulaIndex := createNewIndex()
+	jobIndex := createNewIndex()
+
+	if _, ok := searchIndex.formulaIndex[account]; !ok {
+		searchIndex.formulaIndex[account] = formulaIndex
+	}
+
+	if _, ok := searchIndex.jobIndex[account]; !ok {
+		searchIndex.jobIndex[account] = jobIndex
+	}
+}
+
 // populateIndex queries the database and loads the index for a specific account
 func populateIndex(account string, searchIndex *Search) {
 	storage, err := storage.InitStorage()
@@ -91,41 +124,27 @@ func populateIndex(account string, searchIndex *Search) {
 		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize storage", err)
 	}
 
+	newAccountIndex(account, searchIndex)
+
+	// Index all formulas
 	formulas, err := storage.GetAllFormulas(account)
 	if err != nil {
 		utils.StructuredLog(utils.LogLevelError, "failed to query database for formulas", err)
 	}
 
-	formulaMapping := bleve.NewIndexMapping()
-	formulaIndex, err := bleve.NewMemOnly(formulaMapping)
-	if err != nil {
-		utils.StructuredLog(utils.LogLevelError,
-			fmt.Sprintf("could not create formula index for account %s", account), err)
-	}
-
 	for _, formula := range formulas {
-		formulaIndex.Index(formula.Id, &formula)
+		searchIndex.formulaIndex[account].Index(formula.Id, &formula)
 	}
 
-	searchIndex.formulaIndex[account] = formulaIndex
-
+	// Index all jobs
 	jobs, err := storage.GetAllJobs(account)
 	if err != nil {
 		utils.StructuredLog(utils.LogLevelError, "failed to query database for jobs", err)
 	}
 
-	jobMapping := bleve.NewIndexMapping()
-	jobIndex, err := bleve.NewMemOnly(jobMapping)
-	if err != nil {
-		utils.StructuredLog(utils.LogLevelError,
-			fmt.Sprintf("could not create job index for account %s", account), err)
-	}
-
 	for _, job := range jobs {
-		jobIndex.Index(job.Id, &job)
+		searchIndex.jobIndex[account].Index(job.Id, &job)
 	}
-
-	searchIndex.jobIndex[account] = jobIndex
 
 	return
 }
@@ -160,11 +179,13 @@ func (searchIndex *Search) SearchJobs(account, searchPhrase string) ([]string, e
 	return nil, fmt.Errorf("could not find account: %s", account)
 }
 
-// queryIndex runs the actual search query against the index
-// It uses the boolean query is a type of query builder
+// queryIndex runs the actual search query against the index.
+// It uses the boolean query which is a type of query builder
 // The search phrase given is separated into separate search terms, made into a wildcard query
 // and then passed to the boolean query. The boolean query checks that all terms are found in any hits
 // it returns.
+// Example: "hello world" is searched as .*hello.* .*world.* and only when both are present in a document
+// will it be present in the results
 func queryIndex(index bleve.Index, searchPhrase string) ([]string, error) {
 	queryBuilder := bleve.NewBooleanQuery()
 

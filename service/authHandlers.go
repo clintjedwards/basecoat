@@ -38,7 +38,10 @@ func (basecoat *API) CreateAPIToken(context context.Context, request *api.Create
 		if err == utils.ErrEntityNotFound {
 			return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate user")
 		}
-		utils.StructuredLog(utils.LogLevelError, "could not authenticate user", err)
+		utils.Log().Errorw("could not authenticate user",
+			"error", err,
+			"user", user.Name)
+
 		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate user; internal error")
 	}
 
@@ -51,13 +54,15 @@ func (basecoat *API) CreateAPIToken(context context.Context, request *api.Create
 		"expiry":   int64(time.Now().Unix() + request.Duration),
 	})
 
-	tokenString, error := token.SignedString([]byte(basecoat.config.Backend.SecretKey))
-	if error != nil {
-		utils.StructuredLog(utils.LogLevelError, "could not sign jwt token", err)
+	tokenString, err := token.SignedString([]byte(basecoat.config.Backend.SecretKey))
+	if err != nil {
+		utils.Log().Errorw("could not sign jwt token",
+			"error", err)
 		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate user; internal error")
 	}
 
-	utils.StructuredLog(utils.LogLevelInfo, "api token created", request.User)
+	utils.Log().Infow("api token created", "user", request.User)
+
 	return &api.CreateAPITokenResponse{Key: tokenString}, nil
 }
 
@@ -88,35 +93,37 @@ func (basecoat *API) authenticate(ctx context.Context) (context.Context, error) 
 		return []byte(basecoat.config.Backend.SecretKey), nil
 	})
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "could not decode jwt token", nil)
-		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token: %v", nil)
+		utils.Log().Errorw("could not decode jwt token", "error", err)
+		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	if _, present := jwtToken.Claims.(jwt.MapClaims); !present {
-		utils.StructuredLog(utils.LogLevelError, "could not verify jwt token", nil)
-		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token: %v", nil)
+		utils.Log().Error("could not verify jwt token")
+		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	if !jwtToken.Valid {
-		utils.StructuredLog(utils.LogLevelError, "could not verify jwt token; not valid", nil)
-		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token: %v", nil)
+		utils.Log().Error("could not verify jwt token; not valid")
+		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	claims := jwtToken.Claims.(jwt.MapClaims)
 
 	if _, present := claims["username"]; !present {
-		utils.StructuredLog(utils.LogLevelError, "misformatted jwt token; missing username", nil)
-		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token: %v", nil)
+		utils.Log().Error("misformatted jwt token; missing username")
+		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 	if _, present := claims["expiry"]; !present {
-		utils.StructuredLog(utils.LogLevelError, "misformatted jwt token; missing expiry", nil)
-		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token: %v", nil)
+		utils.Log().Error("misformatted jwt token; missing expiry")
+		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	expiry := int64(claims["expiry"].(float64))
 	if time.Now().Unix() > expiry && expiry != 0 {
-		utils.StructuredLog(utils.LogLevelInfo, "token has expired",
-			map[string]int64{"current_time": time.Now().Unix(), "expiry_time": expiry})
+		utils.Log().Infow("token has expired",
+			"current_time", time.Now().Unix(),
+			"expiry_time", expiry)
+
 		return ctx, grpc.Errorf(codes.Unauthenticated, "token has expired: %v", time.Unix(expiry, 0).UTC())
 	}
 

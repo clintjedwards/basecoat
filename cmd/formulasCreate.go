@@ -8,7 +8,6 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
-	"github.com/clintjedwards/basecoat/utils"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -37,12 +36,12 @@ func runFormulasCreateCmd(cmd *cobra.Command, args []string) {
 
 	config, err := config.FromEnv()
 	if err != nil {
-		log.Fatalf("failed to read configuration")
+		log.Fatalf("failed to read configuration: %v", err)
 	}
 
 	creds, err := credentials.NewClientTLSFromFile(config.TLSCertPath, "")
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to get certificates", err)
+		log.Fatalf("failed to get certificates: %v", err)
 	}
 
 	var opts []grpc.DialOption
@@ -52,7 +51,7 @@ func runFormulasCreateCmd(cmd *cobra.Command, args []string) {
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]), opts...)
 	if err != nil {
-		log.Fatalf("could not connect to basecoat: %v", err)
+		log.Fatalf("could not connect to server: %v", err)
 	}
 	defer conn.Close()
 

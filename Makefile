@@ -39,11 +39,12 @@ build-protos:
 deploy: export BUILD_PATH=/tmp/${APP_NAME}
 deploy: build
 	scp /tmp/${APP_NAME} ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com:/tmp/${APP_NAME}
-	ssh -t ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com '
-	sudo mv /tmp/${APP_NAME} /usr/local/bin/
-	sudo chmod +x /usr/local/bin/${APP_NAME}
-	sudo chown ${SERVER_USERNAME}:${SERVER_USERNAME} /usr/local/bin/${APP_NAME}
-	sudo service ${APP_NAME} restart
+	ssh -t ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com ' \
+	sudo mv /tmp/${APP_NAME} /usr/local/bin/; \
+	sudo chmod +x /usr/local/bin/${APP_NAME}; \
+	sudo chown ${SERVER_USERNAME}:${SERVER_USERNAME} /usr/local/bin/${APP_NAME}; \
+	sudo service ${APP_NAME} stop && sudo setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/${APP_NAME} && sudo service ${APP_NAME} start; \
+	'
 
 ## help: prints this help message
 help:

@@ -20,7 +20,8 @@ func (db *googleDatastore) Init(config *config.Config) error {
 
 	if config.Database.GoogleDatastore.EmulatorHost != "" {
 		os.Setenv("DATASTORE_EMULATOR_HOST", config.Database.GoogleDatastore.EmulatorHost)
-		utils.StructuredLog(utils.LogLevelInfo, "connecting to google datastore emulator", config.Database.GoogleDatastore.EmulatorHost)
+		utils.Log().Infow("connecting to google datastore",
+			"emulator_host", config.Database.GoogleDatastore.EmulatorHost)
 	}
 
 	client, err := datastore.NewClient(context.Background(), config.Database.GoogleDatastore.ProjectID)
@@ -88,7 +89,6 @@ func (db *googleDatastore) GetAllUsers() (map[string]*api.User, error) {
 	query := datastore.NewQuery(string(UsersBucket))
 	keys, err := db.client.GetAll(tctx, query, &rawUsers)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "could not retrieve users from database", err)
 		return nil, err
 	}
 
@@ -161,7 +161,6 @@ func (db *googleDatastore) GetAllFormulas(account string) (map[string]*api.Formu
 	query := datastore.NewQuery(string(FormulasBucket)).Ancestor(parentKey).Filter("__key__ >", parentKey)
 	keys, err := db.client.GetAll(tctx, query, &rawFormulas)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "could not retrieve formulas from database", err)
 		return nil, err
 	}
 

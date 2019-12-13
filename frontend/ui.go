@@ -68,7 +68,7 @@ func InitHTTPService(config *config.Config, server *grpc.Server) {
 	if config.Frontend.Enable {
 		frontend := NewFrontend()
 		frontend.RegisterUIRoutes(router)
-		utils.StructuredLog(utils.LogLevelInfo, "basecoat frontend enabled", config.Frontend)
+		utils.Log().Infow("basecoat frontend enabled", "enabled", config.Frontend)
 	}
 
 	combinedHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
@@ -93,9 +93,7 @@ func InitHTTPService(config *config.Config, server *grpc.Server) {
 		httpServer.Handler = handlers.LoggingHandler(os.Stdout, httpServer.Handler)
 	}
 
-	utils.StructuredLog(utils.LogLevelInfo, "starting basecoat http service",
-		map[string]string{"url": config.Backend.HTTPURL})
-
+	utils.Log().Infow("starting basecoat http service", "url", config.Backend.HTTPURL)
 	log.Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
 }
 

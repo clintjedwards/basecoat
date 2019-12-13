@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/clintjedwards/basecoat/api"
-	"github.com/clintjedwards/basecoat/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -31,7 +30,7 @@ func runFormulasListCmd(cmd *cobra.Command, args []string) {
 
 	creds, err := credentials.NewClientTLSFromFile(config.TLSCertPath, "")
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to get certificates", err)
+		log.Fatalf("failed to get certificates: %v", err)
 	}
 
 	var opts []grpc.DialOption

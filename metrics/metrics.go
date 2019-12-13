@@ -13,8 +13,8 @@ import (
 // InitPrometheusService starts a long running http prometheus endpoint
 func InitPrometheusService(config *config.Config) {
 
-	utils.StructuredLog(utils.LogLevelInfo, "starting metrics http service",
-		map[string]string{"url": config.Metrics.Endpoint})
+	utils.Log().Infow("starting metrics http service",
+		"url", config.Metrics.Endpoint)
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(config.Metrics.Endpoint, nil))

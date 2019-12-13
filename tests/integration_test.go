@@ -26,7 +26,7 @@ func init() {
 
 	creds, err := credentials.NewClientTLSFromFile("../localhost.crt", "")
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to get certificates", err)
+		log.Fatalf("failed ot get certificates: %v", err)
 	}
 
 	opts = append(opts, grpc.WithTransportCredentials(creds))

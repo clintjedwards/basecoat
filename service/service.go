@@ -30,12 +30,12 @@ func NewBasecoatAPI(config *config.Config) *API {
 
 	storage, err := storage.InitStorage()
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize storage", err)
+		utils.Log().Fatalw("failed to initialize storage", "error", err)
 	}
 
 	searchIndex, err := search.InitSearch()
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize search functions", err)
+		utils.Log().Fatalw("failed to initialize search indexes", "error", err)
 	}
 
 	go searchIndex.BuildIndex()
@@ -52,7 +52,7 @@ func CreateGRPCServer(basecoatAPI *API) *grpc.Server {
 
 	creds, err := credentials.NewServerTLSFromFile(basecoatAPI.config.TLSCertPath, basecoatAPI.config.TLSKeyPath)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to get certificates", err)
+		utils.Log().Fatalw("failed ot get certificates", "error", err)
 	}
 
 	serverOption := grpc.Creds(creds)
@@ -79,11 +79,9 @@ func InitGRPCService(config *config.Config, server *grpc.Server) {
 
 	listen, err := net.Listen("tcp", config.Backend.GRPCURL)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "could not initialize tcp listener", err)
+		utils.Log().Fatalw("could not initialize tcp listener", "error", err)
 	}
 
-	utils.StructuredLog(utils.LogLevelInfo, "starting basecoat grpc service",
-		map[string]string{"url": config.Backend.GRPCURL})
-
+	utils.Log().Infow("starting basecoat grpc service", "url", config.Backend.GRPCURL)
 	log.Fatal(server.Serve(listen))
 }

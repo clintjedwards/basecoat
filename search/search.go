@@ -39,12 +39,14 @@ func (searchIndex *Search) BuildIndex() {
 
 	storage, err := storage.InitStorage()
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize storage", err)
+		utils.Log().Fatalw("failed to initialize storage",
+			"error", err)
 	}
 
 	users, err := storage.GetAllUsers()
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "failed to query database for accounts", err)
+		utils.Log().Fatalw("failed to query database for accounts",
+			"error", err)
 	}
 
 	for account := range users {
@@ -52,7 +54,7 @@ func (searchIndex *Search) BuildIndex() {
 	}
 
 	elapsed := time.Since(start)
-	utils.StructuredLog(utils.LogLevelInfo, fmt.Sprintf("compiled index in %s", elapsed), nil)
+	utils.Log().Infow("compiled index", "time(seconds)", elapsed)
 	return
 }
 
@@ -95,7 +97,8 @@ func createNewIndex() bleve.Index {
 	indexMapping := bleve.NewIndexMapping()
 	index, err := bleve.NewMemOnly(indexMapping)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "failed to create search index", err)
+		utils.Log().Errorw("failed to create search index", "error", err)
+		return nil
 	}
 
 	return index
@@ -121,7 +124,7 @@ func newAccountIndex(account string, searchIndex *Search) {
 func populateIndex(account string, searchIndex *Search) {
 	storage, err := storage.InitStorage()
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelFatal, "failed to initialize storage", err)
+		utils.Log().Fatalw("failed to initialize storage", "error", err)
 	}
 
 	newAccountIndex(account, searchIndex)
@@ -129,7 +132,9 @@ func populateIndex(account string, searchIndex *Search) {
 	// Index all formulas
 	formulas, err := storage.GetAllFormulas(account)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "failed to query database for formulas", err)
+		utils.Log().Errorw("failed to query database for formulas",
+			"error", err,
+			"account", account)
 	}
 
 	for _, formula := range formulas {
@@ -139,7 +144,9 @@ func populateIndex(account string, searchIndex *Search) {
 	// Index all jobs
 	jobs, err := storage.GetAllJobs(account)
 	if err != nil {
-		utils.StructuredLog(utils.LogLevelError, "failed to query database for jobs", err)
+		utils.Log().Errorw("failed to query database for jobs",
+			"error", err,
+			"account", account)
 	}
 
 	for _, job := range jobs {

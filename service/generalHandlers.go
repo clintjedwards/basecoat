@@ -9,6 +9,7 @@ import (
 
 var appVersion = "v0.0.dev <commit>"
 
+// GetSystemInfo returns system information and health
 func (basecoat *API) GetSystemInfo(context context.Context, request *api.GetSystemInfoRequest) (*api.GetSystemInfoResponse, error) {
 
 	versionTuple := strings.Split(appVersion, " ")

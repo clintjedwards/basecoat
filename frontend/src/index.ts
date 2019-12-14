@@ -2,6 +2,7 @@ import Cookies from "js-cookie";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import BasecoatClientWrapper from "./basecoatClientWrapper";
+import PageFooter from "./components/PageFooter.vue";
 import PageHeader from "./components/PageHeader.vue";
 import router from "./router";
 import store from "./store";
@@ -42,9 +43,16 @@ const app = new Vue({
   store,
   router,
   components: {
+    PageFooter,
     PageHeader
   },
   mounted() {
+    client.getSystemInfo().then(systemInfo => {
+      if (systemInfo) {
+        store.commit("updateAppInfo", systemInfo);
+      }
+    });
+
     setInterval(() => {
       client.getFormulaData().then(formulas => {
         store.commit("updateFormulaData", formulas);

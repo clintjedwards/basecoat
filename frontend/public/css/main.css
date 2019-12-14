@@ -1,73 +1,78 @@
+/*This is need override vuetifies default always on scrollbar*/
+html {
+  overflow-y: auto !important;
+}
+
 /*Red #ff5252*/
 .search-panel {
-    margin-top: 3em;
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
+  margin-top: 3em;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
 }
 
 .data-table {
-    margin-top: 5em;
-    width: 92%;
-    margin-left: auto;
-    margin-right: auto;
+  margin-top: 5em;
+  width: 92%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .format-modal-add-buttons {
-    margin: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 [v-cloak] {
-    display: none;
+  display: none;
 }
 
-[v-cloak]+#loader::before {
-    content: " ";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-image: url(../images/paintbrush.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 220px 220px;
-    width: 100%;
-    height: 100vh;
-    -webkit-animation: pulsate-fwd 0.5s ease-in-out infinite both;
-    animation: pulsate-fwd 0.5s ease-in-out infinite both;
+[v-cloak] + #loader::before {
+  content: " ";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url(../images/paintbrush.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 220px 220px;
+  width: 100%;
+  height: 100vh;
+  -webkit-animation: pulsate-fwd 0.5s ease-in-out infinite both;
+  animation: pulsate-fwd 0.5s ease-in-out infinite both;
 }
 
 @-webkit-keyframes pulsate-fwd {
-    0% {
-        -webkit-transform: scale(1);
-        transform: scale(1);
-    }
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 
-    50% {
-        -webkit-transform: scale(1.1);
-        transform: scale(1.1);
-    }
+  50% {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+  }
 
-    100% {
-        -webkit-transform: scale(1);
-        transform: scale(1);
-    }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 }
 
 @keyframes pulsate-fwd {
-    0% {
-        -webkit-transform: scale(1);
-        transform: scale(1);
-    }
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 
-    50% {
-        -webkit-transform: scale(1.1);
-        transform: scale(1.1);
-    }
+  50% {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+  }
 
-    100% {
-        -webkit-transform: scale(1);
-        transform: scale(1);
-    }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 }

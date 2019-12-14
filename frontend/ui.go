@@ -68,7 +68,9 @@ func InitHTTPService(config *config.Config, server *grpc.Server) {
 	if config.Frontend.Enable {
 		frontend := NewFrontend()
 		frontend.RegisterUIRoutes(router)
-		utils.Log().Infow("basecoat frontend enabled", "enabled", config.Frontend)
+		utils.Log().Infow("basecoat frontend enabled",
+			"enabled", config.Frontend.Enable,
+			"api_host", config.Frontend.APIHost)
 	}
 
 	combinedHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {

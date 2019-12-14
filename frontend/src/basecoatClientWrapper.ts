@@ -12,6 +12,7 @@ import {
   Formula,
   GetFormulaRequest,
   GetJobRequest,
+  GetSystemInfoRequest,
   Job,
   ListFormulasRequest,
   ListJobsRequest,
@@ -31,6 +32,14 @@ interface formulaMap {
 }
 interface jobMap {
   [key: string]: Job;
+}
+
+interface systemInfo {
+  commit: string;
+  database_engine: string;
+  debug_enabled: boolean;
+  frontend_enabled: boolean;
+  version: string;
 }
 
 declare var __API__: string; // The api endpoint that the client will talk to
@@ -431,6 +440,33 @@ class BasecoatClientWrapper {
           reject(err);
         }
         resolve();
+      });
+    });
+  }
+
+  //getSystemInfo retrieves a system information
+  getSystemInfo(): Promise<systemInfo | undefined> {
+    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
+    let getSystemInfoRequest = new GetSystemInfoRequest();
+
+    return new Promise((resolve, reject) => {
+      this.client.getSystemInfo(getSystemInfoRequest, metadata, function(
+        err,
+        response
+      ) {
+        if (err) {
+          console.log(err);
+          reject(undefined);
+          return;
+        }
+        let systemInfo: systemInfo = {
+          commit: response.getCommit(),
+          database_engine: response.getDatabaseEngine(),
+          debug_enabled: response.getDebugEnabled(),
+          frontend_enabled: response.getFrontendEnabled(),
+          version: response.getVersion()
+        };
+        resolve(systemInfo);
       });
     });
   }

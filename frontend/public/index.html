@@ -1,50 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+    />
     <title>Basecoat</title>
 
-    <link rel='shortcut icon' href="/images/paintbrush.ico" type='image/x-icon' />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+    <link
+      rel="shortcut icon"
+      href="/images/paintbrush.ico"
+      type="image/x-icon"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons"
+      rel="stylesheet"
+    />
 
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.12/dist/vuetify.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
+    <link
+      href="https://cdn.jsdelivr.net/npm/vuetify@1.5.12/dist/vuetify.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/main.css" />
 
     <script src="/javascript/main.js" defer></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="app" v-cloak>
-        <v-app>
-            <page-header>Basecoat</page-header>
+      <v-app>
+        <page-header>Basecoat</page-header>
 
-            <!-- Tabs -->
-            <v-tabs centered icons-and-text color="transparent">
-                <v-tabs-slider color="#ff5252"></v-tabs-slider>
-                <v-tab :to="{name: 'formulas'}">
-                    Formulas
-                    <v-icon>format_paint</v-icon>
-                </v-tab>
-                <v-tab :to="{name: 'jobs'}">
-                    Jobs
-                    <v-icon>work</v-icon>
-                </v-tab>
-            </v-tabs>
+        <!-- Tabs -->
+        <v-tabs centered icons-and-text color="transparent">
+          <v-tabs-slider color="#ff5252"></v-tabs-slider>
+          <v-tab :to="{name: 'formulas'}">
+            Formulas
+            <v-icon>format_paint</v-icon>
+          </v-tab>
+          <v-tab :to="{name: 'jobs'}">
+            Jobs
+            <v-icon>work</v-icon>
+          </v-tab>
+        </v-tabs>
 
-            <router-view></router-view>
+        <router-view></router-view>
 
-            <!-- Notifications-->
-            <v-snackbar v-model="$store.state.displaySnackBar" color="error" :timeout="3000" auto-height top>
-                {{ $store.state.snackBarText }}
-                <v-btn dark flat @click="$store.state.displaySnackBar = false">
-                    Close
-                </v-btn>
-            </v-snackbar>
-        </v-app>
+        <page-footer></page-footer>
+
+        <!-- Notifications-->
+        <v-snackbar
+          v-model="$store.state.displaySnackBar"
+          color="error"
+          :timeout="3000"
+          auto-height
+          top
+        >
+          {{ $store.state.snackBarText }}
+          <v-btn dark flat @click="$store.state.displaySnackBar = false">
+            Close
+          </v-btn>
+        </v-snackbar>
+      </v-app>
     </div>
     <div id="loader"></div>
-</body>
-
+  </body>
 </html>

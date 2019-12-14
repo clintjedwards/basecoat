@@ -54,7 +54,7 @@ func (searchIndex *Search) BuildIndex() {
 	}
 
 	elapsed := time.Since(start)
-	utils.Log().Infow("compiled index", "time(seconds)", elapsed)
+	utils.Log().Infow("compiled index", "time", elapsed)
 	return
 }
 

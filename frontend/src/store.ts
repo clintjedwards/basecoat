@@ -21,11 +21,20 @@ interface colorantTypeMap {
   [key: string]: colorantType;
 }
 
+interface systemInfo {
+  commit: string;
+  database_engine: string;
+  debug_enabled: boolean;
+  frontend_enabled: boolean;
+  version: string;
+}
+
 interface RootState {
   isInitialized: boolean;
   username: string;
   snackBarText: string;
   displaySnackBar: boolean;
+  appInfo: systemInfo;
 
   // Formula Data
   formulaData: FormulaMap;
@@ -43,6 +52,13 @@ const state: RootState = {
   username: "Unknown",
   snackBarText: "",
   displaySnackBar: false,
+  appInfo: {
+    commit: "",
+    version: "",
+    frontend_enabled: false,
+    debug_enabled: true,
+    database_engine: ""
+  },
 
   // Formula Data
   formulaData: {},
@@ -69,6 +85,9 @@ const mutations: MutationTree<RootState> = {
   },
   updateUsername(state, username: string) {
     state.username = username;
+  },
+  updateAppInfo(state, systemInfo: systemInfo) {
+    state.appInfo = systemInfo;
   },
   //Formula Data Mutators
   updateFormulaDataFilter(state, newFilterList: string[]) {

@@ -203,7 +203,7 @@ func createFormula() {
 	createFormulaRequest := &api.CreateFormulaRequest{
 		Name:   generateColor(),
 		Number: fake.DigitsN(2) + "-" + fake.DigitsN(4),
-		Notes:  fake.EmailBody(),
+		Notes:  fake.WordsN(20),
 		Jobs:   []string{JobIDs[randJob]},
 		Bases: []*api.Base{
 			{

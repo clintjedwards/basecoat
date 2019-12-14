@@ -18,19 +18,25 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-var JobIDs []string
-var APIKey string
+var jobIDs []string
+
+// dev only creds
+const user string = "test"
+const pass string = "test"
+const certPath string = "./localhost.crt"
+const key string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcnkiOjE1NzYzMjI4OTEsInVzZXJuYW1lIjoidGVzdCJ9.DB-U0U7KEXI5_c3uHN6H-1yBVv-W20YOOXP_f0lM2C0"
+
 var opts []grpc.DialOption
 
 func init() {
-	creds, err := credentials.NewClientTLSFromFile("./localhost.crt", "")
+	creds, err := credentials.NewClientTLSFromFile(certPath, "")
 	if err != nil {
 		log.Fatalf("failed to get certificates: %v", err)
 	}
 
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	hash, err := utils.HashPassword([]byte("test"))
+	hash, err := utils.HashPassword([]byte(pass))
 	if err != nil {
 		log.Fatalf("failed to hash password: %v", err)
 	}
@@ -40,8 +46,8 @@ func init() {
 		log.Fatalf("could not connect to storage: %v", err)
 	}
 
-	err = storage.CreateUser("test", &api.User{
-		Name: "test",
+	err = storage.CreateUser(user, &api.User{
+		Name: user,
 		Hash: string(hash),
 	})
 	if err != nil {
@@ -51,27 +57,6 @@ func init() {
 		}
 		log.Fatalf("could not create user: %v", err)
 	}
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
-	if err != nil {
-		log.Fatalf("could not connect to basecoat: %v", err)
-	}
-	defer conn.Close()
-
-	basecoatClient := api.NewBasecoatClient(conn)
-
-	createAPITokenRequest := &api.CreateAPITokenRequest{
-		User:     "test",
-		Password: "test",
-		Duration: 14400,
-	}
-
-	createResponse, err := basecoatClient.CreateAPIToken(context.Background(), createAPITokenRequest)
-	if err != nil {
-		log.Fatalf("could not create Token: %v", err)
-	}
-
-	APIKey = createResponse.Key
 }
 
 func generateColor() string {
@@ -177,7 +162,7 @@ func createJob() {
 		},
 	}
 
-	md := metadata.Pairs("Authorization", "Bearer "+APIKey)
+	md := metadata.Pairs("Authorization", "Bearer "+key)
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 	response, err := basecoatClient.CreateJob(ctx, createJobRequest)
@@ -185,7 +170,7 @@ func createJob() {
 		log.Fatalf("could not create Job: %v", err)
 	}
 
-	JobIDs = append(JobIDs, response.Id)
+	jobIDs = append(jobIDs, response.Id)
 }
 
 func createFormula() {
@@ -204,7 +189,7 @@ func createFormula() {
 		Name:   generateColor(),
 		Number: fake.DigitsN(2) + "-" + fake.DigitsN(4),
 		Notes:  fake.WordsN(20),
-		Jobs:   []string{JobIDs[randJob]},
+		Jobs:   []string{jobIDs[randJob]},
 		Bases: []*api.Base{
 			{
 				Type:   fake.Company(),
@@ -226,7 +211,7 @@ func createFormula() {
 		},
 	}
 
-	md := metadata.Pairs("Authorization", "Bearer "+APIKey)
+	md := metadata.Pairs("Authorization", "Bearer "+key)
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 	_, err = basecoatClient.CreateFormula(ctx, createFormulaRequest)

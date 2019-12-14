@@ -52,7 +52,7 @@ func CreateGRPCServer(basecoatAPI *API) *grpc.Server {
 
 	creds, err := credentials.NewServerTLSFromFile(basecoatAPI.config.TLSCertPath, basecoatAPI.config.TLSKeyPath)
 	if err != nil {
-		utils.Log().Fatalw("failed ot get certificates", "error", err)
+		utils.Log().Fatalw("failed to get certificates", "error", err)
 	}
 
 	serverOption := grpc.Creds(creds)

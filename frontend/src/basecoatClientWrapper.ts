@@ -446,11 +446,10 @@ class BasecoatClientWrapper {
 
   //getSystemInfo retrieves a system information
   getSystemInfo(): Promise<systemInfo | undefined> {
-    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
     let getSystemInfoRequest = new GetSystemInfoRequest();
 
     return new Promise((resolve, reject) => {
-      this.client.getSystemInfo(getSystemInfoRequest, metadata, function(
+      this.client.getSystemInfo(getSystemInfoRequest, {}, function(
         err,
         response
       ) {

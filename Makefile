@@ -8,6 +8,10 @@ BUILD_PATH = /tmp/${APP_NAME}
 GO_LDFLAGS := '-X "github.com/clintjedwards/${APP_NAME}/cmd.appVersion=$(VERSION) $(GIT_COMMIT)" \
 			   -X "github.com/clintjedwards/${APP_NAME}/service.appVersion=$(VERSION) $(GIT_COMMIT)"'
 
+## backup: backup production database using gcp
+backup:
+	gcloud datastore export gs://clintjedwardsbackups/basecoat
+
 ## build: run tests and compile full app in production mode
 build: export FRONTEND_API_HOST="https://${APP_NAME}.clintjedwards.com"
 build:
@@ -37,7 +41,7 @@ build-protos:
 
 ## deploy: deploy the application to production
 deploy: export BUILD_PATH=/tmp/${APP_NAME}
-deploy: build
+deploy: build backup
 	scp /tmp/${APP_NAME} ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com:/tmp/${APP_NAME}
 	ssh -t ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com ' \
 	sudo mv /tmp/${APP_NAME} /usr/local/bin/; \

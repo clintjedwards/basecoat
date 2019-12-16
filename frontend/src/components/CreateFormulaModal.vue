@@ -99,7 +99,7 @@
               <v-layout>
                 <v-flex xs12>
                   <v-autocomplete
-                    v-model="formulaData.jobs"
+                    v-model="formulaData.jobsList"
                     :items="jobDataToList"
                     item-text="name"
                     item-value="id"

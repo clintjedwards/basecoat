@@ -9,6 +9,7 @@ import (
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
 
+	"github.com/clintjedwards/toolkit/listutil"
 	"github.com/clintjedwards/toolkit/logger"
 	"github.com/clintjedwards/toolkit/tkerrors"
 )
@@ -203,16 +204,26 @@ func (db *googleDatastore) AddFormula(account, key string, newFormula *api.Formu
 	defer cancel()
 
 	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
-		var formula api.Formula
-		err := tx.Get(newKey, &formula)
+		// make sure item does not already exist
+		err := tx.Get(newKey, &api.Formula{})
 		if err != datastore.ErrNoSuchEntity {
 			return tkerrors.ErrEntityExists
 		}
 
+		// insert new formula
 		_, err = tx.Put(newKey, newFormula)
 		if err != nil {
 			return err
 		}
+
+		// for all jobs included in newformula make sure to add new formula ID to all
+		for _, jobID := range newFormula.Jobs {
+			err := db.linkFormulaToJob(tx, account, newFormula.Id, jobID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -230,6 +241,8 @@ func (db *googleDatastore) UpdateFormula(account, key string, updatedFormula *ap
 	defer cancel()
 
 	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+
+		// make sure item exists
 		var formula api.Formula
 		err := tx.Get(updateKey, &formula)
 		if err != nil {
@@ -239,10 +252,31 @@ func (db *googleDatastore) UpdateFormula(account, key string, updatedFormula *ap
 			return err
 		}
 
+		// persist formula changes
 		_, err = tx.Put(updateKey, updatedFormula)
 		if err != nil {
 			return err
 		}
+
+		// figure out which changes to need to be made to other objects due to job additions/removals
+		additions, removals := listutil.FindListUpdates(formula.Jobs, updatedFormula.Jobs)
+
+		// Append formula id to formula list in job
+		for _, jobID := range additions {
+			err := db.linkFormulaToJob(tx, account, updatedFormula.Id, jobID)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Remove formula id from formulas list in jobs removed
+		for _, jobID := range removals {
+			err := db.unlinkFormulaFromJob(tx, account, updatedFormula.Id, jobID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -260,6 +294,8 @@ func (db *googleDatastore) DeleteFormula(account, key string) error {
 	defer cancel()
 
 	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+
+		// make sure item exists
 		var formula api.Formula
 		err := tx.Get(deleteKey, &formula)
 		if err != nil {
@@ -269,10 +305,20 @@ func (db *googleDatastore) DeleteFormula(account, key string) error {
 			return err
 		}
 
+		// persist delete
 		err = tx.Delete(deleteKey)
 		if err != nil {
 			return err
 		}
+
+		// Remove formula id from formulas list in jobs this was linked to
+		for _, jobID := range formula.Jobs {
+			err := db.unlinkFormulaFromJob(tx, account, formula.Id, jobID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -324,7 +370,6 @@ func (db *googleDatastore) GetJob(account, key string) (*api.Job, error) {
 	return &job, nil
 }
 
-// First check if the ID exits
 func (db *googleDatastore) AddJob(account, key string, newJob *api.Job) error {
 	parentKey := datastore.NameKey(string(JobsBucket), account, nil)
 	newKey := datastore.NameKey(string(JobsBucket), key, parentKey)
@@ -333,16 +378,27 @@ func (db *googleDatastore) AddJob(account, key string, newJob *api.Job) error {
 	defer cancel()
 
 	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
-		var job api.Job
-		err := tx.Get(newKey, &job)
+
+		// make sure item does not already exist
+		err := tx.Get(newKey, &api.Job{})
 		if err != datastore.ErrNoSuchEntity {
 			return tkerrors.ErrEntityExists
 		}
 
+		// insert new job
 		_, err = tx.Put(newKey, newJob)
 		if err != nil {
 			return err
 		}
+
+		// for all formulas included in newJob make sure to add new job ID to all
+		for _, formulaID := range newJob.Formulas {
+			err := db.linkJobToFormula(tx, account, newJob.Id, formulaID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -359,6 +415,8 @@ func (db *googleDatastore) UpdateJob(account, key string, updatedJob *api.Job) e
 	defer cancel()
 
 	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+
+		// make sure item exists
 		var job api.Job
 		err := tx.Get(updateKey, &job)
 		if err != nil {
@@ -368,10 +426,31 @@ func (db *googleDatastore) UpdateJob(account, key string, updatedJob *api.Job) e
 			return err
 		}
 
+		// persist job changes
 		_, err = tx.Put(updateKey, updatedJob)
 		if err != nil {
 			return err
 		}
+
+		// figure out which changes to need to be made to other objects due to job additions/removals
+		additions, removals := listutil.FindListUpdates(job.Formulas, updatedJob.Formulas)
+
+		// Append job id to job list in formula
+		for _, formulaID := range additions {
+			err := db.linkJobToFormula(tx, account, updatedJob.Id, formulaID)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Remove job id from job list in formulas removed
+		for _, formulaID := range removals {
+			err := db.unlinkJobFromFormula(tx, account, updatedJob.Id, formulaID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -388,6 +467,7 @@ func (db *googleDatastore) DeleteJob(account, key string) error {
 	defer cancel()
 
 	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+		// make sure item exists
 		var job api.Job
 		err := tx.Get(deleteKey, &job)
 		if err != nil {
@@ -397,10 +477,20 @@ func (db *googleDatastore) DeleteJob(account, key string) error {
 			return err
 		}
 
+		// persist delete
 		err = tx.Delete(deleteKey)
 		if err != nil {
 			return err
 		}
+
+		// Remove job id from jobs list in formulas this was linked to
+		for _, formulaID := range job.Formulas {
+			err := db.unlinkJobFromFormula(tx, account, job.Id, formulaID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {

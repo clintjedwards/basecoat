@@ -27,10 +27,10 @@ const (
 type EngineType string
 
 const (
-	// StorageEngineGoogleDatastore represents a google datastore
+	// EngineGoogleDatastore represents a google datastore
 	// a distributed key-value store
 	// https://cloud.google.com/datastore/docs/concepts/overview
-	StorageEngineGoogleDatastore EngineType = "googleDatastore"
+	EngineGoogleDatastore EngineType = "googleDatastore"
 )
 
 // Engine represents backend storage implementations where items can be persisted
@@ -53,7 +53,6 @@ type Engine interface {
 
 // InitStorage creates a storage object with the appropriate engine
 func InitStorage() (Engine, error) {
-
 	config, err := config.FromEnv()
 	if err != nil {
 		return nil, err
@@ -62,10 +61,10 @@ func InitStorage() (Engine, error) {
 	engineType := EngineType(config.Database.Engine)
 
 	switch engineType {
-	case StorageEngineGoogleDatastore:
+	case EngineGoogleDatastore:
 
 		datastoreEngine := googleDatastore{}
-		err = datastoreEngine.Init(config)
+		err := datastoreEngine.Init(config)
 		if err != nil {
 			return nil, err
 		}

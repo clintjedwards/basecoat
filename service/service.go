@@ -8,10 +8,12 @@ import (
 	"github.com/clintjedwards/basecoat/config"
 	"github.com/clintjedwards/basecoat/search"
 	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/basecoat/utils"
+	"github.com/clintjedwards/toolkit/logger"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
@@ -30,12 +32,12 @@ func NewBasecoatAPI(config *config.Config) *API {
 
 	storage, err := storage.InitStorage()
 	if err != nil {
-		utils.Log().Fatalw("failed to initialize storage", "error", err)
+		logger.Log().Fatalw("failed to initialize storage", "error", err)
 	}
 
 	searchIndex, err := search.InitSearch()
 	if err != nil {
-		utils.Log().Fatalw("failed to initialize search indexes", "error", err)
+		logger.Log().Fatalw("failed to initialize search indexes", "error", err)
 	}
 
 	go searchIndex.BuildIndex()
@@ -52,7 +54,7 @@ func CreateGRPCServer(basecoatAPI *API) *grpc.Server {
 
 	creds, err := credentials.NewServerTLSFromFile(basecoatAPI.config.TLSCertPath, basecoatAPI.config.TLSKeyPath)
 	if err != nil {
-		utils.Log().Fatalw("failed to get certificates", "error", err)
+		logger.Log().Fatalw("failed to get certificates", "error", err)
 	}
 
 	serverOption := grpc.Creds(creds)
@@ -79,9 +81,9 @@ func InitGRPCService(config *config.Config, server *grpc.Server) {
 
 	listen, err := net.Listen("tcp", config.Backend.GRPCURL)
 	if err != nil {
-		utils.Log().Fatalw("could not initialize tcp listener", "error", err)
+		logger.Log().Fatalw("could not initialize tcp listener", "error", err)
 	}
 
-	utils.Log().Infow("starting basecoat grpc service", "url", config.Backend.GRPCURL)
+	logger.Log().Infow("starting basecoat grpc service", "url", config.Backend.GRPCURL)
 	log.Fatal(server.Serve(listen))
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/clintjedwards/basecoat/config"
-	"github.com/clintjedwards/basecoat/utils"
+	"github.com/clintjedwards/toolkit/logger"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -13,7 +13,7 @@ import (
 // InitPrometheusService starts a long running http prometheus endpoint
 func InitPrometheusService(config *config.Config) {
 
-	utils.Log().Infow("starting metrics http service",
+	logger.Log().Infow("starting metrics http service",
 		"url", config.Metrics.Endpoint)
 
 	http.Handle("/metrics", promhttp.Handler())

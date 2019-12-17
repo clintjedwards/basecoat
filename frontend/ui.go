@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/clintjedwards/basecoat/config"
-	"github.com/clintjedwards/basecoat/utils"
+	"github.com/clintjedwards/toolkit/logger"
+
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -68,7 +69,7 @@ func InitHTTPService(config *config.Config, server *grpc.Server) {
 	if config.Frontend.Enable {
 		frontend := NewFrontend()
 		frontend.RegisterUIRoutes(router)
-		utils.Log().Infow("basecoat frontend enabled",
+		logger.Log().Infow("basecoat frontend enabled",
 			"enabled", config.Frontend.Enable,
 			"api_host", config.Frontend.APIHost)
 	}
@@ -95,7 +96,7 @@ func InitHTTPService(config *config.Config, server *grpc.Server) {
 		httpServer.Handler = handlers.LoggingHandler(os.Stdout, httpServer.Handler)
 	}
 
-	utils.Log().Infow("starting basecoat http service", "url", config.Backend.HTTPURL)
+	logger.Log().Infow("starting basecoat http service", "url", config.Backend.HTTPURL)
 	log.Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
 }
 

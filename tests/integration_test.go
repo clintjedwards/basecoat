@@ -8,7 +8,10 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/basecoat/utils"
+
+	"github.com/clintjedwards/toolkit/password"
+	"github.com/clintjedwards/toolkit/tkerrors"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -31,7 +34,7 @@ func init() {
 
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	hash, err := utils.HashPassword([]byte("test"))
+	hash, err := password.HashPassword([]byte("test"))
 	if err != nil {
 		log.Fatalf("failed to hash password: %v", err)
 	}
@@ -46,7 +49,7 @@ func init() {
 		Hash: string(hash),
 	})
 	if err != nil {
-		if err == utils.ErrEntityExists {
+		if err == tkerrors.ErrEntityExists {
 			log.Printf("could not create user: %v\n", err)
 			return
 		}

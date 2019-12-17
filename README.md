@@ -25,6 +25,7 @@ Basecoat is a CRUD formula indexing tool meant to record formulas for certain co
 This takes a few steps
 
 ### Download golang packages
+
 `go mod tidy`
 
 ### Generating go and javascript code using protobuf definition
@@ -33,16 +34,16 @@ This project uses grpc and grpc-web which use generated functions from a protobu
 
 You'll need:
 
-* protoc: `https://github.com/golang/protobuf`
-* go's proto plugin: `go get github.com/golang/protobuf/protoc-gen-go`
-* grpc-web proto plugin: `https://github.com/grpc/grpc-web/releases`
+- protoc: `https://github.com/golang/protobuf`
+- go's proto plugin: `go get github.com/golang/protobuf/protoc-gen-go`
+- grpc-web proto plugin: `https://github.com/grpc/grpc-web/releases`
 
 ### Building the frontend
 
 This requires installing vue js and a bunch of other packages that the frontend uses. We also use Packr to compiled the frontend assets into binary
 
-* install npm packages: `cd frontend; npm install`
-* install packr: `go get -u github.com/gobuffalo/packr/packr`
+- install npm packages: `cd frontend; npm install`
+- install packr: `go get -u github.com/gobuffalo/packr/packr`
 
 ### Generate certificates
 

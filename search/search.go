@@ -9,7 +9,8 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/basecoat/utils"
+
+	"github.com/clintjedwards/toolkit/logger"
 )
 
 // searchSyntax is a wrapper for all search terms to improve fuzzy searching
@@ -39,13 +40,13 @@ func (searchIndex *Search) BuildIndex() {
 
 	storage, err := storage.InitStorage()
 	if err != nil {
-		utils.Log().Fatalw("failed to initialize storage",
+		logger.Log().Fatalw("failed to initialize storage",
 			"error", err)
 	}
 
 	users, err := storage.GetAllUsers()
 	if err != nil {
-		utils.Log().Fatalw("failed to query database for accounts",
+		logger.Log().Fatalw("failed to query database for accounts",
 			"error", err)
 	}
 
@@ -54,7 +55,7 @@ func (searchIndex *Search) BuildIndex() {
 	}
 
 	elapsed := time.Since(start)
-	utils.Log().Infow("compiled index", "time", elapsed)
+	logger.Log().Infow("compiled index", "time", elapsed)
 	return
 }
 
@@ -97,7 +98,7 @@ func createNewIndex() bleve.Index {
 	indexMapping := bleve.NewIndexMapping()
 	index, err := bleve.NewMemOnly(indexMapping)
 	if err != nil {
-		utils.Log().Errorw("failed to create search index", "error", err)
+		logger.Log().Errorw("failed to create search index", "error", err)
 		return nil
 	}
 
@@ -124,7 +125,7 @@ func newAccountIndex(account string, searchIndex *Search) {
 func populateIndex(account string, searchIndex *Search) {
 	storage, err := storage.InitStorage()
 	if err != nil {
-		utils.Log().Fatalw("failed to initialize storage", "error", err)
+		logger.Log().Fatalw("failed to initialize storage", "error", err)
 	}
 
 	newAccountIndex(account, searchIndex)
@@ -132,7 +133,7 @@ func populateIndex(account string, searchIndex *Search) {
 	// Index all formulas
 	formulas, err := storage.GetAllFormulas(account)
 	if err != nil {
-		utils.Log().Errorw("failed to query database for formulas",
+		logger.Log().Errorw("failed to query database for formulas",
 			"error", err,
 			"account", account)
 	}
@@ -144,7 +145,7 @@ func populateIndex(account string, searchIndex *Search) {
 	// Index all jobs
 	jobs, err := storage.GetAllJobs(account)
 	if err != nil {
-		utils.Log().Errorw("failed to query database for jobs",
+		logger.Log().Errorw("failed to query database for jobs",
 			"error", err,
 			"account", account)
 	}

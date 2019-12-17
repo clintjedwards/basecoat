@@ -1,7 +1,8 @@
 <template>
   <v-footer absolute padless color="#424242">
     <div class="page-footer-text font-weight-light">
-      Version {{ $store.state.appInfo.version }}
+      Version v{{ $store.state.appInfo.semver }} |
+      {{ humanizedBuildTime }} ({{ humanizedRelativeBuildTime }}) |
       {{ $store.state.appInfo.commit }}
     </div>
     <template v-if="$store.state.appInfo.debug_enabled">
@@ -13,10 +14,27 @@
 
 <script lang="ts">
 import Vue from "vue";
+import * as moment from "moment";
 
 export default Vue.extend({
   data: function() {
     return {};
+  },
+  computed: {
+    humanizedBuildTime: function() {
+      let build_time = moment(
+        moment.unix(this.$store.state.appInfo.build_time)
+      ).format("L");
+
+      return build_time;
+    },
+    humanizedRelativeBuildTime: function() {
+      let build_time = moment(
+        moment.unix(this.$store.state.appInfo.build_time)
+      ).fromNow();
+
+      return build_time;
+    }
   }
 });
 </script>

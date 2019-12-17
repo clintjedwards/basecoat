@@ -35,11 +35,12 @@ interface jobMap {
 }
 
 interface systemInfo {
+  build_time: string;
   commit: string;
   database_engine: string;
   debug_enabled: boolean;
   frontend_enabled: boolean;
-  version: string;
+  semver: string;
 }
 
 declare var __API__: string; // The api endpoint that the client will talk to
@@ -102,8 +103,7 @@ class BasecoatClientWrapper {
         response
       ) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
           return;
         }
         resolve(response.getFormula());
@@ -125,8 +125,7 @@ class BasecoatClientWrapper {
         response
       ) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
         }
 
         let formulas: formulaMap = {};
@@ -151,8 +150,7 @@ class BasecoatClientWrapper {
         response
       ) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
           return;
         }
         resolve(response.getResultsList());
@@ -169,8 +167,7 @@ class BasecoatClientWrapper {
     return new Promise((resolve, reject) => {
       this.client.getJob(getJobRequest, metadata, function(err, response) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
           return;
         }
         resolve(response.getJob());
@@ -189,8 +186,7 @@ class BasecoatClientWrapper {
       }
       this.client.listJobs(listJobsRequest, metadata, function(err, response) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
         }
 
         let jobs: jobMap = {};
@@ -215,8 +211,7 @@ class BasecoatClientWrapper {
         response
       ) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
           return;
         }
         resolve(response.getResultsList());
@@ -454,16 +449,16 @@ class BasecoatClientWrapper {
         response
       ) {
         if (err) {
-          console.log(err);
-          reject(undefined);
+          reject(err);
           return;
         }
         let systemInfo: systemInfo = {
+          build_time: response.getBuildTime(),
           commit: response.getCommit(),
           database_engine: response.getDatabaseEngine(),
           debug_enabled: response.getDebugEnabled(),
           frontend_enabled: response.getFrontendEnabled(),
-          version: response.getVersion()
+          semver: response.getSemver()
         };
         resolve(systemInfo);
       });

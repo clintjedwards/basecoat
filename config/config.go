@@ -25,6 +25,7 @@ type GoogleDatastoreConfig struct {
 
 // Config refers to general application configuration
 type Config struct {
+	// Debug is useful for development builds; turns on extra/better logging
 	Debug       bool   `envconfig:"debug" default:"false"`
 	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"`
 	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`

@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/clintjedwards/toolkit/listutil"
+	"github.com/clintjedwards/toolkit/logger"
+	"github.com/clintjedwards/toolkit/random"
+	"github.com/clintjedwards/toolkit/tkerrors"
+
 	"github.com/clintjedwards/basecoat/api"
-	"github.com/clintjedwards/basecoat/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -21,7 +25,7 @@ func (basecoat *API) GetJob(context context.Context, request *api.GetJobRequest)
 
 	job, err := basecoat.storage.GetJob(account, request.Id)
 	if err != nil {
-		if err == utils.ErrEntityNotFound {
+		if err == tkerrors.ErrEntityNotFound {
 			return &api.GetJobResponse{}, status.Error(codes.NotFound, "job requested not found")
 		}
 		return &api.GetJobResponse{}, status.Error(codes.Internal, "failed to retrieve job from database")
@@ -70,7 +74,7 @@ func (basecoat *API) ListJobs(context context.Context, request *api.ListJobsRequ
 func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRequest) (*api.CreateJobResponse, error) {
 
 	newJob := api.Job{
-		Id:       string(utils.GenerateRandString(basecoat.config.Backend.IDLength)),
+		Id:       string(random.GenerateRandString(basecoat.config.Backend.IDLength)),
 		Name:     request.Name,
 		Street:   request.Street,
 		Street2:  request.Street2,
@@ -95,10 +99,10 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 
 	err := basecoat.storage.AddJob(account, newJob.Id, &newJob)
 	if err != nil {
-		if err == utils.ErrEntityExists {
+		if err == tkerrors.ErrEntityExists {
 			return &api.CreateJobResponse{}, status.Error(codes.AlreadyExists, "could not save job; job already exists")
 		}
-		utils.Log().Errorw("could not save job", "error", err)
+		logger.Log().Errorw("could not save job", "error", err)
 		return &api.CreateJobResponse{}, status.Error(codes.Internal, "could not save job")
 	}
 
@@ -107,7 +111,7 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 		for _, formulaID := range newJob.Formulas {
 			formula, err := basecoat.storage.GetFormula(account, formulaID)
 			if err != nil {
-				utils.Log().Warnw("could not retrieve formula when attempting to update job list", "formula_id", formulaID)
+				logger.Log().Warnw("could not retrieve formula when attempting to update job list", "formula_id", formulaID)
 				continue
 			}
 
@@ -115,7 +119,7 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 
 			err = basecoat.storage.UpdateFormula(account, formulaID, formula)
 			if err != nil {
-				utils.Log().Errorw("could not update formula", "error", err)
+				logger.Log().Errorw("could not update formula", "error", err)
 				continue
 			}
 		}
@@ -123,7 +127,7 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 
 	basecoat.search.UpdateJobIndex(account, newJob)
 
-	utils.Log().Infow("job created", "job", newJob)
+	logger.Log().Infow("job created", "job", newJob)
 	return &api.CreateJobResponse{Id: newJob.Id}, nil
 }
 
@@ -158,19 +162,19 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 
 	err := basecoat.storage.UpdateJob(account, request.Id, &updatedJob)
 	if err != nil {
-		if err == utils.ErrEntityNotFound {
+		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateJobResponse{}, status.Error(codes.NotFound, "could not update job; job key not found")
 		}
-		utils.Log().Errorw("could not update job", "error", err)
+		logger.Log().Errorw("could not update job", "error", err)
 		return &api.UpdateJobResponse{}, status.Error(codes.Internal, "could not update job")
 	}
 
-	additions, removals := utils.FindListUpdates(currentJob.Formulas, updatedJob.Formulas)
+	additions, removals := listutil.FindListUpdates(currentJob.Formulas, updatedJob.Formulas)
 	// Append job id to job list in formula
 	for _, formulaID := range additions {
 		formula, err := basecoat.storage.GetFormula(account, formulaID)
 		if err != nil {
-			utils.Log().Warnw("could not retrieve formula when attempting to update job list", "formula_id", formulaID)
+			logger.Log().Warnw("could not retrieve formula when attempting to update job list", "formula_id", formulaID)
 			continue
 		}
 
@@ -178,7 +182,7 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 
 		err = basecoat.storage.UpdateFormula(account, formulaID, formula)
 		if err != nil {
-			utils.Log().Errorw("could not update formula", "error", err)
+			logger.Log().Errorw("could not update formula", "error", err)
 			continue
 		}
 	}
@@ -187,24 +191,24 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 	for _, formulaID := range removals {
 		formula, err := basecoat.storage.GetFormula(account, formulaID)
 		if err != nil {
-			utils.Log().Warnw("could not retrieve formula when attempting to update job list",
+			logger.Log().Warnw("could not retrieve formula when attempting to update job list",
 				"formula_id", formulaID,
 				"job_id", request.Id)
 			continue
 		}
 
-		formula.Jobs = utils.RemoveStringFromList(formula.Jobs, currentJob.Id)
+		formula.Jobs = listutil.RemoveStringFromList(formula.Jobs, currentJob.Id)
 
 		err = basecoat.storage.UpdateFormula(account, formulaID, formula)
 		if err != nil {
-			utils.Log().Errorw("could not update formula", "error", err)
+			logger.Log().Errorw("could not update formula", "error", err)
 			continue
 		}
 	}
 
 	basecoat.search.UpdateJobIndex(account, updatedJob)
 
-	utils.Log().Infow("job updated", "job", updatedJob)
+	logger.Log().Infow("job updated", "job", updatedJob)
 	return &api.UpdateJobResponse{}, nil
 }
 
@@ -225,17 +229,17 @@ func (basecoat *API) DeleteJob(context context.Context, request *api.DeleteJobRe
 	for _, formulaID := range currentJob.Formulas {
 		formula, err := basecoat.storage.GetFormula(account, formulaID)
 		if err != nil {
-			utils.Log().Warnw("could not retrieve formula when attempting to update job list",
+			logger.Log().Warnw("could not retrieve formula when attempting to update job list",
 				"formula_id", formulaID,
 				"job_id", currentJob.Id)
 			continue
 		}
 
-		updatedJobsList := utils.RemoveStringFromList(formula.Jobs, currentJob.Id)
+		updatedJobsList := listutil.RemoveStringFromList(formula.Jobs, currentJob.Id)
 		formula.Jobs = updatedJobsList
 		err = basecoat.storage.UpdateFormula(account, formulaID, formula)
 		if err != nil {
-			utils.Log().Warnw("could not update formula when attempting to remove deleted job",
+			logger.Log().Warnw("could not update formula when attempting to remove deleted job",
 				"formula_id", formulaID,
 				"job_id", currentJob.Id)
 			continue
@@ -244,15 +248,15 @@ func (basecoat *API) DeleteJob(context context.Context, request *api.DeleteJobRe
 
 	err := basecoat.storage.DeleteJob(account, request.Id)
 	if err != nil {
-		if err == utils.ErrEntityNotFound {
+		if err == tkerrors.ErrEntityNotFound {
 			return &api.DeleteJobResponse{}, status.Error(codes.NotFound, "could not delete job; job key not found")
 		}
-		utils.Log().Errorw("could not delete job", "error", err, "job_id", request.Id)
+		logger.Log().Errorw("could not delete job", "error", err, "job_id", request.Id)
 		return &api.DeleteJobResponse{}, status.Error(codes.Internal, "could not delete job")
 	}
 
 	basecoat.search.DeleteJobIndex(account, request.Id)
 
-	utils.Log().Infow("job deleted", "job_id", request.Id)
+	logger.Log().Infow("job deleted", "job_id", request.Id)
 	return &api.DeleteJobResponse{}, nil
 }

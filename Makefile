@@ -1,12 +1,13 @@
 APP_NAME = basecoat
-GIT_COMMIT := $(shell git rev-parse --short HEAD)
-SHELL = /bin/bash
-VERSION = $(shell date +%s)
 BUILD_PATH = /tmp/${APP_NAME}
+EPOCH_TIME = $(shell date +%s)
+GIT_COMMIT = $(shell git rev-parse --short HEAD)
+GO_LDFLAGS = '-X "github.com/clintjedwards/${APP_NAME}/cmd.appVersion=$(VERSION)" \
+			   -X "github.com/clintjedwards/${APP_NAME}/service.appVersion=$(VERSION)"'
+SEMVER = 0.0.1
+SHELL = /bin/bash
+VERSION = ${SEMVER}_${EPOCH_TIME}_${GIT_COMMIT}
 
-
-GO_LDFLAGS := '-X "github.com/clintjedwards/${APP_NAME}/cmd.appVersion=$(VERSION) $(GIT_COMMIT)" \
-			   -X "github.com/clintjedwards/${APP_NAME}/service.appVersion=$(VERSION) $(GIT_COMMIT)"'
 
 ## backup: backup production database using gcp
 backup:
@@ -18,7 +19,6 @@ build:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
-	go test ./utils
 	npm run --prefix ./frontend build:production
 	packr build -ldflags $(GO_LDFLAGS) -o $(BUILD_PATH)
 
@@ -26,7 +26,6 @@ build:
 build-backend:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	go mod tidy
-	go test ./utils
 	go build -ldflags $(GO_LDFLAGS) -o $(BUILD_PATH)
 
 ## build-dev: build development version of app
@@ -40,7 +39,6 @@ build-protos:
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 
 ## deploy: deploy the application to production
-deploy: export BUILD_PATH=/tmp/${APP_NAME}
 deploy: build backup
 	scp /tmp/${APP_NAME} ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com:/tmp/${APP_NAME}
 	ssh -t ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com ' \
@@ -56,12 +54,8 @@ help:
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
 ## install: build application and install on system
-install:
-	protoc --go_out=plugins=grpc:. api/*.proto
-	go mod tidy
-	npm run --prefix ./frontend build:production
-	packr build -ldflags $(GO_LDFLAGS) -o /tmp/${APP_NAME}
-	sudo mv /tmp/${APP_NAME} /usr/local/bin/
+install: build
+	sudo mv BUILD_PATH /usr/local/bin/
 	chmod +x /usr/local/bin/${APP_NAME}
 
 ## run: build application and run server; useful for dev

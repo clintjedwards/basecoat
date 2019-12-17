@@ -2,23 +2,27 @@ package service
 
 import (
 	"context"
-	"strings"
 
 	"github.com/clintjedwards/basecoat/api"
+	"github.com/clintjedwards/toolkit/version"
 )
 
-var appVersion = "v0.0.dev <commit>"
+var appVersion = "v0.0.dev_<build_time>_<commit>"
 
 // GetSystemInfo returns system information and health
 func (basecoat *API) GetSystemInfo(context context.Context, request *api.GetSystemInfoRequest) (*api.GetSystemInfoResponse, error) {
 
-	versionTuple := strings.Split(appVersion, " ")
+	info, err := version.Parse(appVersion)
+	if err != nil {
+		return nil, err
+	}
 
 	return &api.GetSystemInfoResponse{
+		BuildTime:       info.Epoch,
+		Commit:          info.Hash,
+		DatabaseEngine:  basecoat.config.Database.Engine,
 		DebugEnabled:    basecoat.config.Debug,
 		FrontendEnabled: basecoat.config.Frontend.Enable,
-		Version:         versionTuple[0],
-		Commit:          versionTuple[1],
-		DatabaseEngine:  basecoat.config.Database.Engine,
+		Semver:          info.Semver,
 	}, nil
 }

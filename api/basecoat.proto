@@ -98,11 +98,12 @@ message CreateAPITokenResponse { string key = 1; }
 
 message GetSystemInfoRequest {}
 message GetSystemInfoResponse {
-  bool debug_enabled = 1;
-  bool frontend_enabled = 2;
-  string commit = 3;
-  string version = 4;
-  string database_engine = 5;
+  string build_time = 1;
+  string commit = 2;
+  string database_engine = 3;
+  bool debug_enabled = 4;
+  bool frontend_enabled = 5;
+  string semver = 6;
 }
 
 message GetFormulaRequest { string id = 1; }

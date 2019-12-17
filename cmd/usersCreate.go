@@ -6,7 +6,8 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/basecoat/utils"
+	"github.com/clintjedwards/toolkit/password"
+
 	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +29,7 @@ func runUsersCreateCmd(cmd *cobra.Command, args []string) {
 		log.Fatalf("failed retrieve password")
 	}
 
-	hash, err := utils.HashPassword(pass)
+	hash, err := password.HashPassword(pass)
 	if err != nil {
 		log.Fatalf("failed to hash password: %v", err)
 	}

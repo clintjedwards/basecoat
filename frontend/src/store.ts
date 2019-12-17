@@ -22,11 +22,12 @@ interface colorantTypeMap {
 }
 
 interface systemInfo {
+  build_time: string;
   commit: string;
   database_engine: string;
   debug_enabled: boolean;
   frontend_enabled: boolean;
-  version: string;
+  semver: string;
 }
 
 interface RootState {
@@ -53,11 +54,12 @@ const state: RootState = {
   snackBarText: "",
   displaySnackBar: false,
   appInfo: {
+    build_time: "",
     commit: "",
-    version: "",
-    frontend_enabled: false,
+    database_engine: "",
     debug_enabled: true,
-    database_engine: ""
+    frontend_enabled: false,
+    semver: ""
   },
 
   // Formula Data

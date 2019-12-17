@@ -11,7 +11,9 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/basecoat/utils"
+	"github.com/clintjedwards/toolkit/password"
+	"github.com/clintjedwards/toolkit/tkerrors"
+
 	"github.com/icrowley/fake"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -24,7 +26,7 @@ var jobIDs []string
 const user string = "test"
 const pass string = "test"
 const certPath string = "./localhost.crt"
-const key string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcnkiOjE1NzYzMjI4OTEsInVzZXJuYW1lIjoidGVzdCJ9.DB-U0U7KEXI5_c3uHN6H-1yBVv-W20YOOXP_f0lM2C0"
+const key string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcnkiOjI1MjM1MzUyODAsInVzZXJuYW1lIjoidGVzdCJ9.sLsqUxM3MZ_DIKJyEvymAYN3uwFQH8gkufhgY7j9970"
 
 var opts []grpc.DialOption
 
@@ -36,7 +38,7 @@ func init() {
 
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	hash, err := utils.HashPassword([]byte(pass))
+	hash, err := password.HashPassword([]byte(pass))
 	if err != nil {
 		log.Fatalf("failed to hash password: %v", err)
 	}
@@ -51,7 +53,7 @@ func init() {
 		Hash: string(hash),
 	})
 	if err != nil {
-		if err == utils.ErrEntityExists {
+		if err == tkerrors.ErrEntityExists {
 			log.Printf("could not create user: %v\n", err)
 			return
 		}

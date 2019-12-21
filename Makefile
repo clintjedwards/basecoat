@@ -11,7 +11,7 @@ VERSION = ${SEMVER}_${EPOCH_TIME}_${GIT_COMMIT}
 
 ## backup: backup production database using gcp
 backup:
-	gcloud datastore export gs://clintjedwardsbackups/basecoat
+	gcloud datastore export gs://clintjedwardsbackups/basecoat-${EPOCH_TIME}
 
 ## build: run tests and compile full app in production mode
 build: export FRONTEND_API_HOST="https://${APP_NAME}.clintjedwards.com"

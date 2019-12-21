@@ -39,7 +39,8 @@ build-protos:
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 
 ## deploy: deploy the application to production
-deploy: build backup
+deploy: backup
+	wget -O /tmp/${APP_NAME} https://github.com/clintjedwards/${APP_NAME}/releases/download/v${SEMVER}/${APP_NAME}
 	scp /tmp/${APP_NAME} ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com:/tmp/${APP_NAME}
 	ssh -t ${SERVER_USERNAME}@${APP_NAME}.clintjedwards.com ' \
 	sudo mv /tmp/${APP_NAME} /usr/local/bin/; \

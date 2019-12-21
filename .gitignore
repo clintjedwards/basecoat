@@ -24,5 +24,8 @@ main.js
 *.crt
 *.key
 
+#toolkit file
+.toolkit.yml
+
 #ignore shitty packr file that wont go away
 a_frontend-packr.go

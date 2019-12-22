@@ -13,7 +13,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c
 	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
-	github.com/improbable-eng/grpc-web v0.9.5
+	github.com/improbable-eng/grpc-web v0.12.0
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/prometheus/client_golang v1.1.0
 	github.com/spf13/cobra v0.0.5

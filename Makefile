@@ -20,7 +20,7 @@ build:
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
 	npm run --prefix ./frontend build:production
-	packr build -race -ldflags $(GO_LDFLAGS) -o $(BUILD_PATH)
+	packr build -ldflags $(GO_LDFLAGS) -o $(BUILD_PATH)
 
 ## build-backend: build backend without frontend assets
 build-backend:

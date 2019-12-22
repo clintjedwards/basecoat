@@ -47,6 +47,7 @@
                 :loading="this.loading"
                 :disabled="this.loading"
                 @click="handleLogin()"
+                type="submit"
               >Login</v-btn>
             </v-card-actions>
           </v-layout>

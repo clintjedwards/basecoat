@@ -12,9 +12,11 @@ import (
 	"github.com/clintjedwards/basecoat/metrics"
 	"github.com/clintjedwards/basecoat/service"
 	"github.com/clintjedwards/toolkit/logger"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"github.com/mholt/certmagic"
 	"google.golang.org/grpc"
 )
 
@@ -26,6 +28,7 @@ func StartServices() {
 	}
 
 	api := service.NewBasecoatAPI(config)
+
 	grpcServer := service.CreateGRPCServer(api)
 
 	go metrics.InitPrometheusService(config)
@@ -54,22 +57,31 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 		router.ServeHTTP(resp, req)
 	})
 
-	httpServer := http.Server{
-		Addr:         config.URL,
-		Handler:      combinedHandler,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
 	// Set default http headers
-	httpServer.Handler = defaultHeaders(httpServer.Handler)
+	modifiedHandler := defaultHeaders(combinedHandler)
 
 	if config.Debug {
-		httpServer.Handler = handlers.LoggingHandler(os.Stdout, httpServer.Handler)
+		modifiedHandler = handlers.LoggingHandler(os.Stdout, modifiedHandler)
 	}
 
-	logger.Log().Infow("starting basecoat grpc/http service", "url", config.URL)
-	log.Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
+	// certmagic allows us to auto renew tls certs. Useful in production not so useful in dev
+	if config.CertMagic.Enable {
+		certmagic.Default.Agreed = true
+		certmagic.Default.Email = config.CertMagic.Email
+
+		log.Fatal(certmagic.HTTPS([]string{config.CertMagic.Domain}, modifiedHandler))
+	} else {
+
+		httpServer := http.Server{
+			Addr:         config.URL,
+			Handler:      modifiedHandler,
+			WriteTimeout: 15 * time.Second,
+			ReadTimeout:  15 * time.Second,
+		}
+
+		logger.Log().Infow("starting basecoat grpc/http service", "url", config.URL)
+		log.Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
+	}
 }
 
 // Wrapper function setting http headers

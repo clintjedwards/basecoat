@@ -36,6 +36,7 @@ require (
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/mholt/certmagic v0.9.0
 	github.com/prometheus/client_golang v1.3.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
 	github.com/rogpeppe/go-internal v1.5.1 // indirect

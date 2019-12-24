@@ -29,6 +29,7 @@ type Config struct {
 	Debug       bool   `envconfig:"debug" default:"false"`
 	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"`
 	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`
+	URL         string `envconfig:"url" default:"localhost:8080"`
 	Frontend    *FrontendConfig
 	Backend     *BackendConfig
 	Database    *DatabaseConfig
@@ -39,18 +40,12 @@ type Config struct {
 // FrontendConfig represents configuration for frontend basecoat
 type FrontendConfig struct {
 	Enable bool `envconfig:"frontend_enable" default:"true"`
-	// This envvar is not used from this config but is here for completeness
-	// it is set in the makefile and is injected into the js code at build time.
-	// It controls where the frontend client should look for the gprc backend
-	APIHost string `envconfig:"frontend_api_host" default:"https://localhost:8080"`
 }
 
 // BackendConfig represents configuration for backend basecoat grpc service
 type BackendConfig struct {
 	IDLength  int    `envconfig:"backend_id_length" default:"5"`          // the length of all randomly generated ids
 	SecretKey string `envconfig:"backend_secret_key" default:"testtoken"` // secret key used to encrypt api tokens
-	HTTPURL   string `envconfig:"backend_http_url" default:"localhost:8080"`
-	GRPCURL   string `envconfig:"backend_grpc_url" default:"localhost:8081"`
 }
 
 // MetricsConfig represents configuration for the metrics endpoint

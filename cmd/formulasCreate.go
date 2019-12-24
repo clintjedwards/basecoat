@@ -47,7 +47,7 @@ func runFormulasCreateCmd(cmd *cobra.Command, args []string) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	hostPortTuple := strings.Split(config.Backend.GRPCURL, ":")
+	hostPortTuple := strings.Split(config.URL, ":")
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]), opts...)
 	if err != nil {

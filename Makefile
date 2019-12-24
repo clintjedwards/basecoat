@@ -14,7 +14,6 @@ backup:
 	gcloud datastore export gs://clintjedwardsbackups/basecoat-${EPOCH_TIME}
 
 ## build: run tests and compile full app in production mode
-build: export FRONTEND_API_HOST="https://${APP_NAME}.clintjedwards.com"
 build:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
@@ -29,7 +28,6 @@ build-backend:
 	go build -ldflags $(GO_LDFLAGS) -o $(BUILD_PATH)
 
 ## run: build application and run server; useful for dev
-build-dev: export FRONTEND_API_HOST="https://localhost:8080"
 build-dev:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
@@ -64,7 +62,6 @@ install: build
 	chmod +x /usr/local/bin/${APP_NAME}
 
 ## run: build application and run server; useful for dev
-run: export FRONTEND_API_HOST="https://localhost:8080"
 run:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto

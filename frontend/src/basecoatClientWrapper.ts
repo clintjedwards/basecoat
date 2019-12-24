@@ -43,14 +43,13 @@ interface systemInfo {
   semver: string;
 }
 
-declare var __API__: string; // The api endpoint that the client will talk to
-
 // BasecoatClientWrapper is a wrapper for all frontend to backend communication
 class BasecoatClientWrapper {
   client: BasecoatClient;
 
   constructor() {
-    this.client = new BasecoatClient(__API__, null, null);
+    let url = location.protocol + "//" + location.host;
+    this.client = new BasecoatClient(url, null, null);
   }
 
   // isUserLoggedIn determines if the user should be kicked back to the login route

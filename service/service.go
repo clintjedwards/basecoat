@@ -1,9 +1,6 @@
 package service
 
 import (
-	"log"
-	"net"
-
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
 	"github.com/clintjedwards/basecoat/search"
@@ -74,16 +71,4 @@ func CreateGRPCServer(basecoatAPI *API) *grpc.Server {
 	api.RegisterBasecoatServer(grpcServer, basecoatAPI)
 
 	return grpcServer
-}
-
-// InitGRPCService starts a GPRC server
-func InitGRPCService(config *config.Config, server *grpc.Server) {
-
-	listen, err := net.Listen("tcp", config.Backend.GRPCURL)
-	if err != nil {
-		logger.Log().Fatalw("could not initialize tcp listener", "error", err)
-	}
-
-	logger.Log().Infow("starting basecoat grpc service", "url", config.Backend.GRPCURL)
-	log.Fatal(server.Serve(listen))
 }

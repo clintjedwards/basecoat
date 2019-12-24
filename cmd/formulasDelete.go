@@ -29,7 +29,7 @@ func runFormulasDeleteCmd(cmd *cobra.Command, args []string) {
 		log.Fatalf("failed to read configuration")
 	}
 
-	hostPortTuple := strings.Split(config.Backend.GRPCURL, ":")
+	hostPortTuple := strings.Split(config.URL, ":")
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]))
 	if err != nil {

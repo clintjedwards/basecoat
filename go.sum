@@ -75,6 +75,8 @@ github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/clintjedwards/toolkit v0.0.0-20191222074624-61a099505b8d h1:Sn9LPoLvukI3kdeYyDVYzFTPmoWQb4d1ul/V2OuBu2o=
 github.com/clintjedwards/toolkit v0.0.0-20191222074624-61a099505b8d/go.mod h1:cqyInIZdhkToQPyORbVTep3KWmuyQxWzjh0xKiRJxpI=
+github.com/clintjedwards/toolkit v0.0.0-20191224020756-a93e6eeb46b9 h1:aSDqXkhp6qgcAQlk4Z4hIa6NUPSvnPXeUacz+owIPtg=
+github.com/clintjedwards/toolkit v0.0.0-20191224020756-a93e6eeb46b9/go.mod h1:pbCsKRBm+iNDS1VEQ5g2H7n1ujFGkyFNYI3kv+1wQT8=
 github.com/cloudflare/cloudflare-go v0.10.2/go.mod h1:qhVI5MKwBGhdNU89ZRz2plgYutcJ5PCekLxXn56w6SY=
 github.com/codegangsta/cli v1.20.0/go.mod h1:/qJNoX69yVSKu5o4jLyXAENLRyk1uhi7zkbQ3slBdOA=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=

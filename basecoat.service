@@ -1,0 +1,13 @@
+[Unit]
+Description=Basecoat Server
+After=network.target
+
+[Service]
+EnvironmentFile=-/etc/default/basecoat
+ExecStart=/usr/local/bin/basecoat server
+KillMode=process
+User=<User>
+Group=<User>
+
+[Install]
+WantedBy=multi-user.target

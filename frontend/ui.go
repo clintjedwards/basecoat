@@ -1,11 +1,11 @@
 package frontend
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 
-	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 )
 
@@ -41,12 +41,21 @@ func historyModeHandler(fileServerHandler http.Handler, indexFile []byte) http.H
 // with an already established router
 func (ui *Frontend) RegisterUIRoutes(router *mux.Router) {
 
-	box := packr.NewBox("./public")
-	fileServerHandler := http.FileServer(box)
-	indexHTMLfile, err := box.Find("./index.html")
+	// We bake frontend files directly into the binary
+	// assets is an implementation of an http.filesystem created by
+	// github.com/shurcooL/vfsgen that points to the "public" folder
+	fileServerHandler := http.FileServer(assets)
+
+	file, err := assets.Open("index.html")
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("could not find index.html file: %v", err)
+	}
+	defer file.Close()
+
+	indexContent, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalf("could not read index.html file: %v", err)
 	}
 
-	router.PathPrefix("/").Handler(historyModeHandler(fileServerHandler, indexHTMLfile))
+	router.PathPrefix("/").Handler(historyModeHandler(fileServerHandler, indexContent))
 }

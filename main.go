@@ -1,3 +1,5 @@
+//go:generate go run frontend/generate.go
+
 // Basecoat is an internal formula management system
 package main
 

@@ -2,7 +2,7 @@
 <template>
   <v-data-table :headers="headers" :items="jobDataToList" hide-actions disable-filtering>
     <template v-slot:items="props">
-      <tr style="cursor: pointer;" :ripple="{ center: true }" @click="navigateToJob(props.item.id)">
+      <tr style="cursor: pointer;" @click="navigateToJob(props.item.id)">
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>
           <span class="text-capitalize">{{ props.item.contact_name }}</span>

@@ -21,8 +21,6 @@ require (
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
 	github.com/glycerine/go-unsnap-stream v0.0.0-20190901134440-81cf024a9e0a // indirect
-	github.com/gobuffalo/envy v1.8.1 // indirect
-	github.com/gobuffalo/packr v1.30.1
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/handlers v1.4.2
@@ -39,7 +37,6 @@ require (
 	github.com/mholt/certmagic v0.9.0
 	github.com/prometheus/client_golang v1.3.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
-	github.com/rogpeppe/go-internal v1.5.1 // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect

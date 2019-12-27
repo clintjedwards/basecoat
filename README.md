@@ -26,7 +26,7 @@ This takes a few steps
 
 ### Download golang packages
 
-`go mod tidy`
+`go mod tidy` or `go mod download`
 
 ### Generating go and javascript code using protobuf definition
 
@@ -40,10 +40,9 @@ You'll need:
 
 ### Building the frontend
 
-This requires installing vue js and a bunch of other packages that the frontend uses. We also use Packr to compiled the frontend assets into binary
+This requires installing vue js and a bunch of other packages that the frontend uses. Basecoat uses go generate and vfsgen to bake frontend files into the binary.
 
 - install npm packages: `cd frontend; npm install`
-- install packr: `go get -u github.com/gobuffalo/packr/packr`
 
 ### Generate certificates
 
@@ -54,7 +53,7 @@ This tool will autogenerate certs for your and add them as trusted
 
 ### Bring up database
 
-from the docker directory: `docker-compose up`
+from the 'docker' directory: `docker-compose up`
 
 ### Start application
 

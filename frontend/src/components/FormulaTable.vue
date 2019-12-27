@@ -2,11 +2,7 @@
 <template>
   <v-data-table :headers="headers" :items="formulaDataToList" hide-actions disable-filtering>
     <template v-slot:items="props">
-      <tr
-        style="cursor: pointer;"
-        :ripple="{ center: true }"
-        v-on:click="navigateToFormula(props.item.id)"
-      >
+      <tr style="cursor: pointer;" v-on:click="navigateToFormula(props.item.id)">
         <td class="text-capitalize">{{ props.item.name }}</td>
         <td>{{ props.item.number }}</td>
         <td class="text-capitalize">{{ props.item.base }}</td>

@@ -142,7 +142,7 @@ func generateColor() string {
 }
 
 func createJob() {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -176,7 +176,7 @@ func createJob() {
 }
 
 func createFormula() {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}

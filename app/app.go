@@ -57,8 +57,8 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 		router.ServeHTTP(resp, req)
 	})
 
-	// Set default http headers
-	modifiedHandler := defaultHeaders(combinedHandler)
+	// gzip compression
+	modifiedHandler := handlers.CompressHandler(combinedHandler)
 
 	if config.Debug {
 		modifiedHandler = handlers.LoggingHandler(os.Stdout, modifiedHandler)
@@ -82,15 +82,4 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 		logger.Log().Infow("starting basecoat grpc/http service", "url", config.URL)
 		log.Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
 	}
-}
-
-// Wrapper function setting http headers
-func defaultHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
-		next.ServeHTTP(w, r)
-	})
 }

@@ -1,0 +1,14 @@
+repository: clintjedwards/basecoat
+commands:
+  build:
+    - protoc --go_out=plugins=grpc:. api/*.proto
+    - protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
+    - go mod tidy
+    - npm run --prefix ./frontend build:production
+    - go generate
+    - go build -ldflags '-X "github.com/clintjedwards/{{.ProjectName}}/cmd.appVersion={{.VersionFull}}" -X "github.com/clintjedwards/{{.ProjectName}}/service.appVersion={{.VersionFull}}"' -o {{.Path}}
+  deploy:
+    - sudo mv {{.UploadFilePath}} /usr/local/bin/basecoat
+    - sudo chmod +x /usr/local/bin/basecoat
+    - sudo chown romeo:romeo /usr/local/bin/basecoat
+    - sudo service basecoat stop && sudo setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/basecoat && sudo service basecoat start;

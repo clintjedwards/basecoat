@@ -24,8 +24,5 @@ main.js
 *.crt
 *.key
 
-#toolkit file
-.toolkit.yml
-
 #ignore frontend static import
 frontend/assets.go

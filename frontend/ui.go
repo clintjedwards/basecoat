@@ -45,7 +45,7 @@ func (ui *Frontend) RegisterUIRoutes(router *mux.Router) {
 	// We bake frontend files directly into the binary
 	// assets is an implementation of an http.filesystem created by
 	// github.com/shurcooL/vfsgen that points to the "public" folder
-	fileServerHandler := httpgzip.FileServer(assets, httpgzip.FileServerOptions{})
+	fileServerHandler := httpgzip.FileServer(assets, httpgzip.FileServerOptions{IndexHTML: true})
 
 	file, err := assets.Open("index.html")
 	if err != nil {

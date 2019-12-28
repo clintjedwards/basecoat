@@ -9,6 +9,7 @@ type DatabaseConfig struct {
 	// The database engine used by the backend
 	// possible values are: googleDatastore
 	Engine          string `envconfig:"database_engine" default:"googleDatastore"`
+	IDLength        int    `envconfig:"database_id_length" default:"5"` // the length of all randomly generated ids
 	GoogleDatastore *GoogleDatastoreConfig
 }
 
@@ -25,7 +26,7 @@ type GoogleDatastoreConfig struct {
 
 // Config refers to general application configuration
 type Config struct {
-	Debug       bool   `envconfig:"debug" default:"true"`
+	Debug       bool   `envconfig:"debug" default:"false"`
 	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"` // does not apply if certmagic is enabled
 	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`  // does not apply if certmagic is enabled
 	URL         string `envconfig:"url" default:"localhost:8080"`            // does not apply if certmagic is enabled
@@ -52,7 +53,6 @@ type FrontendConfig struct {
 
 // BackendConfig represents configuration for backend basecoat grpc service
 type BackendConfig struct {
-	IDLength  int    `envconfig:"backend_id_length" default:"5"`          // the length of all randomly generated ids
 	SecretKey string `envconfig:"backend_secret_key" default:"testtoken"` // secret key used to encrypt api tokens
 }
 

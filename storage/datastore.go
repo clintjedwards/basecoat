@@ -15,8 +15,9 @@ import (
 )
 
 type googleDatastore struct {
-	client  *datastore.Client
-	timeout time.Duration
+	client   *datastore.Client
+	idLength int
+	timeout  time.Duration
 }
 
 func (db *googleDatastore) Init(config *config.Config) error {
@@ -37,6 +38,8 @@ func (db *googleDatastore) Init(config *config.Config) error {
 	if err != nil {
 		return err
 	}
+
+	db.idLength = config.Database.IDLength
 
 	return nil
 }
@@ -195,30 +198,36 @@ func (db *googleDatastore) GetFormula(account, key string) (*api.Formula, error)
 	return &formula, nil
 }
 
-func (db *googleDatastore) AddFormula(account, key string, newFormula *api.Formula) error {
+func (db *googleDatastore) AddFormula(account string, newFormula *api.Formula) (key string, err error) {
 
 	parentKey := datastore.NameKey(string(FormulasBucket), account, nil)
-	newKey := datastore.NameKey(string(FormulasBucket), key, parentKey)
 
 	tctx, cancel := context.WithTimeout(context.Background(), db.timeout)
 	defer cancel()
 
-	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
-		// make sure item does not already exist
-		err := tx.Get(newKey, &api.Formula{})
-		if err != datastore.ErrNoSuchEntity {
-			return tkerrors.ErrEntityExists
+	_, err = db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+		key, err = db.getNewKey(tx, account, FormulasBucket)
+		if err != nil {
+			return err
+		}
+
+		newNameKey := datastore.NameKey(string(FormulasBucket), key, parentKey)
+
+		newFormula.Id = key
+		// If the user has not entered a formula number just make it the ID
+		if newFormula.Number == "" {
+			newFormula.Number = newFormula.Id
 		}
 
 		// insert new formula
-		_, err = tx.Put(newKey, newFormula)
+		_, err = tx.Put(newNameKey, newFormula)
 		if err != nil {
 			return err
 		}
 
 		// for all jobs included in newformula make sure to add new formula ID to all
 		for _, jobID := range newFormula.Jobs {
-			err := db.linkFormulaToJob(tx, account, newFormula.Id, jobID)
+			err := db.linkFormulaToJob(tx, account, key, jobID)
 			if err != nil {
 				return err
 			}
@@ -227,10 +236,10 @@ func (db *googleDatastore) AddFormula(account, key string, newFormula *api.Formu
 		return nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return key, err
 }
 
 func (db *googleDatastore) UpdateFormula(account, key string, updatedFormula *api.Formula) error {
@@ -370,30 +379,30 @@ func (db *googleDatastore) GetJob(account, key string) (*api.Job, error) {
 	return &job, nil
 }
 
-func (db *googleDatastore) AddJob(account, key string, newJob *api.Job) error {
+func (db *googleDatastore) AddJob(account string, newJob *api.Job) (key string, err error) {
 	parentKey := datastore.NameKey(string(JobsBucket), account, nil)
-	newKey := datastore.NameKey(string(JobsBucket), key, parentKey)
 
 	tctx, cancel := context.WithTimeout(context.Background(), db.timeout)
 	defer cancel()
 
-	_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
-
-		// make sure item does not already exist
-		err := tx.Get(newKey, &api.Job{})
-		if err != datastore.ErrNoSuchEntity {
-			return tkerrors.ErrEntityExists
+	_, err = db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+		key, err = db.getNewKey(tx, account, JobsBucket)
+		if err != nil {
+			return err
 		}
 
+		newNameKey := datastore.NameKey(string(JobsBucket), key, parentKey)
+		newJob.Id = key
+
 		// insert new job
-		_, err = tx.Put(newKey, newJob)
+		_, err = tx.Put(newNameKey, newJob)
 		if err != nil {
 			return err
 		}
 
 		// for all formulas included in newJob make sure to add new job ID to all
 		for _, formulaID := range newJob.Formulas {
-			err := db.linkJobToFormula(tx, account, newJob.Id, formulaID)
+			err := db.linkJobToFormula(tx, account, key, formulaID)
 			if err != nil {
 				return err
 			}
@@ -402,9 +411,9 @@ func (db *googleDatastore) AddJob(account, key string, newJob *api.Job) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return key, err
 }
 
 func (db *googleDatastore) UpdateJob(account, key string, updatedJob *api.Job) error {

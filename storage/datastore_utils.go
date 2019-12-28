@@ -1,10 +1,14 @@
 package storage
 
 import (
+	"context"
+	"fmt"
+
 	"cloud.google.com/go/datastore"
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/toolkit/listutil"
 	"github.com/clintjedwards/toolkit/logger"
+	"github.com/clintjedwards/toolkit/random"
 )
 
 // linkFormulaToJob adds a formula's id to the formula list for a particular job
@@ -93,4 +97,38 @@ func (*googleDatastore) unlinkJobFromFormula(tx *datastore.Transaction, account,
 	}
 
 	return nil
+}
+
+// getNewKey generates and returns a key guranteed not to be in the datastore for a particular bucket
+func (db *googleDatastore) getNewKey(tx *datastore.Transaction, account string, bucket Bucket) (string, error) {
+
+	const retryLimit int = 3
+	var key string
+
+	parentKey := datastore.NameKey(string(bucket), account, nil)
+
+	tctx, cancel := context.WithTimeout(context.Background(), db.timeout)
+	defer cancel()
+
+	for i := 1; i <= retryLimit; i++ {
+		key = string(random.GenerateRandString(db.idLength))
+		potentialKey := datastore.NameKey(string(bucket), key, parentKey)
+
+		_, err := db.client.RunInTransaction(tctx, func(tx *datastore.Transaction) error {
+			err := tx.Get(potentialKey, &api.Formula{})
+			if err != datastore.ErrNoSuchEntity {
+				return err
+			}
+
+			return nil
+		})
+		if err != nil {
+			continue
+		} else {
+			return key, nil
+		}
+	}
+
+	// exceeded retries
+	return "", fmt.Errorf("exceeded maximum retries(%d) for key generation", retryLimit)
 }

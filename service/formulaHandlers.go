@@ -7,7 +7,6 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/toolkit/logger"
-	"github.com/clintjedwards/toolkit/random"
 	"github.com/clintjedwards/toolkit/tkerrors"
 
 	"google.golang.org/grpc/codes"
@@ -82,7 +81,6 @@ func (basecoat *API) CreateFormula(context context.Context, request *api.CreateF
 	}
 
 	newFormula := api.Formula{
-		Id:        string(random.GenerateRandString(basecoat.config.Backend.IDLength)),
 		Name:      request.Name,
 		Number:    request.Number,
 		Notes:     request.Notes,
@@ -97,11 +95,6 @@ func (basecoat *API) CreateFormula(context context.Context, request *api.CreateF
 		return &api.CreateFormulaResponse{}, status.Error(codes.FailedPrecondition, "name required")
 	}
 
-	// If the user has not entered a formula number just make it the ID
-	if newFormula.Number == "" {
-		newFormula.Number = newFormula.Id
-	}
-
 	for _, base := range newFormula.Bases {
 		if base.Name == "" {
 			return &api.CreateFormulaResponse{}, status.Error(codes.FailedPrecondition, "base name required")
@@ -114,7 +107,7 @@ func (basecoat *API) CreateFormula(context context.Context, request *api.CreateF
 		}
 	}
 
-	err := basecoat.storage.AddFormula(account, newFormula.Id, &newFormula)
+	formulaID, err := basecoat.storage.AddFormula(account, &newFormula)
 	if err != nil {
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateFormulaResponse{}, status.Error(codes.AlreadyExists, "could not save formula; formula already exists")
@@ -123,10 +116,18 @@ func (basecoat *API) CreateFormula(context context.Context, request *api.CreateF
 		return &api.CreateFormulaResponse{}, status.Error(codes.Internal, "could not save formula")
 	}
 
-	basecoat.search.UpdateFormulaIndex(account, newFormula)
+	formula, err := basecoat.storage.GetFormula(account, formulaID)
+	if err != nil {
+		if err == tkerrors.ErrEntityNotFound {
+			return &api.CreateFormulaResponse{}, status.Error(codes.NotFound, "could not retrieve formula after saving")
+		}
+		return &api.CreateFormulaResponse{}, status.Error(codes.Internal, "could not retrieve formula after saving")
+	}
 
-	logger.Log().Infow("formula created", "formula", newFormula)
-	return &api.CreateFormulaResponse{Id: newFormula.Id}, nil
+	basecoat.search.UpdateFormulaIndex(account, *formula)
+
+	logger.Log().Infow("formula created", "formula", *formula)
+	return &api.CreateFormulaResponse{Id: formula.Id}, nil
 }
 
 // UpdateFormula updates an already existing formula

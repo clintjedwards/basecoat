@@ -41,12 +41,12 @@ type Engine interface {
 	CreateUser(name string, user *api.User) error
 	GetAllFormulas(account string) (map[string]*api.Formula, error)
 	GetFormula(account, key string) (*api.Formula, error)
-	AddFormula(account, key string, formula *api.Formula) error
+	AddFormula(account string, formula *api.Formula) (key string, err error)
 	UpdateFormula(account, key string, formula *api.Formula) error
 	DeleteFormula(account, key string) error
 	GetAllJobs(account string) (map[string]*api.Job, error)
 	GetJob(account, key string) (*api.Job, error)
-	AddJob(account, key string, job *api.Job) error
+	AddJob(account string, job *api.Job) (key string, err error)
 	UpdateJob(account, key string, job *api.Job) error
 	DeleteJob(account, key string) error
 }

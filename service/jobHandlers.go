@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/clintjedwards/toolkit/logger"
-	"github.com/clintjedwards/toolkit/random"
 	"github.com/clintjedwards/toolkit/tkerrors"
 
 	"github.com/clintjedwards/basecoat/api"
@@ -73,7 +72,6 @@ func (basecoat *API) ListJobs(context context.Context, request *api.ListJobsRequ
 func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRequest) (*api.CreateJobResponse, error) {
 
 	newJob := api.Job{
-		Id:       string(random.GenerateRandString(basecoat.config.Backend.IDLength)),
 		Name:     request.Name,
 		Street:   request.Street,
 		Street2:  request.Street2,
@@ -96,7 +94,7 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 		return &api.CreateJobResponse{}, status.Error(codes.FailedPrecondition, "name required")
 	}
 
-	err := basecoat.storage.AddJob(account, newJob.Id, &newJob)
+	jobID, err := basecoat.storage.AddJob(account, &newJob)
 	if err != nil {
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateJobResponse{}, status.Error(codes.AlreadyExists, "could not save job; job already exists")
@@ -104,6 +102,8 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 		logger.Log().Errorw("could not save job", "error", err)
 		return &api.CreateJobResponse{}, status.Error(codes.Internal, "could not save job")
 	}
+
+	newJob.Id = jobID
 
 	basecoat.search.UpdateJobIndex(account, newJob)
 

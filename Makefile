@@ -54,6 +54,7 @@ install: build-prod
 	chmod +x /usr/local/bin/${APP_NAME}
 
 ## run: build application and run server; useful for dev
+run: export DEBUG=true
 run:
 	protoc --go_out=plugins=grpc:. api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto

@@ -7,10 +7,6 @@ import (
 	"testing"
 
 	"github.com/clintjedwards/basecoat/api"
-	"github.com/clintjedwards/basecoat/storage"
-
-	"github.com/clintjedwards/toolkit/password"
-	"github.com/clintjedwards/toolkit/tkerrors"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -34,32 +30,11 @@ func init() {
 
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	hash, err := password.HashPassword([]byte("test"))
-	if err != nil {
-		log.Fatalf("failed to hash password: %v", err)
-	}
-
-	storage, err := storage.InitStorage()
-	if err != nil {
-		log.Fatalf("could not connect to storage: %v", err)
-	}
-
-	err = storage.CreateUser("test", &api.User{
-		Name: "test",
-		Hash: string(hash),
-	})
-	if err != nil {
-		if err == tkerrors.ErrEntityExists {
-			log.Printf("could not create user: %v\n", err)
-			return
-		}
-		log.Fatalf("could not create user: %v", err)
-	}
 }
 
 func TestCreateAPIToken(t *testing.T) {
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -82,7 +57,7 @@ func TestCreateAPIToken(t *testing.T) {
 }
 
 func TestCreateJob(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -134,7 +109,7 @@ func TestCreateJob(t *testing.T) {
 }
 
 func TestUpdateJob(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -176,7 +151,7 @@ func TestUpdateJob(t *testing.T) {
 }
 
 func TestCreateFormula(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -234,7 +209,7 @@ func TestCreateFormula(t *testing.T) {
 }
 
 func TestUpdateFormula(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -288,7 +263,7 @@ func TestUpdateFormula(t *testing.T) {
 }
 
 func TestJobState(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -316,7 +291,7 @@ func TestJobState(t *testing.T) {
 }
 
 func TestDeleteJob(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -346,7 +321,7 @@ func TestDeleteJob(t *testing.T) {
 }
 
 func TestFormulaState(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}
@@ -371,7 +346,7 @@ func TestFormulaState(t *testing.T) {
 }
 
 func TestDeleteFormula(t *testing.T) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8081"), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
 		log.Fatalf("could not connect to basecoat: %v", err)
 	}

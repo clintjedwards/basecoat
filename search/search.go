@@ -34,24 +34,18 @@ func InitSearch() (*Search, error) {
 }
 
 // BuildIndex will query basecoat's database and populate the search index
-func (searchIndex *Search) BuildIndex() {
+func (searchIndex *Search) BuildIndex(store storage.Engine) {
 	// Log how long it took to build the index in prometheus
 	start := time.Now()
 
-	storage, err := storage.InitStorage()
-	if err != nil {
-		logger.Log().Fatalw("failed to initialize storage",
-			"error", err)
-	}
-
-	users, err := storage.GetAllUsers()
+	users, err := store.GetAllUsers()
 	if err != nil {
 		logger.Log().Fatalw("failed to query database for accounts",
 			"error", err)
 	}
 
 	for account := range users {
-		populateIndex(account, searchIndex)
+		populateIndex(account, searchIndex, store)
 	}
 
 	elapsed := time.Since(start)
@@ -122,16 +116,11 @@ func newAccountIndex(account string, searchIndex *Search) {
 }
 
 // populateIndex queries the database and loads the index for a specific account
-func populateIndex(account string, searchIndex *Search) {
-	storage, err := storage.InitStorage()
-	if err != nil {
-		logger.Log().Fatalw("failed to initialize storage", "error", err)
-	}
-
+func populateIndex(account string, searchIndex *Search, store storage.Engine) {
 	newAccountIndex(account, searchIndex)
 
 	// Index all formulas
-	formulas, err := storage.GetAllFormulas(account)
+	formulas, err := store.GetAllFormulas(account)
 	if err != nil {
 		logger.Log().Errorw("failed to query database for formulas",
 			"error", err,
@@ -143,7 +132,7 @@ func populateIndex(account string, searchIndex *Search) {
 	}
 
 	// Index all jobs
-	jobs, err := storage.GetAllJobs(account)
+	jobs, err := store.GetAllJobs(account)
 	if err != nil {
 		logger.Log().Errorw("failed to query database for jobs",
 			"error", err,

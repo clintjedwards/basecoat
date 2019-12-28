@@ -8,6 +8,7 @@ require (
 	github.com/blevesearch/blevex v0.0.0-20190916190636-152f0fe5c040 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.2 // indirect
 	github.com/blevesearch/segment v0.0.0-20160915185041-762005e7a34f // indirect
+	github.com/boltdb/bolt v1.3.1
 	github.com/clintjedwards/toolkit v0.0.0-20191224020756-a93e6eeb46b9
 	github.com/corpix/uarand v0.1.0 // indirect
 	github.com/couchbase/vellum v0.0.0-20190829182332-ef2e028c01fd // indirect
@@ -38,8 +39,6 @@ require (
 	github.com/prometheus/client_golang v1.3.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
 	github.com/rs/cors v1.7.0 // indirect
-	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
-	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect

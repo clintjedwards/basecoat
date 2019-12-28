@@ -20,7 +20,9 @@ type googleDatastore struct {
 	timeout  time.Duration
 }
 
-func (db *googleDatastore) Init(config *config.Config) error {
+func newGoogleDatastore(config *config.Config) (googleDatastore, error) {
+
+	db := googleDatastore{}
 
 	if config.Database.GoogleDatastore.EmulatorHost != "" {
 		os.Setenv("DATASTORE_EMULATOR_HOST", config.Database.GoogleDatastore.EmulatorHost)
@@ -30,18 +32,18 @@ func (db *googleDatastore) Init(config *config.Config) error {
 
 	client, err := datastore.NewClient(context.Background(), config.Database.GoogleDatastore.ProjectID)
 	if err != nil {
-		return err
+		return googleDatastore{}, err
 	}
 
 	db.client = client
 	db.timeout, err = time.ParseDuration(config.Database.GoogleDatastore.Timeout)
 	if err != nil {
-		return err
+		return googleDatastore{}, err
 	}
 
 	db.idLength = config.Database.IDLength
 
-	return nil
+	return db, nil
 }
 
 // CreateParentKeys creates the initial account string key in all buckets so that assets

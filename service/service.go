@@ -36,7 +36,7 @@ func NewBasecoatAPI(config *config.Config) *API {
 		logger.Log().Fatalw("failed to initialize search indexes", "error", err)
 	}
 
-	go searchIndex.BuildIndex()
+	go searchIndex.BuildIndex(storage)
 
 	basecoatAPI.config = config
 	basecoatAPI.storage = storage

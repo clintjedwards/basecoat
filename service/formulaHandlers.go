@@ -156,6 +156,7 @@ func (basecoat *API) UpdateFormula(context context.Context, request *api.UpdateF
 		Colorants: request.Colorants,
 	}
 
+	fmt.Println("hi")
 	err := basecoat.storage.UpdateFormula(account, request.Id, &updatedFormula)
 	if err != nil {
 		if err == tkerrors.ErrEntityNotFound {
@@ -164,6 +165,7 @@ func (basecoat *API) UpdateFormula(context context.Context, request *api.UpdateF
 		logger.Log().Errorw("could not update formula", "error", err)
 		return &api.UpdateFormulaResponse{}, status.Error(codes.Internal, "could not update formula")
 	}
+	fmt.Println("bye")
 
 	basecoat.search.UpdateFormulaIndex(account, updatedFormula)
 

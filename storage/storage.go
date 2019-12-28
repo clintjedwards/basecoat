@@ -31,11 +31,14 @@ const (
 	// a distributed key-value store
 	// https://cloud.google.com/datastore/docs/concepts/overview
 	EngineGoogleDatastore EngineType = "googleDatastore"
+
+	// EngineBoltDB represents a boltDB storage engine.
+	// A file based key-value store.(https://github.com/boltdb/bolt)
+	EngineBoltDB EngineType = "boltdb"
 )
 
 // Engine represents backend storage implementations where items can be persisted
 type Engine interface {
-	Init(config *config.Config) error
 	GetAllUsers() (map[string]*api.User, error)
 	GetUser(name string) (*api.User, error)
 	CreateUser(name string, user *api.User) error
@@ -63,13 +66,19 @@ func InitStorage() (Engine, error) {
 	switch engineType {
 	case EngineGoogleDatastore:
 
-		datastoreEngine := googleDatastore{}
-		err := datastoreEngine.Init(config)
+		datastoreEngine, err := newGoogleDatastore(config)
 		if err != nil {
 			return nil, err
 		}
 
 		return &datastoreEngine, nil
+	case EngineBoltDB:
+		boltDBEngine, err := newBoltDB(config)
+		if err != nil {
+			return nil, err
+		}
+
+		return &boltDBEngine, nil
 	default:
 		return nil, fmt.Errorf("storage backend not implemented: %s", engineType)
 	}

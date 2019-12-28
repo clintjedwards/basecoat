@@ -57,11 +57,11 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 		router.ServeHTTP(resp, req)
 	})
 
-	// gzip compression
-	modifiedHandler := handlers.CompressHandler(combinedHandler)
-
+	var modifiedHandler http.Handler
 	if config.Debug {
-		modifiedHandler = handlers.LoggingHandler(os.Stdout, modifiedHandler)
+		modifiedHandler = handlers.LoggingHandler(os.Stdout, combinedHandler)
+	} else {
+		modifiedHandler = combinedHandler
 	}
 
 	// certmagic allows us to auto renew tls certs. Useful in production not so useful in dev

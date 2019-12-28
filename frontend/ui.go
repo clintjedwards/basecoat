@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/shurcooL/httpgzip"
 )
 
 //Frontend represents an instance of the frontend application
@@ -44,7 +45,7 @@ func (ui *Frontend) RegisterUIRoutes(router *mux.Router) {
 	// We bake frontend files directly into the binary
 	// assets is an implementation of an http.filesystem created by
 	// github.com/shurcooL/vfsgen that points to the "public" folder
-	fileServerHandler := http.FileServer(assets)
+	fileServerHandler := httpgzip.FileServer(assets, httpgzip.FileServerOptions{})
 
 	file, err := assets.Open("index.html")
 	if err != nil {

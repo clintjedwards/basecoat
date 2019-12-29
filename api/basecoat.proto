@@ -39,23 +39,29 @@ message Base {
 message Job {
   string id = 1;
   string name = 2;
-  string street = 3;
-  string street2 = 4;
-  string city = 5;
-  string state = 6;
-  string zipcode = 7;
-  string notes = 8;
-  int64 created = 9;
-  int64 modified = 10;
+  Address address = 3;
+  string notes = 4;
+  int64 created = 5;
+  int64 modified = 6;
   // formula ids that have been made for this job
-  repeated string formulas = 11;
-  Contact contact = 12;
+  repeated string formulas = 7;
+  string contractor_id = 8;
 }
 
-// Contact is information about point of contact for a job
-message Contact {
-  string name = 1;
-  string info = 2;
+message Contractor {
+  string id = 1;
+  string company = 2;
+  string name = 3;
+  string email = 4;
+  string phone = 5;
+}
+
+message Address {
+  string street = 1;
+  string street2 = 2;
+  string city = 3;
+  string state = 4;
+  string zipcode = 5;
 }
 
 message User {
@@ -77,6 +83,16 @@ service Basecoat {
   rpc CreateFormula(CreateFormulaRequest) returns (CreateFormulaResponse);
   rpc UpdateFormula(UpdateFormulaRequest) returns (UpdateFormulaResponse);
   rpc DeleteFormula(DeleteFormulaRequest) returns (DeleteFormulaResponse);
+
+  // Contractor routes
+  rpc GetContractor(GetContractorRequest) returns (GetContractorResponse);
+  rpc ListContractors(ListContractorsRequest) returns (ListContractorsResponse);
+  rpc CreateContractor(CreateContractorRequest)
+      returns (CreateContractorResponse);
+  rpc UpdateContractor(UpdateContractorRequest)
+      returns (UpdateContractorResponse);
+  rpc DeleteContractor(DeleteContractorRequest)
+      returns (DeleteContractorResponse);
 
   // Job routes
   rpc GetJob(GetJobRequest) returns (GetJobResponse);
@@ -141,6 +157,32 @@ message UpdateFormulaResponse {}
 message DeleteFormulaRequest { string id = 1; }
 message DeleteFormulaResponse {}
 
+message GetContractorRequest { string id = 1; }
+message GetContractorResponse { Contractor contractor = 1; }
+
+message ListContractorsRequest {}
+message ListContractorsResponse { map<string, Contractor> contractors = 1; }
+
+message CreateContractorRequest {
+  string company = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+}
+message CreateContractorResponse { string id = 1; }
+
+message UpdateContractorRequest {
+  string id = 1;
+  string company = 2;
+  string name = 3;
+  string email = 4;
+  string phone = 5;
+}
+message UpdateContractorResponse {}
+
+message DeleteContractorRequest { string id = 1; }
+message DeleteContractorResponse {}
+
 message GetJobRequest { string id = 1; }
 message GetJobResponse { Job job = 1; }
 
@@ -148,35 +190,27 @@ message SearchJobsRequest { string term = 1; }
 
 message SearchJobsResponse { repeated string results = 1; }
 
-message ListJobsRequest { string search_filter = 1; }
+message ListJobsRequest {}
 message ListJobsResponse { map<string, Job> jobs = 1; }
 
 message CreateJobRequest {
   string name = 1;
-  string street = 2;
-  string street2 = 3;
-  string city = 4;
-  string state = 5;
-  string zipcode = 6;
-  string notes = 7;
+  Address address = 2;
+  string notes = 3;
   // formula ids that have been made for this job
-  repeated string formulas = 8;
-  Contact contact = 9;
+  repeated string formulas = 4;
+  string contractor_id = 5;
 }
 message CreateJobResponse { string id = 1; }
 
 message UpdateJobRequest {
   string id = 1;
   string name = 2;
-  string street = 3;
-  string street2 = 4;
-  string city = 5;
-  string state = 6;
-  string zipcode = 7;
-  string notes = 8;
+  Address address = 3;
+  string notes = 4;
   // ids of formulas
-  repeated string formulas = 9;
-  Contact contact = 10;
+  repeated string formulas = 5;
+  string contractor_id = 6;
 }
 message UpdateJobResponse {}
 

@@ -1,8 +1,0 @@
-version: "3"
-
-services:
-  basecoat_db:
-    image: google/cloud-sdk
-    command: gcloud beta emulators datastore start --project=test --host-port 0.0.0.0:8000
-    ports:
-      - "8000:8000"

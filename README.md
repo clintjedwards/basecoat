@@ -18,7 +18,6 @@ Basecoat is a CRUD formula indexing tool meant to record formulas for certain co
 - /service: Logic for backend GRPC api service
 - /storage: Storage interface for backend database functions
 - /tests: Testing code which runs against a live local server to verify api functionality is correct
-- /utils: Utility folder which encompasses functions that really don't belong anywhere else
 
 ## How to run locally
 
@@ -50,10 +49,6 @@ This tool will autogenerate certs for your and add them as trusted
 
 `go get -u github.com/FiloSottile/mkcert`
 `$(go env GOBIN)/mkcert`
-
-### Bring up database
-
-from the 'docker' directory: `docker-compose up`
 
 ### Start application
 

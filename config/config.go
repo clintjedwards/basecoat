@@ -6,30 +6,8 @@ import (
 
 // DatabaseConfig refers to database connection settings
 type DatabaseConfig struct {
-	// The database engine used by the backend
-	// possible values are: googleDatastore, boltdb
-	Engine          string `envconfig:"database_engine" default:"boltdb"`
-	IDLength        int    `envconfig:"database_id_length" default:"5"` // the length of all randomly generated ids
-	GoogleDatastore *GoogleDatastoreConfig
-	Bolt            *BoltDBConfig
-}
-
-// GoogleDatastoreConfig represents google firebase datastore configuration
-// https://cloud.google.com/datastore/docs/concepts/overview
-type GoogleDatastoreConfig struct {
-	ProjectID string `envconfig:"database_google_datastore_project_id" default:"test"`
-	// Use local emulator as a test database
-	EmulatorHost string `envconfig:"database_google_datastore_emulator_host" default:"localhost:8000"`
-	// Timeout for RPC calls to the database. Will accept duration string as noted in
-	// https://golang.org/pkg/time/#ParseDuration
-	Timeout string `envconfig:"database_google_datastore_timeout" default:"10s"`
-}
-
-// BoltDBConfig represents a on-disk key/value store
-// https://github.com/boltdb/bolt
-type BoltDBConfig struct {
-	// file path for database file
-	Path string `envconfig:"database_bolt_path" default:"/tmp/basecoat.db"`
+	IDLength int    `envconfig:"database_id_length" default:"5"` // the length of all randomly generated ids
+	Path     string `envconfig:"database_path" default:"/tmp/basecoat.db"`
 }
 
 // Config refers to general application configuration

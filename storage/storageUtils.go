@@ -11,7 +11,7 @@ import (
 	go_proto "github.com/golang/protobuf/proto"
 )
 
-func (db *boltDB) getNewKey(bucket *bolt.Bucket) (string, error) {
+func (db *BoltDB) getNewKey(bucket *bolt.Bucket) (string, error) {
 
 	const retryLimit int = 3
 	var key string
@@ -31,7 +31,7 @@ func (db *boltDB) getNewKey(bucket *bolt.Bucket) (string, error) {
 	return "", fmt.Errorf("exceeded maximum retries(%d) for key generation", retryLimit)
 }
 
-func (db *boltDB) linkFormulaToJob(tx *bolt.Tx, account, formulaID, jobID string) error {
+func (db *BoltDB) linkFormulaToJob(tx *bolt.Tx, account, formulaID, jobID string) error {
 
 	var storedJob api.Job
 
@@ -63,7 +63,7 @@ func (db *boltDB) linkFormulaToJob(tx *bolt.Tx, account, formulaID, jobID string
 	return nil
 }
 
-func (db *boltDB) unlinkFormulaFromJob(tx *bolt.Tx, account, formulaID, jobID string) error {
+func (db *BoltDB) unlinkFormulaFromJob(tx *bolt.Tx, account, formulaID, jobID string) error {
 	var storedJob api.Job
 
 	accountBucket := tx.Bucket([]byte(account))
@@ -94,7 +94,7 @@ func (db *boltDB) unlinkFormulaFromJob(tx *bolt.Tx, account, formulaID, jobID st
 	return nil
 }
 
-func (db *boltDB) linkJobToFormula(tx *bolt.Tx, account, jobID, formulaID string) error {
+func (db *BoltDB) linkJobToFormula(tx *bolt.Tx, account, jobID, formulaID string) error {
 
 	var storedFormula api.Formula
 
@@ -126,7 +126,7 @@ func (db *boltDB) linkJobToFormula(tx *bolt.Tx, account, jobID, formulaID string
 	return nil
 }
 
-func (db *boltDB) unlinkJobFromFormula(tx *bolt.Tx, account, jobID, formulaID string) error {
+func (db *BoltDB) unlinkJobFromFormula(tx *bolt.Tx, account, jobID, formulaID string) error {
 	var storedFormula api.Formula
 
 	accountBucket := tx.Bucket([]byte(account))

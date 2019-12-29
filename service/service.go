@@ -17,7 +17,7 @@ import (
 
 // API represents a basecoat grpc backend service
 type API struct {
-	storage storage.Engine
+	storage *storage.BoltDB
 	config  *config.Config
 	search  *search.Search
 }
@@ -26,7 +26,7 @@ type API struct {
 func NewBasecoatAPI(config *config.Config) *API {
 	basecoatAPI := API{}
 
-	storage, err := storage.InitStorage()
+	storage, err := storage.InitStorage(config)
 	if err != nil {
 		logger.Log().Fatalw("failed to initialize storage", "error", err)
 	}

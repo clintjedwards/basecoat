@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/clintjedwards/basecoat/api"
+	"github.com/clintjedwards/basecoat/config"
 	"github.com/clintjedwards/basecoat/storage"
 	"github.com/clintjedwards/toolkit/password"
 
@@ -34,7 +35,12 @@ func runUsersCreateCmd(cmd *cobra.Command, args []string) {
 		log.Fatalf("failed to hash password: %v", err)
 	}
 
-	storage, err := storage.InitStorage()
+	config, err := config.FromEnv()
+	if err != nil {
+		log.Fatalf("failed to get config: %v", err)
+	}
+
+	storage, err := storage.InitStorage(config)
 	if err != nil {
 		log.Fatalf("could not connect to storage: %v", err)
 	}

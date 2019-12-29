@@ -2,8 +2,9 @@ package storage
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/clintjedwards/basecoat/api"
+	"github.com/boltdb/bolt"
 	"github.com/clintjedwards/basecoat/config"
 )
 
@@ -18,68 +19,47 @@ const (
 
 	// JobsBucket represents the container in which jobs are kept in the database
 	JobsBucket Bucket = "jobs"
-
-	// UsersBucket represents the container in which users are managed
-	UsersBucket Bucket = "users"
 )
 
-// EngineType type represents the different possible storage engines available
-type EngineType string
-
-const (
-	// EngineGoogleDatastore represents a google datastore
-	// a distributed key-value store
-	// https://cloud.google.com/datastore/docs/concepts/overview
-	EngineGoogleDatastore EngineType = "googleDatastore"
-
-	// EngineBoltDB represents a boltDB storage engine.
-	// A file based key-value store.(https://github.com/boltdb/bolt)
-	EngineBoltDB EngineType = "boltdb"
-)
-
-// Engine represents backend storage implementations where items can be persisted
-type Engine interface {
-	GetAllUsers() (map[string]*api.User, error)
-	GetUser(name string) (*api.User, error)
-	CreateUser(name string, user *api.User) error
-	GetAllFormulas(account string) (map[string]*api.Formula, error)
-	GetFormula(account, key string) (*api.Formula, error)
-	AddFormula(account string, formula *api.Formula) (key string, err error)
-	UpdateFormula(account, key string, formula *api.Formula) error
-	DeleteFormula(account, key string) error
-	GetAllJobs(account string) (map[string]*api.Job, error)
-	GetJob(account, key string) (*api.Job, error)
-	AddJob(account string, job *api.Job) (key string, err error)
-	UpdateJob(account, key string, job *api.Job) error
-	DeleteJob(account, key string) error
+// BoltDB is a representation of the bolt datastore
+type BoltDB struct {
+	idLength int // length of generated IDs
+	store    *bolt.DB
 }
 
-// InitStorage creates a storage object with the appropriate engine
-func InitStorage() (Engine, error) {
-	config, err := config.FromEnv()
+// Create a new boltdb from settings in config file
+func newBoltDB(config *config.Config) (BoltDB, error) {
+	db := BoltDB{}
+
+	store, err := bolt.Open(config.Database.Path, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		return BoltDB{}, err
+	}
+
+	db.store = store
+	db.idLength = config.Database.IDLength
+
+	return db, nil
+}
+
+// createBuckets creates buckets inside of another bucket
+func (db *BoltDB) createBuckets(tx *bolt.Tx, root *bolt.Bucket, buckets ...Bucket) error {
+
+	for _, bucket := range buckets {
+		_, err := root.CreateBucketIfNotExists([]byte(bucket))
+		if err != nil {
+			return fmt.Errorf("could not create bucket: %s; %v", bucket, err)
+		}
+	}
+	return nil
+}
+
+// InitStorage creates a storage object
+func InitStorage(config *config.Config) (*BoltDB, error) {
+	boltDBEngine, err := newBoltDB(config)
 	if err != nil {
 		return nil, err
 	}
 
-	engineType := EngineType(config.Database.Engine)
-
-	switch engineType {
-	case EngineGoogleDatastore:
-
-		datastoreEngine, err := newGoogleDatastore(config)
-		if err != nil {
-			return nil, err
-		}
-
-		return &datastoreEngine, nil
-	case EngineBoltDB:
-		boltDBEngine, err := newBoltDB(config)
-		if err != nil {
-			return nil, err
-		}
-
-		return &boltDBEngine, nil
-	default:
-		return nil, fmt.Errorf("storage backend not implemented: %s", engineType)
-	}
+	return &boltDBEngine, nil
 }

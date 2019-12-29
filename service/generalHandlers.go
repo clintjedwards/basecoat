@@ -20,7 +20,6 @@ func (basecoat *API) GetSystemInfo(context context.Context, request *api.GetSyst
 	return &api.GetSystemInfoResponse{
 		BuildTime:       info.Epoch,
 		Commit:          info.Hash,
-		DatabaseEngine:  basecoat.config.Database.Engine,
 		DebugEnabled:    basecoat.config.Debug,
 		FrontendEnabled: basecoat.config.Frontend.Enable,
 		Semver:          info.Semver,

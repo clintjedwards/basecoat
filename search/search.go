@@ -34,7 +34,7 @@ func InitSearch() (*Search, error) {
 }
 
 // BuildIndex will query basecoat's database and populate the search index
-func (searchIndex *Search) BuildIndex(store storage.Engine) {
+func (searchIndex *Search) BuildIndex(store *storage.BoltDB) {
 	// Log how long it took to build the index in prometheus
 	start := time.Now()
 
@@ -116,7 +116,7 @@ func newAccountIndex(account string, searchIndex *Search) {
 }
 
 // populateIndex queries the database and loads the index for a specific account
-func populateIndex(account string, searchIndex *Search, store storage.Engine) {
+func populateIndex(account string, searchIndex *Search, store *storage.BoltDB) {
 	newAccountIndex(account, searchIndex)
 
 	// Index all formulas

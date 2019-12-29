@@ -37,7 +37,6 @@ interface jobMap {
 interface systemInfo {
   build_time: string;
   commit: string;
-  database_engine: string;
   debug_enabled: boolean;
   frontend_enabled: boolean;
   semver: string;
@@ -454,7 +453,6 @@ class BasecoatClientWrapper {
         let systemInfo: systemInfo = {
           build_time: response.getBuildTime(),
           commit: response.getCommit(),
-          database_engine: response.getDatabaseEngine(),
           debug_enabled: response.getDebugEnabled(),
           frontend_enabled: response.getFrontendEnabled(),
           semver: response.getSemver()

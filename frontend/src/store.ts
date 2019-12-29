@@ -24,7 +24,6 @@ interface colorantTypeMap {
 interface systemInfo {
   build_time: string;
   commit: string;
-  database_engine: string;
   debug_enabled: boolean;
   frontend_enabled: boolean;
   semver: string;
@@ -56,7 +55,6 @@ const state: RootState = {
   appInfo: {
     build_time: "",
     commit: "",
-    database_engine: "",
     debug_enabled: true,
     frontend_enabled: false,
     semver: ""

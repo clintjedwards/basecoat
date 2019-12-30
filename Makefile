@@ -15,7 +15,7 @@ backup:
 
 ## build-prod: run tests and compile full app in production mode
 build-prod:
-	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
 	npm run --prefix ./frontend build:production
@@ -24,14 +24,14 @@ build-prod:
 
 ## build-backend: build backend without frontend assets
 build-backend:
-	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	go mod tidy
 	go generate
 	go build -ldflags $(GO_LDFLAGS) -o $(BUILD_PATH)
 
 ## build-dev: build application in dev mode
 build-dev:
-	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
 	npm run --prefix ./frontend build:development
@@ -40,7 +40,7 @@ build-dev:
 
 ## build-protos: build required protobuf files
 build-protos:
-	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 
 ## help: prints this help message
@@ -56,7 +56,7 @@ install: build-prod
 ## run: build application and run server; useful for dev
 run: export DEBUG=true
 run:
-	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
 	go mod tidy
 	npm run --prefix ./frontend build:development
@@ -65,6 +65,6 @@ run:
 
 ## run-backend: build backend only and run server; useful for dev
 run-backend:
-	protoc --go_out=plugins=grpc:. api/*.proto
+	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	go mod tidy
 	go build -ldflags $(GO_LDFLAGS) -o /tmp/${APP_NAME} && /tmp/${APP_NAME} server

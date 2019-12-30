@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package api;
+
+message Formula {
+  // Unique ID for formula
+  string id = 1;
+  // Formula color name
+  string name = 2;
+  // Used to identify formulas in other systems
+  string number = 3;
+  string notes = 4;
+  // Time created in epoch
+  int64 created = 5;
+  // Time modified in epoch
+  int64 modified = 6;
+  // List of jobs ids that this formula was used for
+  repeated string jobs = 7;
+  repeated Base bases = 8;
+  repeated Colorant colorants = 9;
+}
+
+// Colorants are the different colors included in a base so that a color
+// can be created
+message Colorant {
+  // type defines which manufacturer the colorant was made by
+  string type = 1;
+  string name = 2;
+  string amount = 3;
+}
+
+message Base {
+  string type = 1;
+  string name = 2;
+  string amount = 3;
+}
+
+// Jobs are places where a formula might have been sent
+message Job {
+  string id = 1;
+  string name = 2;
+  string street = 3;
+  string street2 = 4;
+  string city = 5;
+  string state = 6;
+  string zipcode = 7;
+  string notes = 8;
+  int64 created = 9;
+  int64 modified = 10;
+  // formula ids that have been made for this job
+  repeated string formulas = 11;
+  string contractor_id = 12;
+}
+
+message Contractor {
+  string id = 1;
+  string company = 2;
+  string email = 3;
+  string phone = 4;
+  string contact = 5;
+}
+
+message User {
+  string name = 1;
+  string hash = 2;
+}

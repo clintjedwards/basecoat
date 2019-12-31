@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/clintjedwards/basecoat/api"
+	"github.com/clintjedwards/basecoat/config"
 	"github.com/clintjedwards/basecoat/storage"
 	"github.com/clintjedwards/toolkit/password"
 	"github.com/clintjedwards/toolkit/tkerrors"
@@ -43,7 +44,12 @@ func init() {
 		log.Fatalf("failed to hash password: %v", err)
 	}
 
-	storage, err := storage.InitStorage()
+	config, err := config.FromEnv()
+	if err != nil {
+		log.Fatal("could not get config: %v", err)
+	}
+
+	storage, err := storage.NewBoltDB(config.Database.Path, config.Database.IDLength)
 	if err != nil {
 		log.Fatalf("could not connect to storage: %v", err)
 	}

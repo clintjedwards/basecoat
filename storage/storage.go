@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/clintjedwards/basecoat/config"
 )
 
 // Bucket represents the name of a section of key/value pairs
@@ -14,11 +13,11 @@ import (
 type Bucket string
 
 const (
-	// FormulasBucket represents the container in which formulas are kept in the database
-	FormulasBucket Bucket = "formulas"
+	// formulasBucket represents the container in which formulas are kept in the database
+	formulasBucket Bucket = "formulas"
 
-	// JobsBucket represents the container in which jobs are kept in the database
-	JobsBucket Bucket = "jobs"
+	// contractorsBucket represents the container in which jobs are kept in the database
+	contractorsBucket Bucket = "contractors"
 )
 
 // BoltDB is a representation of the bolt datastore
@@ -27,23 +26,23 @@ type BoltDB struct {
 	store    *bolt.DB
 }
 
-// Create a new boltdb from settings in config file
-func newBoltDB(config *config.Config) (BoltDB, error) {
+// NewBoltDB creates a new Boltdb from settings in config file
+func NewBoltDB(path string, idlength int) (BoltDB, error) {
 	db := BoltDB{}
 
-	store, err := bolt.Open(config.Database.Path, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	store, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return BoltDB{}, err
 	}
 
 	db.store = store
-	db.idLength = config.Database.IDLength
+	db.idLength = idlength
 
 	return db, nil
 }
 
 // createBuckets creates buckets inside of another bucket
-func (db *BoltDB) createBuckets(tx *bolt.Tx, root *bolt.Bucket, buckets ...Bucket) error {
+func (db *BoltDB) createBuckets(root *bolt.Bucket, buckets ...Bucket) error {
 
 	for _, bucket := range buckets {
 		_, err := root.CreateBucketIfNotExists([]byte(bucket))
@@ -52,14 +51,4 @@ func (db *BoltDB) createBuckets(tx *bolt.Tx, root *bolt.Bucket, buckets ...Bucke
 		}
 	}
 	return nil
-}
-
-// InitStorage creates a storage object
-func InitStorage(config *config.Config) (*BoltDB, error) {
-	boltDBEngine, err := newBoltDB(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return &boltDBEngine, nil
 }

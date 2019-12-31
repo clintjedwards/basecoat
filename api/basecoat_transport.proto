@@ -4,8 +4,9 @@ package api;
 
 import "basecoat_message.proto";
 
+// Authentication
 message CreateAPITokenRequest {
-  string user = 1;
+  string id = 1;
   string password = 2;
   // duration of API key in seconds
   int64 duration = 3;
@@ -13,6 +14,40 @@ message CreateAPITokenRequest {
 
 message CreateAPITokenResponse { string key = 1; }
 
+// Account transport messages
+message GetAccountRequest { string id = 1; }
+message GetAccountResponse { Account account = 1; }
+message ListAccountsRequest {}
+message ListAccountsResponse { map<string, Account> accounts = 1; }
+message CreateAccountRequest {
+  string id = 1;
+  string password = 2;
+}
+message CreateAccountResponse {}
+
+message GetContractorRequest { string id = 1; }
+message GetContractorResponse { Contractor Contractor = 1; }
+message ListContractorsRequest {}
+message ListContractorsResponse { map<string, Contractor> contractors = 1; }
+message CreateContractorRequest {
+  string company = 1;
+  string email = 2;
+  string phone = 3;
+  string contact = 4;
+  repeated Job jobs = 5;
+}
+message CreateContractorResponse { Contractor contractor = 1; }
+message UpdateContractorRequest {
+  string id = 1;
+  string company = 2;
+  string email = 3;
+  string phone = 4;
+  string contact = 5;
+  repeated Job jobs = 6;
+}
+message UpdateContractorResponse { Contractor Contractor = 1; }
+
+// System transport messages
 message GetSystemInfoRequest {}
 message GetSystemInfoResponse {
   string build_time = 1;
@@ -21,95 +56,3 @@ message GetSystemInfoResponse {
   bool frontend_enabled = 4;
   string semver = 5;
 }
-
-message GetFormulaRequest { string id = 1; }
-message GetFormulaResponse { Formula formula = 1; }
-
-message SearchFormulasRequest { string term = 1; }
-
-message SearchFormulasResponse { repeated string results = 1; }
-
-message ListFormulasRequest {}
-
-message ListFormulasResponse { map<string, Formula> formulas = 1; }
-
-message CreateFormulaRequest {
-  string name = 1;
-  string number = 2;
-  string notes = 3;
-  repeated string jobs = 4;
-  repeated Base bases = 5;
-  repeated Colorant colorants = 6;
-}
-message CreateFormulaResponse { string id = 1; }
-
-message UpdateFormulaRequest {
-  string id = 1;
-  string name = 2;
-  string number = 3;
-  string notes = 4;
-  repeated string jobs = 5;
-  repeated Base bases = 6;
-  repeated Colorant colorants = 7;
-}
-message UpdateFormulaResponse {}
-
-message DeleteFormulaRequest { string id = 1; }
-message DeleteFormulaResponse {}
-
-message GetJobRequest { string id = 1; }
-message GetJobResponse { Job job = 1; }
-
-message SearchJobsRequest { string term = 1; }
-
-message SearchJobsResponse { repeated string results = 1; }
-
-message ListJobsRequest {}
-message ListJobsResponse { map<string, Job> jobs = 1; }
-
-message CreateJobRequest {
-  string name = 1;
-  string street = 2;
-  string street2 = 3;
-  string city = 4;
-  string state = 5;
-  string zipcode = 6;
-  string notes = 7;
-  string contractor_id = 8;
-  // formula ids that have been made for this job
-  repeated string formulas = 9;
-}
-message CreateJobResponse { string id = 1; }
-
-message UpdateJobRequest {
-  string id = 1;
-  string name = 2;
-  string street = 3;
-  string street2 = 4;
-  string city = 5;
-  string state = 6;
-  string zipcode = 7;
-  string notes = 8;
-  string contractor_id = 9;
-  // ids of formulas
-  repeated string formulas = 10;
-}
-message UpdateJobResponse {}
-
-message DeleteJobRequest { string id = 1; }
-message DeleteJobResponse {}
-
-message GetContractorRequest { string id = 1; }
-message GetContractorResponse { Contractor Contractor = 1; }
-
-message ListContractorsRequest {}
-message ListContractorsResponse { map<string, Contractor> Contractors = 1; }
-
-message CreateContractorRequest {}
-message CreateContractorResponse { string id = 1; }
-
-message UpdateContractorRequest {}
-message UpdateContractorResponse {}
-
-message DeleteContractorRequest { string id = 1; }
-message DeleteContractorResponse {}

@@ -1,206 +1,206 @@
 // Package search defines objects that are used to enable search functions within basecoat
 package search
 
-import (
-	"fmt"
-	"strings"
-	"time"
+// import (
+// 	"fmt"
+// 	"strings"
+// 	"time"
 
-	"github.com/blevesearch/bleve"
-	"github.com/clintjedwards/basecoat/api"
-	"github.com/clintjedwards/basecoat/storage"
+// 	"github.com/blevesearch/bleve"
+// 	"github.com/clintjedwards/basecoat/api"
+// 	"github.com/clintjedwards/basecoat/storage"
 
-	"github.com/clintjedwards/toolkit/logger"
-)
+// 	"github.com/clintjedwards/toolkit/logger"
+// )
 
-// searchSyntax is a wrapper for all search terms to improve fuzzy searching
-// We use the wildcard query type and then wrap user search terms with *
-// meaning search for 0 or more characters
-const searchSyntax string = "*%s*"
+// // searchSyntax is a wrapper for all search terms to improve fuzzy searching
+// // We use the wildcard query type and then wrap user search terms with *
+// // meaning search for 0 or more characters
+// const searchSyntax string = "*%s*"
 
-// Search represents a index that can be used to look up basecoat items
-type Search struct {
-	formulaIndex map[string]bleve.Index
-	jobIndex     map[string]bleve.Index
-}
+// // Search represents a index that can be used to look up basecoat items
+// type Search struct {
+// 	formulaIndex map[string]bleve.Index
+// 	//jobIndex     map[string]bleve.Index
+// }
 
-// InitSearch creates a search index object which can then be queried for search results
-func InitSearch() (*Search, error) {
+// // InitSearch creates a search index object which can then be queried for search results
+// func InitSearch() (*Search, error) {
 
-	return &Search{
-		formulaIndex: map[string]bleve.Index{},
-		jobIndex:     map[string]bleve.Index{},
-	}, nil
-}
+// 	return &Search{
+// 		formulaIndex: map[string]bleve.Index{},
+// 		//jobIndex:     map[string]bleve.Index{},
+// 	}, nil
+// }
 
-// BuildIndex will query basecoat's database and populate the search index
-func (searchIndex *Search) BuildIndex(store *storage.BoltDB) {
-	// Log how long it took to build the index in prometheus
-	start := time.Now()
+// // BuildIndex will query basecoat's database and populate the search index
+// func (searchIndex *Search) BuildIndex(store storage.BoltDB) {
+// 	// Log how long it took to build the index in prometheus
+// 	start := time.Now()
 
-	users, err := store.GetAllUsers()
-	if err != nil {
-		logger.Log().Fatalw("failed to query database for accounts",
-			"error", err)
-	}
+// 	users, err := store.GetAllUsers()
+// 	if err != nil {
+// 		logger.Log().Fatalw("failed to query database for accounts",
+// 			"error", err)
+// 	}
 
-	for account := range users {
-		populateIndex(account, searchIndex, store)
-	}
+// 	for account := range users {
+// 		populateIndex(account, searchIndex, store)
+// 	}
 
-	elapsed := time.Since(start)
-	logger.Log().Infow("compiled index", "time", elapsed)
-	return
-}
+// 	elapsed := time.Since(start)
+// 	logger.Log().Infow("compiled index", "time", elapsed)
+// 	return
+// }
 
-// UpdateFormulaIndex updates an already loaded formula index
-func (searchIndex *Search) UpdateFormulaIndex(account string, formula api.Formula) {
-	if _, ok := searchIndex.formulaIndex[account]; !ok {
-		searchIndex.formulaIndex[account] = createNewIndex()
-	}
-	index := searchIndex.formulaIndex[account]
-	index.Index(formula.Id, formula)
-	return
-}
+// // UpdateFormulaIndex updates an already loaded formula index
+// func (searchIndex *Search) UpdateFormulaIndex(account string, formula api.Formula) {
+// 	if _, ok := searchIndex.formulaIndex[account]; !ok {
+// 		searchIndex.formulaIndex[account] = createNewIndex()
+// 	}
+// 	index := searchIndex.formulaIndex[account]
+// 	index.Index(formula.Id, formula)
+// 	return
+// }
 
-// UpdateJobIndex updates an already loaded job index
-func (searchIndex *Search) UpdateJobIndex(account string, job api.Job) {
-	if _, ok := searchIndex.jobIndex[account]; !ok {
-		searchIndex.jobIndex[account] = createNewIndex()
-	}
-	index := searchIndex.jobIndex[account]
-	index.Index(job.Id, job)
-	return
-}
+// // UpdateJobIndex updates an already loaded job index
+// // func (searchIndex *Search) UpdateJobIndex(account string, job api.Job) {
+// // 	if _, ok := searchIndex.jobIndex[account]; !ok {
+// // 		searchIndex.jobIndex[account] = createNewIndex()
+// // 	}
+// // 	index := searchIndex.jobIndex[account]
+// // 	index.Index(job.Id, job)
+// // 	return
+// // }
 
-// DeleteFormulaIndex updates an already loaded formula index
-func (searchIndex *Search) DeleteFormulaIndex(account string, formulaID string) {
-	index := searchIndex.formulaIndex[account]
-	index.Index(formulaID, nil)
-	return
-}
+// // DeleteFormulaIndex updates an already loaded formula index
+// func (searchIndex *Search) DeleteFormulaIndex(account string, formulaID string) {
+// 	index := searchIndex.formulaIndex[account]
+// 	index.Index(formulaID, nil)
+// 	return
+// }
 
-// DeleteJobIndex updates an already loaded job index
-func (searchIndex *Search) DeleteJobIndex(account string, jobID string) {
-	index := searchIndex.jobIndex[account]
-	index.Index(jobID, nil)
-	return
-}
+// // DeleteJobIndex updates an already loaded job index
+// // func (searchIndex *Search) DeleteJobIndex(account string, jobID string) {
+// // 	index := searchIndex.jobIndex[account]
+// // 	index.Index(jobID, nil)
+// // 	return
+// // }
 
-// createNewIndex creates a new empty bleve index
-func createNewIndex() bleve.Index {
-	indexMapping := bleve.NewIndexMapping()
-	index, err := bleve.NewMemOnly(indexMapping)
-	if err != nil {
-		logger.Log().Errorw("failed to create search index", "error", err)
-		return nil
-	}
+// // createNewIndex creates a new empty bleve index
+// func createNewIndex() bleve.Index {
+// 	indexMapping := bleve.NewIndexMapping()
+// 	index, err := bleve.NewMemOnly(indexMapping)
+// 	if err != nil {
+// 		logger.Log().Errorw("failed to create search index", "error", err)
+// 		return nil
+// 	}
 
-	return index
-}
+// 	return index
+// }
 
-// newAccountIndex populates a new account with blank indexes;
-// will only create if index has not been created yet
-func newAccountIndex(account string, searchIndex *Search) {
+// // newAccountIndex populates a new account with blank indexes;
+// // will only create if index has not been created yet
+// func newAccountIndex(account string, searchIndex *Search) {
 
-	formulaIndex := createNewIndex()
-	jobIndex := createNewIndex()
+// 	formulaIndex := createNewIndex()
+// 	//jobIndex := createNewIndex()
 
-	if _, ok := searchIndex.formulaIndex[account]; !ok {
-		searchIndex.formulaIndex[account] = formulaIndex
-	}
+// 	if _, ok := searchIndex.formulaIndex[account]; !ok {
+// 		searchIndex.formulaIndex[account] = formulaIndex
+// 	}
 
-	if _, ok := searchIndex.jobIndex[account]; !ok {
-		searchIndex.jobIndex[account] = jobIndex
-	}
-}
+// 	// if _, ok := searchIndex.jobIndex[account]; !ok {
+// 	// 	searchIndex.jobIndex[account] = jobIndex
+// 	// }
+// }
 
-// populateIndex queries the database and loads the index for a specific account
-func populateIndex(account string, searchIndex *Search, store *storage.BoltDB) {
-	newAccountIndex(account, searchIndex)
+// // populateIndex queries the database and loads the index for a specific account
+// func populateIndex(account string, searchIndex *Search, store storage.BoltDB) {
+// 	newAccountIndex(account, searchIndex)
 
-	// Index all formulas
-	formulas, err := store.GetAllFormulas(account)
-	if err != nil {
-		logger.Log().Errorw("failed to query database for formulas",
-			"error", err,
-			"account", account)
-	}
+// 	// Index all formulas
+// 	formulas, err := store.GetAllFormulas(account)
+// 	if err != nil {
+// 		logger.Log().Errorw("failed to query database for formulas",
+// 			"error", err,
+// 			"account", account)
+// 	}
 
-	for _, formula := range formulas {
-		searchIndex.formulaIndex[account].Index(formula.Id, &formula)
-	}
+// 	for _, formula := range formulas {
+// 		searchIndex.formulaIndex[account].Index(formula.Id, &formula)
+// 	}
 
-	// Index all jobs
-	jobs, err := store.GetAllJobs(account)
-	if err != nil {
-		logger.Log().Errorw("failed to query database for jobs",
-			"error", err,
-			"account", account)
-	}
+// 	// // Index all jobs
+// 	// jobs, err := store.GetAllJobs(account)
+// 	// if err != nil {
+// 	// 	logger.Log().Errorw("failed to query database for jobs",
+// 	// 		"error", err,
+// 	// 		"account", account)
+// 	// }
 
-	for _, job := range jobs {
-		searchIndex.jobIndex[account].Index(job.Id, &job)
-	}
+// 	// for _, job := range jobs {
+// 	// 	searchIndex.jobIndex[account].Index(job.Id, &job)
+// 	// }
 
-	return
-}
+// 	return
+// }
 
-// SearchFormulas searches the index for matching terms and then returns formulas which might match
-func (searchIndex *Search) SearchFormulas(account, searchPhrase string) ([]string, error) {
-	if index, ok := searchIndex.formulaIndex[account]; ok {
+// // SearchFormulas searches the index for matching terms and then returns formulas which might match
+// func (searchIndex *Search) SearchFormulas(account, searchPhrase string) ([]string, error) {
+// 	if index, ok := searchIndex.formulaIndex[account]; ok {
 
-		formulaHits, err := queryIndex(index, strings.ToLower(searchPhrase))
-		if err != nil {
-			return nil, err
-		}
+// 		formulaHits, err := queryIndex(index, strings.ToLower(searchPhrase))
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		return formulaHits, nil
-	}
+// 		return formulaHits, nil
+// 	}
 
-	return nil, fmt.Errorf("could not find account: %s", account)
-}
+// 	return nil, fmt.Errorf("could not find account: %s", account)
+// }
 
-// SearchJobs searches the index for matching terms and then returns jobs which might match
-func (searchIndex *Search) SearchJobs(account, searchPhrase string) ([]string, error) {
-	if index, ok := searchIndex.jobIndex[account]; ok {
+// // SearchJobs searches the index for matching terms and then returns jobs which might match
+// // func (searchIndex *Search) SearchJobs(account, searchPhrase string) ([]string, error) {
+// // 	if index, ok := searchIndex.jobIndex[account]; ok {
 
-		jobHits, err := queryIndex(index, strings.ToLower(searchPhrase))
-		if err != nil {
-			return nil, err
-		}
+// // 		jobHits, err := queryIndex(index, strings.ToLower(searchPhrase))
+// // 		if err != nil {
+// // 			return nil, err
+// // 		}
 
-		return jobHits, err
-	}
+// // 		return jobHits, err
+// // 	}
 
-	return nil, fmt.Errorf("could not find account: %s", account)
-}
+// // 	return nil, fmt.Errorf("could not find account: %s", account)
+// // }
 
-// queryIndex runs the actual search query against the index.
-// It uses the boolean query which is a type of query builder
-// The search phrase given is separated into separate search terms, made into a wildcard query
-// and then passed to the boolean query. The boolean query checks that all terms are found in any hits
-// it returns.
-// Example: "hello world" is searched as .*hello.* .*world.* and only when both are present in a document
-// will it be present in the results
-func queryIndex(index bleve.Index, searchPhrase string) ([]string, error) {
-	queryBuilder := bleve.NewBooleanQuery()
+// // queryIndex runs the actual search query against the index.
+// // It uses the boolean query which is a type of query builder
+// // The search phrase given is separated into separate search terms, made into a wildcard query
+// // and then passed to the boolean query. The boolean query checks that all terms are found in any hits
+// // it returns.
+// // Example: "hello world" is searched as .*hello.* .*world.* and only when both are present in a document
+// // will it be present in the results
+// func queryIndex(index bleve.Index, searchPhrase string) ([]string, error) {
+// 	queryBuilder := bleve.NewBooleanQuery()
 
-	for _, term := range strings.Split(searchPhrase, " ") {
-		query := bleve.NewWildcardQuery(fmt.Sprintf(searchSyntax, term))
-		queryBuilder.AddMust(query)
-	}
+// 	for _, term := range strings.Split(searchPhrase, " ") {
+// 		query := bleve.NewWildcardQuery(fmt.Sprintf(searchSyntax, term))
+// 		queryBuilder.AddMust(query)
+// 	}
 
-	searchRequest := bleve.NewSearchRequest(queryBuilder)
-	searchResult, err := index.Search(searchRequest)
-	if err != nil {
-		return nil, err
-	}
+// 	searchRequest := bleve.NewSearchRequest(queryBuilder)
+// 	searchResult, err := index.Search(searchRequest)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	var matchingIDs []string
-	for _, result := range searchResult.Hits {
-		matchingIDs = append(matchingIDs, result.ID)
-	}
+// 	var matchingIDs []string
+// 	for _, result := range searchResult.Hits {
+// 		matchingIDs = append(matchingIDs, result.ID)
+// 	}
 
-	return matchingIDs, nil
-}
+// 	return matchingIDs, nil
+// }

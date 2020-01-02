@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/clintjedwards/toolkit/logger"
 	"github.com/clintjedwards/toolkit/tkerrors"
 
 	"github.com/clintjedwards/basecoat/api"
@@ -14,14 +13,14 @@ import (
 )
 
 // GetJob returns a single job by key
-func (basecoat *API) GetJob(context context.Context, request *api.GetJobRequest) (*api.GetJobResponse, error) {
+func (bc *API) GetJob(context context.Context, request *api.GetJobRequest) (*api.GetJobResponse, error) {
 
 	account, present := getAccountFromContext(context)
 	if !present {
 		return &api.GetJobResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
 
-	job, err := basecoat.storage.GetJob(account, request.Id)
+	job, err := bc.storage.GetJob(account, request.Id)
 	if err != nil {
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.GetJobResponse{}, status.Error(codes.NotFound, "job requested not found")
@@ -33,7 +32,7 @@ func (basecoat *API) GetJob(context context.Context, request *api.GetJobRequest)
 }
 
 // SearchJobs takes in a search term and returns jobs that might match
-func (basecoat *API) SearchJobs(context context.Context, request *api.SearchJobsRequest) (*api.SearchJobsResponse, error) {
+func (bc *API) SearchJobs(context context.Context, request *api.SearchJobsRequest) (*api.SearchJobsResponse, error) {
 
 	account, present := getAccountFromContext(context)
 	if !present {
@@ -44,7 +43,7 @@ func (basecoat *API) SearchJobs(context context.Context, request *api.SearchJobs
 		return &api.SearchJobsResponse{}, status.Error(codes.FailedPrecondition, "search term required")
 	}
 
-	searchResults, err := basecoat.search.SearchJobs(account, request.Term)
+	searchResults, err := bc.search.SearchJobs(account, request.Term)
 	if err != nil {
 		return &api.SearchJobsResponse{}, status.Error(codes.Internal, fmt.Sprintf("a search error occurred: %v", err))
 	}
@@ -53,14 +52,14 @@ func (basecoat *API) SearchJobs(context context.Context, request *api.SearchJobs
 }
 
 // ListJobs returns a list of all jobs on basecoat service
-func (basecoat *API) ListJobs(context context.Context, request *api.ListJobsRequest) (*api.ListJobsResponse, error) {
+func (bc *API) ListJobs(context context.Context, request *api.ListJobsRequest) (*api.ListJobsResponse, error) {
 
 	account, present := getAccountFromContext(context)
 	if !present {
 		return &api.ListJobsResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
 
-	jobs, err := basecoat.storage.GetAllJobs(account)
+	jobs, err := bc.storage.GetAllJobs(account)
 	if err != nil {
 		return &api.ListJobsResponse{}, status.Error(codes.Internal, "failed to retrieve jobs from database")
 	}
@@ -69,7 +68,7 @@ func (basecoat *API) ListJobs(context context.Context, request *api.ListJobsRequ
 }
 
 // CreateJob registers a new job
-func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRequest) (*api.CreateJobResponse, error) {
+func (bc *API) CreateJob(context context.Context, request *api.CreateJobRequest) (*api.CreateJobResponse, error) {
 
 	newJob := api.Job{
 		Name:     request.Name,
@@ -94,25 +93,25 @@ func (basecoat *API) CreateJob(context context.Context, request *api.CreateJobRe
 		return &api.CreateJobResponse{}, status.Error(codes.FailedPrecondition, "name required")
 	}
 
-	jobID, err := basecoat.storage.AddJob(account, &newJob)
+	jobID, err := bc.storage.AddJob(account, &newJob)
 	if err != nil {
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateJobResponse{}, status.Error(codes.AlreadyExists, "could not save job; job already exists")
 		}
-		logger.Log().Errorw("could not save job", "error", err)
+		bc.log.Errorw("could not save job", "error", err)
 		return &api.CreateJobResponse{}, status.Error(codes.Internal, "could not save job")
 	}
 
 	newJob.Id = jobID
 
-	basecoat.search.UpdateJobIndex(account, newJob)
+	bc.search.UpdateJobIndex(account, newJob)
 
-	logger.Log().Infow("job created", "job", newJob)
+	bc.log.Infow("job created", "job", newJob)
 	return &api.CreateJobResponse{Id: newJob.Id}, nil
 }
 
 // UpdateJob updates an already existing job
-func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRequest) (*api.UpdateJobResponse, error) {
+func (bc *API) UpdateJob(context context.Context, request *api.UpdateJobRequest) (*api.UpdateJobResponse, error) {
 
 	account, present := getAccountFromContext(context)
 	if !present {
@@ -123,7 +122,7 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 		return &api.UpdateJobResponse{}, status.Error(codes.FailedPrecondition, "job id required")
 	}
 
-	currentJob, _ := basecoat.storage.GetJob(account, request.Id)
+	currentJob, _ := bc.storage.GetJob(account, request.Id)
 
 	updatedJob := api.Job{
 		Id:       request.Id,
@@ -140,23 +139,23 @@ func (basecoat *API) UpdateJob(context context.Context, request *api.UpdateJobRe
 		Contact:  request.Contact,
 	}
 
-	err := basecoat.storage.UpdateJob(account, request.Id, &updatedJob)
+	err := bc.storage.UpdateJob(account, request.Id, &updatedJob)
 	if err != nil {
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateJobResponse{}, status.Error(codes.NotFound, "could not update job; job key not found")
 		}
-		logger.Log().Errorw("could not update job", "error", err)
+		bc.log.Errorw("could not update job", "error", err)
 		return &api.UpdateJobResponse{}, status.Error(codes.Internal, "could not update job")
 	}
 
-	basecoat.search.UpdateJobIndex(account, updatedJob)
+	bc.search.UpdateJobIndex(account, updatedJob)
 
-	logger.Log().Infow("job updated", "job", updatedJob)
+	bc.log.Infow("job updated", "job", updatedJob)
 	return &api.UpdateJobResponse{}, nil
 }
 
 // DeleteJob removes a job
-func (basecoat *API) DeleteJob(context context.Context, request *api.DeleteJobRequest) (*api.DeleteJobResponse, error) {
+func (bc *API) DeleteJob(context context.Context, request *api.DeleteJobRequest) (*api.DeleteJobResponse, error) {
 
 	account, present := getAccountFromContext(context)
 	if !present {
@@ -167,17 +166,17 @@ func (basecoat *API) DeleteJob(context context.Context, request *api.DeleteJobRe
 		return &api.DeleteJobResponse{}, status.Error(codes.FailedPrecondition, "job id required")
 	}
 
-	err := basecoat.storage.DeleteJob(account, request.Id)
+	err := bc.storage.DeleteJob(account, request.Id)
 	if err != nil {
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.DeleteJobResponse{}, status.Error(codes.NotFound, "could not delete job; job key not found")
 		}
-		logger.Log().Errorw("could not delete job", "error", err, "job_id", request.Id)
+		bc.log.Errorw("could not delete job", "error", err, "job_id", request.Id)
 		return &api.DeleteJobResponse{}, status.Error(codes.Internal, "could not delete job")
 	}
 
-	basecoat.search.DeleteJobIndex(account, request.Id)
+	bc.search.DeleteJobIndex(account, request.Id)
 
-	logger.Log().Infow("job deleted", "job_id", request.Id)
+	bc.log.Infow("job deleted", "job_id", request.Id)
 	return &api.DeleteJobResponse{}, nil
 }

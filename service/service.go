@@ -27,15 +27,16 @@ type API struct {
 // NewBasecoatAPI inits a grpc basecoat api service
 func NewBasecoatAPI(config *config.Config) *API {
 	basecoatAPI := API{}
+	basecoatAPI.log = logger.Log()
 
 	storage, err := storage.NewBoltDB(config.Database.Path, config.Database.IDLength)
 	if err != nil {
-		logger.Log().Fatalw("failed to initialize storage", "error", err)
+		basecoatAPI.log.Fatalw("failed to initialize storage", "error", err)
 	}
 
 	searchIndex, err := search.InitSearch()
 	if err != nil {
-		logger.Log().Fatalw("failed to initialize search indexes", "error", err)
+		basecoatAPI.log.Fatalw("failed to initialize search indexes", "error", err)
 	}
 
 	go searchIndex.BuildIndex(storage)
@@ -43,7 +44,6 @@ func NewBasecoatAPI(config *config.Config) *API {
 	basecoatAPI.config = config
 	basecoatAPI.storage = storage
 	basecoatAPI.search = searchIndex
-	basecoatAPI.log = logger.Log()
 
 	return &basecoatAPI
 }

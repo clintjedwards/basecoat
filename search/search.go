@@ -9,8 +9,8 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/storage"
-
 	"github.com/clintjedwards/toolkit/logger"
+	"go.uber.org/zap"
 )
 
 // searchSyntax is a wrapper for all search terms to improve fuzzy searching
@@ -22,6 +22,7 @@ const searchSyntax string = "*%s*"
 type Search struct {
 	formulaIndex map[string]bleve.Index
 	jobIndex     map[string]bleve.Index
+	log          *zap.SugaredLogger
 }
 
 // InitSearch creates a search index object which can then be queried for search results
@@ -30,59 +31,60 @@ func InitSearch() (*Search, error) {
 	return &Search{
 		formulaIndex: map[string]bleve.Index{},
 		jobIndex:     map[string]bleve.Index{},
+		log:          logger.Log(),
 	}, nil
 }
 
 // BuildIndex will query basecoat's database and populate the search index
-func (searchIndex *Search) BuildIndex(store storage.BoltDB) {
+func (si *Search) BuildIndex(store storage.BoltDB) {
 	// Log how long it took to build the index in prometheus
 	start := time.Now()
 
 	accounts, err := store.GetAllAccounts()
 	if err != nil {
-		logger.Log().Fatalw("failed to query database for accounts",
+		si.log.Fatalw("failed to query database for accounts",
 			"error", err)
 	}
 
 	for account := range accounts {
-		populateIndex(account, searchIndex, store)
+		populateIndex(account, si, store)
 	}
 
 	elapsed := time.Since(start)
-	logger.Log().Infow("compiled index", "time", elapsed)
+	si.log.Infow("compiled index", "time", elapsed)
 	return
 }
 
 // UpdateFormulaIndex updates an already loaded formula index
-func (searchIndex *Search) UpdateFormulaIndex(account string, formula api.Formula) {
-	if _, ok := searchIndex.formulaIndex[account]; !ok {
-		searchIndex.formulaIndex[account] = createNewIndex()
+func (si *Search) UpdateFormulaIndex(account string, formula api.Formula) {
+	if _, ok := si.formulaIndex[account]; !ok {
+		si.formulaIndex[account] = createNewIndex()
 	}
-	index := searchIndex.formulaIndex[account]
+	index := si.formulaIndex[account]
 	index.Index(formula.Id, formula)
 	return
 }
 
 // UpdateJobIndex updates an already loaded job index
-func (searchIndex *Search) UpdateJobIndex(account string, job api.Job) {
-	if _, ok := searchIndex.jobIndex[account]; !ok {
-		searchIndex.jobIndex[account] = createNewIndex()
+func (si *Search) UpdateJobIndex(account string, job api.Job) {
+	if _, ok := si.jobIndex[account]; !ok {
+		si.jobIndex[account] = createNewIndex()
 	}
-	index := searchIndex.jobIndex[account]
+	index := si.jobIndex[account]
 	index.Index(job.Id, job)
 	return
 }
 
 // DeleteFormulaIndex updates an already loaded formula index
-func (searchIndex *Search) DeleteFormulaIndex(account string, formulaID string) {
-	index := searchIndex.formulaIndex[account]
+func (si *Search) DeleteFormulaIndex(account string, formulaID string) {
+	index := si.formulaIndex[account]
 	index.Index(formulaID, nil)
 	return
 }
 
 // DeleteJobIndex updates an already loaded job index
-func (searchIndex *Search) DeleteJobIndex(account string, jobID string) {
-	index := searchIndex.jobIndex[account]
+func (si *Search) DeleteJobIndex(account string, jobID string) {
+	index := si.jobIndex[account]
 	index.Index(jobID, nil)
 	return
 }
@@ -122,7 +124,7 @@ func populateIndex(account string, searchIndex *Search, store storage.BoltDB) {
 	// Index all formulas
 	formulas, err := store.GetAllFormulas(account)
 	if err != nil {
-		logger.Log().Errorw("failed to query database for formulas",
+		searchIndex.log.Errorw("failed to query database for formulas",
 			"error", err,
 			"account", account)
 	}
@@ -147,8 +149,8 @@ func populateIndex(account string, searchIndex *Search, store storage.BoltDB) {
 }
 
 // SearchFormulas searches the index for matching terms and then returns formulas which might match
-func (searchIndex *Search) SearchFormulas(account, searchPhrase string) ([]string, error) {
-	if index, ok := searchIndex.formulaIndex[account]; ok {
+func (si *Search) SearchFormulas(account, searchPhrase string) ([]string, error) {
+	if index, ok := si.formulaIndex[account]; ok {
 
 		formulaHits, err := queryIndex(index, strings.ToLower(searchPhrase))
 		if err != nil {
@@ -162,8 +164,8 @@ func (searchIndex *Search) SearchFormulas(account, searchPhrase string) ([]strin
 }
 
 // SearchJobs searches the index for matching terms and then returns jobs which might match
-func (searchIndex *Search) SearchJobs(account, searchPhrase string) ([]string, error) {
-	if index, ok := searchIndex.jobIndex[account]; ok {
+func (si *Search) SearchJobs(account, searchPhrase string) ([]string, error) {
+	if index, ok := si.jobIndex[account]; ok {
 
 		jobHits, err := queryIndex(index, strings.ToLower(searchPhrase))
 		if err != nil {

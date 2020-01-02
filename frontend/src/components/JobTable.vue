@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Job, Contact } from "../basecoat_pb";
+import { Job, Contact } from "../basecoat_message_pb";
 
 import BasecoatClientWrapper from "../basecoatClientWrapper";
 

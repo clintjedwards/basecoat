@@ -215,13 +215,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {
-  GetJobRequest,
-  UpdateJobRequest,
-  Contact,
-  Job,
-  Formula
-} from "../basecoat_pb";
+import { GetJobRequest, UpdateJobRequest } from "../basecoat_transport_pb";
+import { Contact, Job, Formula } from "../basecoat_message_pb";
 import BasecoatClientWrapper from "../basecoatClientWrapper";
 
 let client: BasecoatClientWrapper;

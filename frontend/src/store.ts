@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex, { MutationTree } from "vuex";
-import { Formula, Job } from "./basecoat_pb";
+import { Formula, Job } from "./basecoat_message_pb";
 
 Vue.use(Vuex);
 

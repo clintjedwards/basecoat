@@ -1,26 +1,22 @@
 import Cookies from "js-cookie";
 import { BasecoatClient } from "./BasecoatServiceClientPb";
+import { Base, Colorant, Contact, Formula, Job } from "./basecoat_message_pb";
 import {
-  Base,
-  Colorant,
-  Contact,
   CreateAPITokenRequest,
   CreateFormulaRequest,
   CreateJobRequest,
   DeleteFormulaRequest,
   DeleteJobRequest,
-  Formula,
   GetFormulaRequest,
   GetJobRequest,
   GetSystemInfoRequest,
-  Job,
   ListFormulasRequest,
   ListJobsRequest,
   SearchFormulasRequest,
   SearchJobsRequest,
   UpdateFormulaRequest,
   UpdateJobRequest
-} from "./basecoat_pb";
+} from "./basecoat_transport_pb";
 
 interface LoginInfo {
   username: string;

@@ -87,7 +87,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Contact, CreateJobRequest } from "../basecoat_pb";
+import { Contact } from "../basecoat_message_pb";
+import { CreateJobRequest } from "../basecoat_transport_pb";
 import BasecoatClientWrapper from "../basecoatClientWrapper";
 
 let client: BasecoatClientWrapper;

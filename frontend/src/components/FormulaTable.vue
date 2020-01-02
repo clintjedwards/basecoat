@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Formula } from "../basecoat_pb";
+import { Formula } from "../basecoat_message_pb";
 import * as moment from "moment";
 
 import BasecoatClientWrapper from "../basecoatClientWrapper";

@@ -258,12 +258,9 @@
 import Vue from "vue";
 import {
   GetFormulaRequest,
-  UpdateFormulaRequest,
-  Base,
-  Colorant,
-  Job,
-  Formula
-} from "../basecoat_pb";
+  UpdateFormulaRequest
+} from "../basecoat_transport_pb";
+import { Base, Colorant, Job, Formula } from "../basecoat_message_pb";
 import BasecoatClientWrapper from "../basecoatClientWrapper";
 
 let client: BasecoatClientWrapper;

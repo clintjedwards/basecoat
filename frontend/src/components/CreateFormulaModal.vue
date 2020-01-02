@@ -143,13 +143,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {
-  Formula,
-  Base,
-  Colorant,
-  CreateFormulaRequest,
-  Job
-} from "../basecoat_pb";
+import { Formula, Base, Colorant, Job } from "../basecoat_message_pb";
+import { CreateFormulaRequest } from "../basecoat_transport_pb";
 import BasecoatClientWrapper from "../basecoatClientWrapper";
 
 let client: BasecoatClientWrapper;

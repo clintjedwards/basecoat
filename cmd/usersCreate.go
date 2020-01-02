@@ -1,13 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
-	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/toolkit/password"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
@@ -30,24 +33,35 @@ func runUsersCreateCmd(cmd *cobra.Command, args []string) {
 		log.Fatalf("failed retrieve password")
 	}
 
-	hash, err := password.HashPassword(pass)
-	if err != nil {
-		log.Fatalf("failed to hash password: %v", err)
-	}
-
 	config, err := config.FromEnv()
 	if err != nil {
-		log.Fatalf("failed to get config: %v", err)
+		log.Fatalf("failed to read configuration: %v", err)
 	}
 
-	storage, err := storage.InitStorage(config)
+	creds, err := credentials.NewClientTLSFromFile(config.TLSCertPath, "")
 	if err != nil {
-		log.Fatalf("could not connect to storage: %v", err)
+		log.Fatalf("failed to get certificates: %v", err)
 	}
 
-	err = storage.CreateUser(name, &api.User{
-		Name: name,
-		Hash: string(hash),
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(creds))
+
+	hostPortTuple := strings.Split(config.URL, ":")
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]), opts...)
+	if err != nil {
+		log.Fatalf("could not connect to server: %v", err)
+	}
+	defer conn.Close()
+
+	basecoatClient := api.NewBasecoatClient(conn)
+
+	md := metadata.Pairs("Authorization", "Bearer "+config.CommandLine.Token)
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
+
+	_, err = basecoatClient.CreateAccount(ctx, &api.CreateAccountRequest{
+		Id:       name,
+		Password: string(pass),
 	})
 	if err != nil {
 		log.Fatalf("could not create user: %v", err)

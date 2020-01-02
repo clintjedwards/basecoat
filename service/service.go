@@ -6,6 +6,7 @@ import (
 	"github.com/clintjedwards/basecoat/search"
 	"github.com/clintjedwards/basecoat/storage"
 	"github.com/clintjedwards/toolkit/logger"
+	"go.uber.org/zap"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
@@ -17,16 +18,17 @@ import (
 
 // API represents a basecoat grpc backend service
 type API struct {
-	storage *storage.BoltDB
+	storage storage.BoltDB
 	config  *config.Config
 	search  *search.Search
+	log     *zap.SugaredLogger
 }
 
 // NewBasecoatAPI inits a grpc basecoat api service
 func NewBasecoatAPI(config *config.Config) *API {
 	basecoatAPI := API{}
 
-	storage, err := storage.InitStorage(config)
+	storage, err := storage.NewBoltDB(config.Database.Path, config.Database.IDLength)
 	if err != nil {
 		logger.Log().Fatalw("failed to initialize storage", "error", err)
 	}
@@ -41,6 +43,7 @@ func NewBasecoatAPI(config *config.Config) *API {
 	basecoatAPI.config = config
 	basecoatAPI.storage = storage
 	basecoatAPI.search = searchIndex
+	basecoatAPI.log = logger.Log()
 
 	return &basecoatAPI
 }

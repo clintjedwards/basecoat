@@ -34,17 +34,17 @@ func InitSearch() (*Search, error) {
 }
 
 // BuildIndex will query basecoat's database and populate the search index
-func (searchIndex *Search) BuildIndex(store *storage.BoltDB) {
+func (searchIndex *Search) BuildIndex(store storage.BoltDB) {
 	// Log how long it took to build the index in prometheus
 	start := time.Now()
 
-	users, err := store.GetAllUsers()
+	accounts, err := store.GetAllAccounts()
 	if err != nil {
 		logger.Log().Fatalw("failed to query database for accounts",
 			"error", err)
 	}
 
-	for account := range users {
+	for account := range accounts {
 		populateIndex(account, searchIndex, store)
 	}
 
@@ -116,7 +116,7 @@ func newAccountIndex(account string, searchIndex *Search) {
 }
 
 // populateIndex queries the database and loads the index for a specific account
-func populateIndex(account string, searchIndex *Search, store *storage.BoltDB) {
+func populateIndex(account string, searchIndex *Search, store storage.BoltDB) {
 	newAccountIndex(account, searchIndex)
 
 	// Index all formulas

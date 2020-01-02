@@ -17,7 +17,7 @@ func (db *BoltDB) GetAllFormulas(account string) (map[string]*api.Formula, error
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 		err := formulasBucket.ForEach(func(key, value []byte) error {
 			var formula api.Formula
@@ -47,7 +47,7 @@ func (db *BoltDB) GetFormula(account, key string) (*api.Formula, error) {
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 		formulaRaw := formulasBucket.Get([]byte(key))
 		if formulaRaw == nil {
@@ -75,7 +75,7 @@ func (db *BoltDB) AddFormula(account string, newFormula *api.Formula) (key strin
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 		key, err = db.getNewKey(formulasBucket)
 
@@ -121,7 +121,7 @@ func (db *BoltDB) UpdateFormula(account, key string, updatedFormula *api.Formula
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 		// First check if key exists
 		currentFormula := formulasBucket.Get([]byte(key))
@@ -180,7 +180,7 @@ func (db *BoltDB) DeleteFormula(account, key string) error {
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 		// First check if key exists
 		currentFormula := formulasBucket.Get([]byte(key))

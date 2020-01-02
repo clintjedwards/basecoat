@@ -2,6 +2,20 @@ syntax = "proto3";
 
 package api;
 
+// Account represents a user account
+message Account {
+  string id = 1;
+  bytes hash = 2;
+  enum State {
+    UNKNOWN = 0;
+    ACTIVE = 1;
+    DISABLED = 2;
+  }
+  State state = 3;
+  int64 created = 4;
+  int64 modified = 5;
+}
+
 message Formula {
   // Unique ID for formula
   string id = 1;
@@ -56,9 +70,4 @@ message Job {
 message Contact {
   string name = 1;
   string info = 2;
-}
-
-message User {
-  string name = 1;
-  string hash = 2;
 }

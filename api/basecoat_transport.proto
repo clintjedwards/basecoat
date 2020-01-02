@@ -13,6 +13,30 @@ message CreateAPITokenRequest {
 
 message CreateAPITokenResponse { string key = 1; }
 
+// Account transport messages
+message GetAccountRequest { string id = 1; }
+message GetAccountResponse { Account account = 1; }
+message ListAccountsRequest {}
+message ListAccountsResponse { map<string, Account> accounts = 1; }
+message CreateAccountRequest {
+  string id = 1;
+  string password = 2;
+}
+message CreateAccountResponse {}
+message UpdateAccountRequest {
+  string id = 1;
+  bytes hash = 2;
+  enum State {
+    UNKNOWN = 0;
+    ACTIVE = 1;
+    DISABLED = 2;
+  }
+  State state = 3;
+}
+message UpdateAccountResponse {}
+message DisableAccountRequest { string id = 1; }
+message DisableAccountResponse {}
+
 message GetSystemInfoRequest {}
 message GetSystemInfoResponse {
   string build_time = 1;

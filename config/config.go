@@ -12,16 +12,19 @@ type DatabaseConfig struct {
 
 // Config refers to general application configuration
 type Config struct {
-	Debug       bool   `envconfig:"debug" default:"false"`
-	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"` // does not apply if certmagic is enabled
-	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`  // does not apply if certmagic is enabled
-	URL         string `envconfig:"url" default:"localhost:8080"`            // does not apply if certmagic is enabled
-	CertMagic   *CertMagicConfig
-	Frontend    *FrontendConfig
-	Backend     *BackendConfig
-	Database    *DatabaseConfig
-	CommandLine *CommandLineConfig
-	Metrics     *MetricsConfig
+	// duration limit on user requested api token, after limit token will expire
+	APITokenDurationLimit int64  `envconfig:"api_token_duration_limit" default:"946708560"` //946708560 = 30 years
+	AdminToken            string `envconfig:"admin_token" default:"admin"`                  // used to allow admin functions
+	Debug                 bool   `envconfig:"debug" default:"false"`
+	TLSCertPath           string `envconfig:"tls_cert_path" default:"./localhost.crt"` // does not apply if certmagic is enabled
+	TLSKeyPath            string `envconfig:"tls_key_path" default:"./localhost.key"`  // does not apply if certmagic is enabled
+	URL                   string `envconfig:"url" default:"localhost:8080"`            // does not apply if certmagic is enabled
+	CertMagic             *CertMagicConfig
+	Frontend              *FrontendConfig
+	Backend               *BackendConfig
+	Database              *DatabaseConfig
+	CommandLine           *CommandLineConfig
+	Metrics               *MetricsConfig
 }
 
 // CertMagicConfig allows the automation of generating tls certificates

@@ -36,9 +36,9 @@ func (db *BoltDB) linkFormulaToJob(tx *bolt.Tx, account, formulaID, jobID string
 	var storedJob api.Job
 
 	accountBucket := tx.Bucket([]byte(account))
-	jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+	targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
-	jobRaw := jobsBucket.Get([]byte(jobID))
+	jobRaw := targetBucket.Get([]byte(jobID))
 	if jobRaw == nil {
 		return tkerrors.ErrEntityNotFound
 	}
@@ -55,7 +55,7 @@ func (db *BoltDB) linkFormulaToJob(tx *bolt.Tx, account, formulaID, jobID string
 		return err
 	}
 
-	err = jobsBucket.Put([]byte(jobID), updatedJobRaw)
+	err = targetBucket.Put([]byte(jobID), updatedJobRaw)
 	if err != nil {
 		return err
 	}
@@ -67,9 +67,9 @@ func (db *BoltDB) unlinkFormulaFromJob(tx *bolt.Tx, account, formulaID, jobID st
 	var storedJob api.Job
 
 	accountBucket := tx.Bucket([]byte(account))
-	jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+	targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
-	jobRaw := jobsBucket.Get([]byte(jobID))
+	jobRaw := targetBucket.Get([]byte(jobID))
 	if jobRaw == nil {
 		return tkerrors.ErrEntityNotFound
 	}
@@ -86,7 +86,7 @@ func (db *BoltDB) unlinkFormulaFromJob(tx *bolt.Tx, account, formulaID, jobID st
 		return err
 	}
 
-	err = jobsBucket.Put([]byte(jobID), updatedJobRaw)
+	err = targetBucket.Put([]byte(jobID), updatedJobRaw)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (db *BoltDB) linkJobToFormula(tx *bolt.Tx, account, jobID, formulaID string
 	var storedFormula api.Formula
 
 	accountBucket := tx.Bucket([]byte(account))
-	formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+	formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 	formulaRaw := formulasBucket.Get([]byte(formulaID))
 	if formulaRaw == nil {
@@ -130,7 +130,7 @@ func (db *BoltDB) unlinkJobFromFormula(tx *bolt.Tx, account, jobID, formulaID st
 	var storedFormula api.Formula
 
 	accountBucket := tx.Bucket([]byte(account))
-	formulasBucket := accountBucket.Bucket([]byte(FormulasBucket))
+	formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
 
 	formulaRaw := formulasBucket.Get([]byte(formulaID))
 	if formulaRaw == nil {

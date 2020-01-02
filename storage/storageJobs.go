@@ -17,9 +17,9 @@ func (db *BoltDB) GetAllJobs(account string) (map[string]*api.Job, error) {
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+		targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
-		err := jobsBucket.ForEach(func(key, value []byte) error {
+		err := targetBucket.ForEach(func(key, value []byte) error {
 			var job api.Job
 			err := go_proto.Unmarshal(value, &job)
 			if err != nil {
@@ -47,9 +47,9 @@ func (db *BoltDB) GetJob(account, key string) (*api.Job, error) {
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+		targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
-		jobRaw := jobsBucket.Get([]byte(key))
+		jobRaw := targetBucket.Get([]byte(key))
 		if jobRaw == nil {
 			return tkerrors.ErrEntityNotFound
 		}
@@ -75,9 +75,9 @@ func (db *BoltDB) AddJob(account string, newJob *api.Job) (key string, err error
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+		targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
-		key, err = db.getNewKey(jobsBucket)
+		key, err = db.getNewKey(targetBucket)
 
 		newJob.Id = key
 
@@ -86,7 +86,7 @@ func (db *BoltDB) AddJob(account string, newJob *api.Job) (key string, err error
 			return err
 		}
 
-		err = jobsBucket.Put([]byte(key), jobRaw)
+		err = targetBucket.Put([]byte(key), jobRaw)
 		if err != nil {
 			return err
 		}
@@ -116,10 +116,10 @@ func (db *BoltDB) UpdateJob(account, key string, updatedJob *api.Job) error {
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+		targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
 		// First check if key exists
-		currentJob := jobsBucket.Get([]byte(key))
+		currentJob := targetBucket.Get([]byte(key))
 		if currentJob == nil {
 			return tkerrors.ErrEntityNotFound
 		}
@@ -134,7 +134,7 @@ func (db *BoltDB) UpdateJob(account, key string, updatedJob *api.Job) error {
 			return err
 		}
 
-		err = jobsBucket.Put([]byte(key), jobRaw)
+		err = targetBucket.Put([]byte(key), jobRaw)
 		if err != nil {
 			return err
 		}
@@ -175,10 +175,10 @@ func (db *BoltDB) DeleteJob(account, key string) error {
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		jobsBucket := accountBucket.Bucket([]byte(JobsBucket))
+		targetBucket := accountBucket.Bucket([]byte(jobsBucket))
 
 		// First check if key exists
-		currentJob := jobsBucket.Get([]byte(key))
+		currentJob := targetBucket.Get([]byte(key))
 		if currentJob == nil {
 			return tkerrors.ErrEntityNotFound
 		}
@@ -188,7 +188,7 @@ func (db *BoltDB) DeleteJob(account, key string) error {
 			return err
 		}
 
-		err = jobsBucket.Delete([]byte(key))
+		err = targetBucket.Delete([]byte(key))
 		if err != nil {
 			return err
 		}

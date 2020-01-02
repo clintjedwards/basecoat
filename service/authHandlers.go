@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/clintjedwards/basecoat/api"
-	"github.com/clintjedwards/toolkit/logger"
 	"github.com/clintjedwards/toolkit/password"
 	"github.com/clintjedwards/toolkit/tkerrors"
 
@@ -19,74 +19,91 @@ import (
 type contextKey string
 
 var contextAccount = contextKey("account")
-
-const durationLimit int64 = 946708560
+var adminMethods = []string{
+	"/api.Basecoat/GetAccount",
+	"/api.Basecoat/CreateAccount",
+	"/api.Basecoat/ListAccounts",
+	"/api.Basecoat/UpdateAccount",
+	"/api.Basecoat/DisableAccount",
+}
+var authlessMethods = []string{
+	"/api.Basecoat/CreateAPIToken",
+	"/api.Basecoat/GetSystemInfo",
+}
 
 // CreateAPIToken returns a temporary api key that can be used on all subsequent requests
-func (basecoat *API) CreateAPIToken(context context.Context, request *api.CreateAPITokenRequest) (*api.CreateAPITokenResponse, error) {
+func (bc *API) CreateAPIToken(ctx context.Context, request *api.CreateAPITokenRequest) (*api.CreateAPITokenResponse, error) {
 
-	if request.User == "" {
-		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "user name required")
+	if request.User == "" || request.Password == "" {
+		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "id and password required")
 	}
 
-	if request.Password == "" {
-		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "password required")
+	// Limit length of duration requests
+	if request.Duration > bc.config.APITokenDurationLimit {
+		return &api.CreateAPITokenResponse{}, status.Errorf(codes.FailedPrecondition,
+			"duration request is too long; greater than %d seconds", bc.config.APITokenDurationLimit)
 	}
 
-	// Limit length of duration requests; 946708560 = 30 years
-	if request.Duration > durationLimit {
-		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "duration request is too long; greater than 30 years")
-	}
-
-	user, err := basecoat.storage.GetUser(request.User)
+	account, err := bc.storage.GetAccount(request.User)
 	if err != nil {
-		if err == tkerrors.ErrEntityNotFound {
-			return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate user")
+		if errors.Is(err, tkerrors.ErrEntityNotFound) {
+			return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate account")
 		}
-		logger.Log().Errorw("could not authenticate user",
-			"error", err,
-			"user", user.Name)
-
-		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate user; internal error")
+		bc.log.Errorw("could not authenticate account", "error", err, "account", request.User)
+		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate account; internal error")
 	}
 
-	if !password.CheckPasswordHash([]byte(user.Hash), []byte(request.Password)) {
-		return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate user")
+	if account.State == api.Account_DISABLED {
+		return &api.CreateAPITokenResponse{}, status.Error(codes.FailedPrecondition, "account is disabled")
+	}
+
+	if !password.CheckPasswordHash([]byte(account.Hash), []byte(request.Password)) {
+		return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate account")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Name,
-		"expiry":   int64(time.Now().Unix() + request.Duration),
+		"account": account.Id,
+		"expiry":  int64(time.Now().Unix() + request.Duration),
 	})
 
-	tokenString, err := token.SignedString([]byte(basecoat.config.Backend.SecretKey))
+	tokenString, err := token.SignedString([]byte(bc.config.Backend.SecretKey))
 	if err != nil {
-		logger.Log().Errorw("could not sign jwt token",
-			"error", err)
-		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate user; internal error")
+		bc.log.Errorw("could not sign jwt token", "error", err)
+		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate account; internal error")
 	}
 
-	logger.Log().Infow("api token created", "user", request.User)
-
+	bc.log.Infow("api token created", "account", request.User)
 	return &api.CreateAPITokenResponse{Key: tokenString}, nil
 }
 
-func (basecoat *API) authenticate(ctx context.Context) (context.Context, error) {
+// authenticate is run on every call to verify if the user is allowed to access a given rpc
+func (bc *API) authenticate(ctx context.Context) (context.Context, error) {
 
-	// Exclude the route to get the API token
 	method, _ := grpc.Method(ctx)
-	if method == "/api.Basecoat/CreateAPIToken" {
-		return ctx, nil
-	}
 
-	// Exclude the route to get system information
-	if method == "/api.Basecoat/GetSystemInfo" {
-		return ctx, nil
+	// Exclude routes that don't need authentication
+	for _, route := range authlessMethods {
+		if method == route {
+			return ctx, nil
+		}
 	}
 
 	token, err := grpc_auth.AuthFromMD(ctx, "Bearer")
 	if err != nil {
 		return ctx, err
+	}
+
+	// Specially handle admin routes
+	for _, route := range adminMethods {
+		if method == route {
+			admin := handleAdminRoutes(token, bc.config.AdminToken)
+			if admin {
+				bc.log.Infow("admin route accessed", "method", method)
+				return ctx, err
+			}
+			bc.log.Warnw("could not verify admin token", "method", method)
+			return ctx, grpc.Errorf(codes.Unauthenticated, "could not verify admin token")
+		}
 	}
 
 	jwtToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
@@ -95,45 +112,45 @@ func (basecoat *API) authenticate(ctx context.Context) (context.Context, error) 
 			return ctx, err
 		}
 
-		return []byte(basecoat.config.Backend.SecretKey), nil
+		return []byte(bc.config.Backend.SecretKey), nil
 	})
 	if err != nil {
-		logger.Log().Errorw("could not decode jwt token", "error", err)
+		bc.log.Errorw("could not decode jwt token", "error", err)
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	if _, present := jwtToken.Claims.(jwt.MapClaims); !present {
-		logger.Log().Error("could not verify jwt token")
+		bc.log.Error("could not verify jwt token")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	if !jwtToken.Valid {
-		logger.Log().Error("could not verify jwt token; not valid")
+		bc.log.Error("could not verify jwt token; not valid")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	claims := jwtToken.Claims.(jwt.MapClaims)
 
-	if _, present := claims["username"]; !present {
-		logger.Log().Error("misformatted jwt token; missing username")
+	if _, present := claims["account"]; !present {
+		bc.log.Error("misformatted jwt token; missing account")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 	if _, present := claims["expiry"]; !present {
-		logger.Log().Error("misformatted jwt token; missing expiry")
+		bc.log.Error("misformatted jwt token; missing expiry")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	expiry := int64(claims["expiry"].(float64))
 	if time.Now().Unix() > expiry && expiry != 0 {
-		logger.Log().Infow("token has expired",
-			"user", claims["username"],
+		bc.log.Infow("token has expired",
+			"user", claims["account"],
 			"current_time", time.Now().Unix(),
 			"expiry_time", expiry)
 
 		return ctx, grpc.Errorf(codes.Unauthenticated, "token has expired: %v", time.Unix(expiry, 0).UTC())
 	}
 
-	newCtx := context.WithValue(ctx, contextAccount, claims["username"].(string))
+	newCtx := context.WithValue(ctx, contextAccount, claims["account"].(string))
 	return newCtx, nil
 }
 
@@ -141,4 +158,12 @@ func (basecoat *API) authenticate(ctx context.Context) (context.Context, error) 
 func getAccountFromContext(ctx context.Context) (string, bool) {
 	account, present := ctx.Value(contextAccount).(string)
 	return account, present
+}
+
+func handleAdminRoutes(token, adminKey string) bool {
+	if token != adminKey {
+		return false
+	}
+
+	return true
 }

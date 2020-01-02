@@ -11,6 +11,13 @@ service Basecoat {
   // System routes
   rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse);
 
+  // Account routes (Admin only)
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountResponse);
+  rpc DisableAccount(DisableAccountRequest) returns (DisableAccountResponse);
+
   // Formula routes
   rpc GetFormula(GetFormulaRequest) returns (GetFormulaResponse);
   rpc SearchFormulas(SearchFormulasRequest) returns (SearchFormulasResponse);

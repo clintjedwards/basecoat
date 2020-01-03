@@ -7,6 +7,7 @@ import (
 	"github.com/clintjedwards/basecoat/storage"
 	"github.com/clintjedwards/toolkit/logger"
 	"go.uber.org/zap"
+	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
@@ -34,12 +35,16 @@ func NewBasecoatAPI(config *config.Config) *API {
 		basecoatAPI.log.Fatalw("failed to initialize storage", "error", err)
 	}
 
-	searchIndex, err := search.InitSearch()
+	searchIndex, err := search.InitSearch(storage)
 	if err != nil {
 		basecoatAPI.log.Fatalw("failed to initialize search indexes", "error", err)
 	}
 
-	go searchIndex.BuildIndex(storage)
+	rebuildTime := time.Duration(config.Backend.SearchIndexRebuildTime) * time.Second
+	go func() {
+		searchIndex.BuildIndex(storage)
+		time.Sleep(rebuildTime)
+	}()
 
 	basecoatAPI.config = config
 	basecoatAPI.storage = storage

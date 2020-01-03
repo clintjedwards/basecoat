@@ -33,4 +33,14 @@ service Basecoat {
   rpc CreateJob(CreateJobRequest) returns (CreateJobResponse);
   rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse);
   rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
+
+  // Contractor routes
+  rpc GetContractor(GetContractorRequest) returns (GetContractorResponse);
+  rpc ListContractors(ListContractorsRequest) returns (ListContractorsResponse);
+  rpc CreateContractor(CreateContractorRequest)
+      returns (CreateContractorResponse);
+  rpc UpdateContractor(UpdateContractorRequest)
+      returns (UpdateContractorResponse);
+  rpc DeleteContractor(DeleteContractorRequest)
+      returns (DeleteContractorResponse);
 }

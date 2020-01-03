@@ -27,7 +27,7 @@ func (info *testHarness) setup() {
 	os.Setenv("TLS_CERT_PATH", "../localhost.crt")
 	os.Setenv("TLS_KEY_PATH", "../localhost.key")
 	os.Setenv("DATABASE_PATH", databasePath)
-	os.Setenv("ADMIN_TOKEN", "admin")
+	os.Setenv("BACKEND_ADMIN_TOKEN", "admin")
 
 	go app.StartServices()
 	time.Sleep(time.Second)
@@ -56,6 +56,7 @@ func (info *testHarness) cleanup() {
 	os.Unsetenv("TLS_CERT_PATH")
 	os.Unsetenv("TLS_KEY_PATH")
 	os.Unsetenv("DATABASE_PATH")
+	os.Unsetenv("BACKEND_ADMIN_TOKEN")
 	os.Remove(info.databasePath)
 }
 
@@ -71,6 +72,21 @@ func TestFullApplication(t *testing.T) {
 	info.TestUpdateAccount(t)
 	// Test auth
 	info.TestCreateAPIToken(t)
+	// Test contractors
+	info.TestCreateContractor(t)
+	info.TestGetContractor(t)
+	info.TestListContractors(t)
+	info.TestUpdateContractor(t)
+	info.TestDeleteContractor(t)
+	info.TestCreateContractorAddJob(t)
+	// Test jobs
+	info.TestCreateJob(t)
+	info.TestGetJob(t)
+	info.TestListJobs(t)
+	info.TestUpdateJob(t)
+	info.TestDeleteJob(t)
+	info.TestCreateJobAddContractor(t)
+	info.TestUpdateJobRemoveContractor(t)
 
 	info.cleanup()
 }

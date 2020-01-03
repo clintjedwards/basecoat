@@ -23,21 +23,30 @@ type Search struct {
 	formulaIndex map[string]bleve.Index
 	jobIndex     map[string]bleve.Index
 	log          *zap.SugaredLogger
+	store        storage.BoltDB
+}
+
+// extendedJob extends a typical job to include the contractor
+// so that we can index both at the same time
+type compositeJob struct {
+	Job        api.Job
+	Contractor api.Contractor
 }
 
 // InitSearch creates a search index object which can then be queried for search results
-func InitSearch() (*Search, error) {
-
+func InitSearch(store storage.BoltDB) (*Search, error) {
 	return &Search{
 		formulaIndex: map[string]bleve.Index{},
 		jobIndex:     map[string]bleve.Index{},
 		log:          logger.Log(),
+		store:        store,
 	}, nil
 }
 
 // BuildIndex will query basecoat's database and populate the search index
+// it clears out any current index with fresh data
 func (si *Search) BuildIndex(store storage.BoltDB) {
-	// Log how long it took to build the index in prometheus
+	// TODO: Log how long it took to build the index in prometheus
 	start := time.Now()
 
 	accounts, err := store.GetAllAccounts()
@@ -47,45 +56,72 @@ func (si *Search) BuildIndex(store storage.BoltDB) {
 	}
 
 	for account := range accounts {
-		populateIndex(account, si, store)
+		si.populateIndex(account)
 	}
 
 	elapsed := time.Since(start)
 	si.log.Infow("compiled index", "time", elapsed)
-	return
 }
 
 // UpdateFormulaIndex updates an already loaded formula index
-func (si *Search) UpdateFormulaIndex(account string, formula api.Formula) {
+func (si *Search) UpdateFormulaIndex(account string, formulaID string) {
 	if _, ok := si.formulaIndex[account]; !ok {
 		si.formulaIndex[account] = createNewIndex()
 	}
+
+	formula, err := si.store.GetFormula(account, formulaID)
+	if err != nil {
+		si.log.Errorw("could not get formula from database",
+			"account", account, "formulaID", formulaID)
+	}
+
 	index := si.formulaIndex[account]
-	index.Index(formula.Id, formula)
+	index.Index(formulaID, formula)
 	return
 }
 
 // UpdateJobIndex updates an already loaded job index
-func (si *Search) UpdateJobIndex(account string, job api.Job) {
+func (si *Search) UpdateJobIndex(account string, jobID string) {
 	if _, ok := si.jobIndex[account]; !ok {
 		si.jobIndex[account] = createNewIndex()
 	}
+
+	job, err := si.store.GetJob(account, jobID)
+	if err != nil {
+		si.log.Errorw("could not get job from database",
+			"account", account, "jobID", jobID)
+	}
+
+	contractor := &api.Contractor{}
+	if job.ContractorId != "" {
+		contractor, err = si.store.GetContractor(account, job.ContractorId)
+		if err != nil {
+			si.log.Errorw("could not get contractor from database",
+				"account", account, "contractorID", job.ContractorId)
+		}
+	}
+
+	compJob := &compositeJob{
+		Job:        *job,
+		Contractor: *contractor,
+	}
+
 	index := si.jobIndex[account]
-	index.Index(job.Id, job)
+	index.Index(job.Id, compJob)
 	return
 }
 
 // DeleteFormulaIndex updates an already loaded formula index
 func (si *Search) DeleteFormulaIndex(account string, formulaID string) {
 	index := si.formulaIndex[account]
-	index.Index(formulaID, nil)
+	index.Delete(formulaID)
 	return
 }
 
 // DeleteJobIndex updates an already loaded job index
 func (si *Search) DeleteJobIndex(account string, jobID string) {
 	index := si.jobIndex[account]
-	index.Index(jobID, nil)
+	index.Delete(jobID)
 	return
 }
 
@@ -103,46 +139,55 @@ func createNewIndex() bleve.Index {
 
 // newAccountIndex populates a new account with blank indexes;
 // will only create if index has not been created yet
-func newAccountIndex(account string, searchIndex *Search) {
-
-	formulaIndex := createNewIndex()
-	jobIndex := createNewIndex()
-
-	if _, ok := searchIndex.formulaIndex[account]; !ok {
-		searchIndex.formulaIndex[account] = formulaIndex
-	}
-
-	if _, ok := searchIndex.jobIndex[account]; !ok {
-		searchIndex.jobIndex[account] = jobIndex
-	}
+func (si *Search) newAccountIndex(account string) {
+	si.formulaIndex[account] = createNewIndex()
+	si.jobIndex[account] = createNewIndex()
 }
 
 // populateIndex queries the database and loads the index for a specific account
-func populateIndex(account string, searchIndex *Search, store storage.BoltDB) {
-	newAccountIndex(account, searchIndex)
+func (si *Search) populateIndex(account string) {
+	si.newAccountIndex(account)
 
 	// Index all formulas
-	formulas, err := store.GetAllFormulas(account)
+	formulas, err := si.store.GetAllFormulas(account)
 	if err != nil {
-		searchIndex.log.Errorw("failed to query database for formulas",
+		si.log.Errorw("failed to query database for formulas",
 			"error", err,
 			"account", account)
 	}
 
 	for _, formula := range formulas {
-		searchIndex.formulaIndex[account].Index(formula.Id, &formula)
+		si.formulaIndex[account].Index(formula.Id, &formula)
 	}
 
 	// Index all jobs
-	jobs, err := store.GetAllJobs(account)
+	jobs, err := si.store.GetAllJobs(account)
 	if err != nil {
-		logger.Log().Errorw("failed to query database for jobs",
+		si.log.Errorw("failed to query database for jobs",
+			"error", err,
+			"account", account)
+	}
+
+	//Get all contractors to be added into job indexes
+	contractors, err := si.store.GetAllContractors(account)
+	if err != nil {
+		si.log.Errorw("failed to query database for contractors",
 			"error", err,
 			"account", account)
 	}
 
 	for _, job := range jobs {
-		searchIndex.jobIndex[account].Index(job.Id, &job)
+		si.jobIndex[account].Index(job.Id, &job)
+
+		contractor := &api.Contractor{}
+		if contra, ok := contractors[job.ContractorId]; ok {
+			contractor = contra
+		}
+
+		si.jobIndex[account].Index(job.Id, compositeJob{
+			Job:        *job,
+			Contractor: *contractor,
+		})
 	}
 
 	return

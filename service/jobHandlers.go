@@ -13,9 +13,9 @@ import (
 )
 
 // GetJob returns a single job by key
-func (bc *API) GetJob(context context.Context, request *api.GetJobRequest) (*api.GetJobResponse, error) {
+func (bc *API) GetJob(ctx context.Context, request *api.GetJobRequest) (*api.GetJobResponse, error) {
 
-	account, present := getAccountFromContext(context)
+	account, present := getAccountFromContext(ctx)
 	if !present {
 		return &api.GetJobResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
@@ -32,9 +32,9 @@ func (bc *API) GetJob(context context.Context, request *api.GetJobRequest) (*api
 }
 
 // SearchJobs takes in a search term and returns jobs that might match
-func (bc *API) SearchJobs(context context.Context, request *api.SearchJobsRequest) (*api.SearchJobsResponse, error) {
+func (bc *API) SearchJobs(ctx context.Context, request *api.SearchJobsRequest) (*api.SearchJobsResponse, error) {
 
-	account, present := getAccountFromContext(context)
+	account, present := getAccountFromContext(ctx)
 	if !present {
 		return &api.SearchJobsResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
@@ -52,9 +52,9 @@ func (bc *API) SearchJobs(context context.Context, request *api.SearchJobsReques
 }
 
 // ListJobs returns a list of all jobs on basecoat service
-func (bc *API) ListJobs(context context.Context, request *api.ListJobsRequest) (*api.ListJobsResponse, error) {
+func (bc *API) ListJobs(ctx context.Context, request *api.ListJobsRequest) (*api.ListJobsResponse, error) {
 
-	account, present := getAccountFromContext(context)
+	account, present := getAccountFromContext(ctx)
 	if !present {
 		return &api.ListJobsResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
@@ -68,23 +68,20 @@ func (bc *API) ListJobs(context context.Context, request *api.ListJobsRequest) (
 }
 
 // CreateJob registers a new job
-func (bc *API) CreateJob(context context.Context, request *api.CreateJobRequest) (*api.CreateJobResponse, error) {
+func (bc *API) CreateJob(ctx context.Context, request *api.CreateJobRequest) (*api.CreateJobResponse, error) {
 
 	newJob := api.Job{
-		Name:     request.Name,
-		Street:   request.Street,
-		Street2:  request.Street2,
-		City:     request.City,
-		State:    request.State,
-		Zipcode:  request.Zipcode,
-		Notes:    request.Notes,
-		Created:  time.Now().Unix(),
-		Modified: time.Now().Unix(),
-		Formulas: request.Formulas,
-		Contact:  request.Contact,
+		Name:         request.Name,
+		Address:      request.Address,
+		Notes:        request.Notes,
+		Created:      time.Now().Unix(),
+		Modified:     time.Now().Unix(),
+		Formulas:     request.Formulas,
+		ContractorId: request.ContractorId,
+		Contact:      request.Contact,
 	}
 
-	account, present := getAccountFromContext(context)
+	account, present := getAccountFromContext(ctx)
 	if !present {
 		return &api.CreateJobResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
@@ -104,16 +101,16 @@ func (bc *API) CreateJob(context context.Context, request *api.CreateJobRequest)
 
 	newJob.Id = jobID
 
-	bc.search.UpdateJobIndex(account, newJob)
+	go bc.search.UpdateJobIndex(account, newJob.Id)
 
 	bc.log.Infow("job created", "job", newJob)
-	return &api.CreateJobResponse{Id: newJob.Id}, nil
+	return &api.CreateJobResponse{Job: &newJob}, nil
 }
 
 // UpdateJob updates an already existing job
-func (bc *API) UpdateJob(context context.Context, request *api.UpdateJobRequest) (*api.UpdateJobResponse, error) {
+func (bc *API) UpdateJob(ctx context.Context, request *api.UpdateJobRequest) (*api.UpdateJobResponse, error) {
 
-	account, present := getAccountFromContext(context)
+	account, present := getAccountFromContext(ctx)
 	if !present {
 		return &api.UpdateJobResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
@@ -122,24 +119,24 @@ func (bc *API) UpdateJob(context context.Context, request *api.UpdateJobRequest)
 		return &api.UpdateJobResponse{}, status.Error(codes.FailedPrecondition, "job id required")
 	}
 
-	currentJob, _ := bc.storage.GetJob(account, request.Id)
-
-	updatedJob := api.Job{
-		Id:       request.Id,
-		Name:     request.Name,
-		Street:   request.Street,
-		Street2:  request.Street2,
-		City:     request.City,
-		State:    request.State,
-		Zipcode:  request.Zipcode,
-		Notes:    request.Notes,
-		Modified: time.Now().Unix(),
-		Created:  currentJob.Created,
-		Formulas: request.Formulas,
-		Contact:  request.Contact,
+	currentJob, err := bc.storage.GetJob(account, request.Id)
+	if err != nil {
+		return &api.UpdateJobResponse{}, status.Error(codes.FailedPrecondition, "could not get current job")
 	}
 
-	err := bc.storage.UpdateJob(account, request.Id, &updatedJob)
+	updatedJob := api.Job{
+		Id:           request.Id,
+		Name:         request.Name,
+		Address:      request.Address,
+		Notes:        request.Notes,
+		Modified:     time.Now().Unix(),
+		Created:      currentJob.Created,
+		Formulas:     request.Formulas,
+		ContractorId: request.ContractorId,
+		Contact:      request.Contact,
+	}
+
+	err = bc.storage.UpdateJob(account, request.Id, &updatedJob)
 	if err != nil {
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateJobResponse{}, status.Error(codes.NotFound, "could not update job; job key not found")
@@ -148,16 +145,16 @@ func (bc *API) UpdateJob(context context.Context, request *api.UpdateJobRequest)
 		return &api.UpdateJobResponse{}, status.Error(codes.Internal, "could not update job")
 	}
 
-	bc.search.UpdateJobIndex(account, updatedJob)
+	go bc.search.UpdateJobIndex(account, updatedJob.Id)
 
 	bc.log.Infow("job updated", "job", updatedJob)
-	return &api.UpdateJobResponse{}, nil
+	return &api.UpdateJobResponse{Job: &updatedJob}, nil
 }
 
 // DeleteJob removes a job
-func (bc *API) DeleteJob(context context.Context, request *api.DeleteJobRequest) (*api.DeleteJobResponse, error) {
+func (bc *API) DeleteJob(ctx context.Context, request *api.DeleteJobRequest) (*api.DeleteJobResponse, error) {
 
-	account, present := getAccountFromContext(context)
+	account, present := getAccountFromContext(ctx)
 	if !present {
 		return &api.DeleteJobResponse{}, status.Error(codes.FailedPrecondition, "account required")
 	}
@@ -175,7 +172,7 @@ func (bc *API) DeleteJob(context context.Context, request *api.DeleteJobRequest)
 		return &api.DeleteJobResponse{}, status.Error(codes.Internal, "could not delete job")
 	}
 
-	bc.search.DeleteJobIndex(account, request.Id)
+	go bc.search.DeleteJobIndex(account, request.Id)
 
 	bc.log.Infow("job deleted", "job_id", request.Id)
 	return &api.DeleteJobResponse{}, nil

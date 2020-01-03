@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/clintjedwards/basecoat/api"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -18,9 +19,7 @@ func (info *testHarness) TestCreateAPIToken(t *testing.T) {
 		var opts []grpc.DialOption
 
 		creds, err := credentials.NewClientTLSFromFile("../localhost.crt", "")
-		if err != nil {
-			log.Fatalf("failed to get certificates: %v", err)
-		}
+		require.NoError(t, err)
 
 		opts = append(opts, grpc.WithTransportCredentials(creds))
 
@@ -39,9 +38,7 @@ func (info *testHarness) TestCreateAPIToken(t *testing.T) {
 		}
 
 		createResponse, err := basecoatClient.CreateAPIToken(context.Background(), createAPITokenRequest)
-		if err != nil {
-			log.Fatalf("could not create token: %v", err)
-		}
+		require.NoError(t, err)
 
 		info.apikey = createResponse.Key
 	})

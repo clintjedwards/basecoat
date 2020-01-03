@@ -53,21 +53,36 @@ message Base {
 message Job {
   string id = 1;
   string name = 2;
-  string street = 3;
-  string street2 = 4;
-  string city = 5;
-  string state = 6;
-  string zipcode = 7;
-  string notes = 8;
-  int64 created = 9;
-  int64 modified = 10;
+  Address address = 3;
+  string notes = 4;
+  int64 created = 5;
+  int64 modified = 6;
   // formula ids that have been made for this job
-  repeated string formulas = 11;
-  Contact contact = 12;
+  repeated string formulas = 7;
+  // each job is tied to a single contractor
+  string contractor_id = 8;
+  Contact contact = 9;
 }
 
-// Contact is information about point of contact for a job
+// Contractor is information about the company who requested
+// work for the job site
+message Contractor {
+  string id = 1;
+  string company = 2;
+  Contact contact = 3;
+  repeated string jobs = 4;
+}
+
 message Contact {
   string name = 1;
-  string info = 2;
+  string email = 2;
+  string phone = 3;
+}
+
+message Address {
+  string street = 1;
+  string street2 = 2;
+  string city = 3;
+  string state = 4;
+  string zipcode = 5;
 }

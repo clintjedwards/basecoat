@@ -18,6 +18,9 @@ func (db *BoltDB) GetAllFormulas(account string) (map[string]*api.Formula, error
 			return tkerrors.ErrEntityNotFound
 		}
 		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
+		if formulasBucket == nil {
+			return tkerrors.ErrEntityNotFound
+		}
 
 		err := formulasBucket.ForEach(func(key, value []byte) error {
 			var formula api.Formula
@@ -48,6 +51,9 @@ func (db *BoltDB) GetFormula(account, key string) (*api.Formula, error) {
 			return tkerrors.ErrEntityNotFound
 		}
 		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
+		if formulasBucket == nil {
+			return tkerrors.ErrEntityNotFound
+		}
 
 		formulaRaw := formulasBucket.Get([]byte(key))
 		if formulaRaw == nil {
@@ -75,9 +81,12 @@ func (db *BoltDB) AddFormula(account string, newFormula *api.Formula) (key strin
 		if accountBucket == nil {
 			return tkerrors.ErrEntityNotFound
 		}
-		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
+		targetBucket := accountBucket.Bucket([]byte(formulasBucket))
+		if targetBucket == nil {
+			return tkerrors.ErrEntityNotFound
+		}
 
-		key, err = db.getNewKey(formulasBucket)
+		key, err = db.getNewKey(targetBucket)
 
 		newFormula.Id = key
 
@@ -91,14 +100,14 @@ func (db *BoltDB) AddFormula(account string, newFormula *api.Formula) (key strin
 			return err
 		}
 
-		err = formulasBucket.Put([]byte(key), formulaRaw)
+		err = targetBucket.Put([]byte(key), formulaRaw)
 		if err != nil {
 			return err
 		}
 
 		// for all jobs included in newformula make sure to add new formula ID to all
 		for _, jobID := range newFormula.Jobs {
-			err := db.linkFormulaToJob(tx, account, key, jobID)
+			err := db.linkFormulaToJob(accountBucket, key, jobID)
 			if err != nil {
 				return err
 			}
@@ -122,6 +131,9 @@ func (db *BoltDB) UpdateFormula(account, key string, updatedFormula *api.Formula
 			return tkerrors.ErrEntityNotFound
 		}
 		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
+		if formulasBucket == nil {
+			return tkerrors.ErrEntityNotFound
+		}
 
 		// First check if key exists
 		currentFormula := formulasBucket.Get([]byte(key))
@@ -149,7 +161,7 @@ func (db *BoltDB) UpdateFormula(account, key string, updatedFormula *api.Formula
 
 		// Append formula id to formula list in job
 		for _, jobID := range additions {
-			err := db.linkFormulaToJob(tx, account, updatedFormula.Id, jobID)
+			err := db.linkFormulaToJob(accountBucket, updatedFormula.Id, jobID)
 			if err != nil {
 				return err
 			}
@@ -157,7 +169,7 @@ func (db *BoltDB) UpdateFormula(account, key string, updatedFormula *api.Formula
 
 		// Remove formula id from formulas list in jobs removed
 		for _, jobID := range removals {
-			err := db.unlinkFormulaFromJob(tx, account, updatedFormula.Id, jobID)
+			err := db.unlinkFormulaFromJob(accountBucket, updatedFormula.Id, jobID)
 			if err != nil {
 				return err
 			}
@@ -181,6 +193,9 @@ func (db *BoltDB) DeleteFormula(account, key string) error {
 			return tkerrors.ErrEntityNotFound
 		}
 		formulasBucket := accountBucket.Bucket([]byte(formulasBucket))
+		if formulasBucket == nil {
+			return tkerrors.ErrEntityNotFound
+		}
 
 		// First check if key exists
 		currentFormula := formulasBucket.Get([]byte(key))
@@ -200,7 +215,7 @@ func (db *BoltDB) DeleteFormula(account, key string) error {
 
 		// Remove formula id from formulas list in jobs this was linked to
 		for _, jobID := range storedFormula.Jobs {
-			err := db.unlinkFormulaFromJob(tx, account, key, jobID)
+			err := db.unlinkFormulaFromJob(accountBucket, key, jobID)
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,7 @@
 repository: clintjedwards/basecoat
 commands:
   build:
-    - protoc --go_out=plugins=grpc:. api/*.proto
+    - protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
     - protoc --js_out=import_style=commonjs,binary:./frontend/src/ --grpc-web_out=import_style=typescript,mode=grpcwebtext:./frontend/src/ -I ./api/ api/*.proto
     - go mod tidy
     - npm run --prefix ./frontend build:production

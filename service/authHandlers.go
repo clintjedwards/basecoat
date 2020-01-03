@@ -39,9 +39,9 @@ func (bc *API) CreateAPIToken(ctx context.Context, request *api.CreateAPITokenRe
 	}
 
 	// Limit length of duration requests
-	if request.Duration > bc.config.APITokenDurationLimit {
+	if request.Duration > bc.config.Backend.APITokenDurationLimit {
 		return &api.CreateAPITokenResponse{}, status.Errorf(codes.FailedPrecondition,
-			"duration request is too long; greater than %d seconds", bc.config.APITokenDurationLimit)
+			"duration request is too long; greater than %d seconds", bc.config.Backend.APITokenDurationLimit)
 	}
 
 	account, err := bc.storage.GetAccount(request.User)
@@ -96,7 +96,7 @@ func (bc *API) authenticate(ctx context.Context) (context.Context, error) {
 	// Specially handle admin routes
 	for _, route := range adminMethods {
 		if method == route {
-			admin := handleAdminRoutes(token, bc.config.AdminToken)
+			admin := handleAdminRoutes(token, bc.config.Backend.AdminToken)
 			if admin {
 				bc.log.Infow("admin route accessed", "method", method)
 				return ctx, err

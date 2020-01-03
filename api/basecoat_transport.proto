@@ -65,7 +65,7 @@ message CreateFormulaRequest {
   repeated Base bases = 5;
   repeated Colorant colorants = 6;
 }
-message CreateFormulaResponse { string id = 1; }
+message CreateFormulaResponse { Formula formula = 1; }
 
 message UpdateFormulaRequest {
   string id = 1;
@@ -76,7 +76,7 @@ message UpdateFormulaRequest {
   repeated Base bases = 6;
   repeated Colorant colorants = 7;
 }
-message UpdateFormulaResponse {}
+message UpdateFormulaResponse { Formula formula = 1; }
 
 message DeleteFormulaRequest { string id = 1; }
 message DeleteFormulaResponse {}
@@ -88,37 +88,55 @@ message SearchJobsRequest { string term = 1; }
 
 message SearchJobsResponse { repeated string results = 1; }
 
-message ListJobsRequest { string search_filter = 1; }
+message ListJobsRequest {}
 message ListJobsResponse { map<string, Job> jobs = 1; }
 
 message CreateJobRequest {
   string name = 1;
-  string street = 2;
-  string street2 = 3;
-  string city = 4;
-  string state = 5;
-  string zipcode = 6;
-  string notes = 7;
+  Address address = 2;
+  string notes = 3;
   // formula ids that have been made for this job
-  repeated string formulas = 8;
-  Contact contact = 9;
+  repeated string formulas = 4;
+  string contractor_id = 5;
+  Contact contact = 6;
 }
-message CreateJobResponse { string id = 1; }
+message CreateJobResponse { Job job = 1; }
 
 message UpdateJobRequest {
   string id = 1;
   string name = 2;
-  string street = 3;
-  string street2 = 4;
-  string city = 5;
-  string state = 6;
-  string zipcode = 7;
-  string notes = 8;
+  Address address = 3;
+  string notes = 4;
   // ids of formulas
-  repeated string formulas = 9;
-  Contact contact = 10;
+  repeated string formulas = 5;
+  string contractor_id = 6;
+  Contact contact = 7;
 }
-message UpdateJobResponse {}
+message UpdateJobResponse { Job job = 1; }
 
 message DeleteJobRequest { string id = 1; }
 message DeleteJobResponse {}
+
+message GetContractorRequest { string id = 1; }
+message GetContractorResponse { Contractor Contractor = 1; }
+
+message ListContractorsRequest {}
+message ListContractorsResponse { map<string, Contractor> contractors = 1; }
+
+message CreateContractorRequest {
+  string company = 1;
+  Contact contact = 2;
+  repeated string jobs = 3;
+}
+message CreateContractorResponse { Contractor Contractor = 1; }
+
+message UpdateContractorRequest {
+  string id = 1;
+  string company = 2;
+  Contact contact = 3;
+  repeated string jobs = 4;
+}
+message UpdateContractorResponse { Contractor Contractor = 1; }
+
+message DeleteContractorRequest { string id = 1; }
+message DeleteContractorResponse {}

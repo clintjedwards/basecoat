@@ -123,10 +123,10 @@ func (bc *API) CreateFormula(ctx context.Context, request *api.CreateFormulaRequ
 		return &api.CreateFormulaResponse{}, status.Error(codes.Internal, "could not retrieve formula after saving")
 	}
 
-	bc.search.UpdateFormulaIndex(account, *formula)
+	go bc.search.UpdateFormulaIndex(account, formulaID)
 
 	bc.log.Infow("formula created", "formula", *formula)
-	return &api.CreateFormulaResponse{Id: formula.Id}, nil
+	return &api.CreateFormulaResponse{Formula: formula}, nil
 }
 
 // UpdateFormula updates an already existing formula
@@ -141,7 +141,10 @@ func (bc *API) UpdateFormula(ctx context.Context, request *api.UpdateFormulaRequ
 		return &api.UpdateFormulaResponse{}, status.Error(codes.FailedPrecondition, "formula id required")
 	}
 
-	currentFormula, _ := bc.storage.GetFormula(account, request.Id)
+	currentFormula, err := bc.storage.GetFormula(account, request.Id)
+	if err != nil {
+		return &api.UpdateFormulaResponse{}, status.Error(codes.FailedPrecondition, "could not get current formula")
+	}
 
 	updatedFormula := api.Formula{
 		Id:        request.Id,
@@ -155,7 +158,7 @@ func (bc *API) UpdateFormula(ctx context.Context, request *api.UpdateFormulaRequ
 		Colorants: request.Colorants,
 	}
 
-	err := bc.storage.UpdateFormula(account, request.Id, &updatedFormula)
+	err = bc.storage.UpdateFormula(account, request.Id, &updatedFormula)
 	if err != nil {
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateFormulaResponse{}, status.Error(codes.NotFound, "could not update formula; formula key not found")
@@ -163,12 +166,11 @@ func (bc *API) UpdateFormula(ctx context.Context, request *api.UpdateFormulaRequ
 		bc.log.Errorw("could not update formula", "error", err)
 		return &api.UpdateFormulaResponse{}, status.Error(codes.Internal, "could not update formula")
 	}
-	fmt.Println("bye")
 
-	bc.search.UpdateFormulaIndex(account, updatedFormula)
+	go bc.search.UpdateFormulaIndex(account, updatedFormula.Id)
 
 	bc.log.Infow("formula updated", "formula", updatedFormula)
-	return &api.UpdateFormulaResponse{}, nil
+	return &api.UpdateFormulaResponse{Formula: &updatedFormula}, nil
 }
 
 // DeleteFormula removes a formula
@@ -192,7 +194,7 @@ func (bc *API) DeleteFormula(ctx context.Context, request *api.DeleteFormulaRequ
 		return &api.DeleteFormulaResponse{}, status.Error(codes.Internal, "could not delete formula")
 	}
 
-	bc.search.DeleteFormulaIndex(account, request.Id)
+	go bc.search.DeleteFormulaIndex(account, request.Id)
 
 	bc.log.Infow("formula deleted", "id", request.Id)
 	return &api.DeleteFormulaResponse{}, nil

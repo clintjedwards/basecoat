@@ -18,6 +18,9 @@ const (
 
 	// jobsBucket represents the container in which jobs are kept in the database
 	jobsBucket Bucket = "jobs"
+
+	// contractorsBucket represents the container in which contractors are kept in the database
+	contractorsBucket Bucket = "contractors"
 )
 
 // BoltDB is a representation of the bolt datastore

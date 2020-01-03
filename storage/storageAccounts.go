@@ -78,7 +78,7 @@ func (db *BoltDB) CreateAccount(id, pass string) error {
 			return fmt.Errorf("could not create account: %s; %v", id, err)
 		}
 
-		err = db.createBuckets(bucket, formulasBucket, jobsBucket)
+		err = db.createBuckets(bucket, formulasBucket, jobsBucket, contractorsBucket)
 		if err != nil {
 			return fmt.Errorf("could not create account buckets: %s; %v", id, err)
 		}

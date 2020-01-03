@@ -68,3 +68,8 @@ run-backend:
 	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	go mod tidy
 	go build -ldflags $(GO_LDFLAGS) -o /tmp/${APP_NAME} && /tmp/${APP_NAME} server
+
+## test: runs all application tests
+test:
+	go test -cover -v ./...
+

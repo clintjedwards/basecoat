@@ -12,19 +12,16 @@ type DatabaseConfig struct {
 
 // Config refers to general application configuration
 type Config struct {
-	// duration limit on user requested api token, after limit token will expire
-	APITokenDurationLimit int64  `envconfig:"api_token_duration_limit" default:"946708560"` //946708560 = 30 years
-	AdminToken            string `envconfig:"admin_token" default:"admin"`                  // used to allow admin functions
-	Debug                 bool   `envconfig:"debug" default:"false"`
-	TLSCertPath           string `envconfig:"tls_cert_path" default:"./localhost.crt"` // does not apply if certmagic is enabled
-	TLSKeyPath            string `envconfig:"tls_key_path" default:"./localhost.key"`  // does not apply if certmagic is enabled
-	URL                   string `envconfig:"url" default:"localhost:8080"`            // does not apply if certmagic is enabled
-	CertMagic             *CertMagicConfig
-	Frontend              *FrontendConfig
-	Backend               *BackendConfig
-	Database              *DatabaseConfig
-	CommandLine           *CommandLineConfig
-	Metrics               *MetricsConfig
+	Debug       bool   `envconfig:"debug" default:"false"`
+	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"` // does not apply if certmagic is enabled
+	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`  // does not apply if certmagic is enabled
+	URL         string `envconfig:"url" default:"localhost:8080"`            // does not apply if certmagic is enabled
+	CertMagic   *CertMagicConfig
+	Frontend    *FrontendConfig
+	Backend     *BackendConfig
+	Database    *DatabaseConfig
+	CommandLine *CommandLineConfig
+	Metrics     *MetricsConfig
 }
 
 // CertMagicConfig allows the automation of generating tls certificates
@@ -42,7 +39,11 @@ type FrontendConfig struct {
 
 // BackendConfig represents configuration for backend basecoat grpc service
 type BackendConfig struct {
-	SecretKey string `envconfig:"backend_secret_key" default:"testtoken"` // secret key used to encrypt api tokens
+	// duration limit on user requested api token, after limit token will expire
+	APITokenDurationLimit  int64  `envconfig:"backend_api_token_duration_limit" default:"946708560"` // 946708560 = 30 years
+	AdminToken             string `envconfig:"backend_admin_token" default:"admin"`                  // used to allow admin functions
+	SearchIndexRebuildTime int64  `envconfig:"backend_search_index_rebuild_time" default:"600"`      // how often the search index rebuilds; in seconds
+	SecretKey              string `envconfig:"backend_secret_key" default:"testtoken"`               // secret key used to encrypt api tokens
 }
 
 // MetricsConfig represents configuration for the metrics endpoint

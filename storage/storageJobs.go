@@ -93,7 +93,14 @@ func (db *BoltDB) AddJob(account string, newJob *api.Job) (key string, err error
 
 		// for all jobs included in newjob make sure to add new job ID to all
 		for _, formulaID := range newJob.Formulas {
-			err := db.linkJobToFormula(tx, account, key, formulaID)
+			err := db.linkJobToFormula(accountBucket, key, formulaID)
+			if err != nil {
+				return err
+			}
+		}
+
+		if newJob.ContractorId != "" {
+			err := db.linkJobToContractor(accountBucket, key, newJob.ContractorId)
 			if err != nil {
 				return err
 			}
@@ -144,7 +151,7 @@ func (db *BoltDB) UpdateJob(account, key string, updatedJob *api.Job) error {
 
 		// Append job id to job list in job
 		for _, formulaID := range additions {
-			err := db.linkJobToFormula(tx, account, updatedJob.Id, formulaID)
+			err := db.linkJobToFormula(accountBucket, updatedJob.Id, formulaID)
 			if err != nil {
 				return err
 			}
@@ -152,9 +159,24 @@ func (db *BoltDB) UpdateJob(account, key string, updatedJob *api.Job) error {
 
 		// Remove job id from jobs list in jobs removed
 		for _, formulaID := range removals {
-			err := db.unlinkJobFromFormula(tx, account, updatedJob.Id, formulaID)
+			err := db.unlinkJobFromFormula(accountBucket, updatedJob.Id, formulaID)
 			if err != nil {
 				return err
+			}
+		}
+
+		// handle contractor linking
+		if updatedJob.ContractorId != storedJob.ContractorId {
+			err := db.unlinkJobFromContractor(accountBucket, updatedJob.Id, storedJob.ContractorId)
+			if err != nil {
+				return err
+			}
+
+			if updatedJob.ContractorId != "" {
+				err := db.linkJobToContractor(accountBucket, updatedJob.Id, updatedJob.ContractorId)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -195,11 +217,19 @@ func (db *BoltDB) DeleteJob(account, key string) error {
 
 		// Remove job id from jobs list in jobs this was linked to
 		for _, formulaID := range storedJob.Formulas {
-			err := db.unlinkJobFromFormula(tx, account, key, formulaID)
+			err := db.unlinkJobFromFormula(accountBucket, key, formulaID)
 			if err != nil {
 				return err
 			}
 		}
+
+		if storedJob.ContractorId != "" {
+			err = db.unlinkJobFromContractor(accountBucket, storedJob.Id, storedJob.ContractorId)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {

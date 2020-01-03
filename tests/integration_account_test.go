@@ -21,9 +21,8 @@ func (info *testHarness) TestCreateAccount(t *testing.T) {
 		ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 		createResponse, err := info.client.CreateAccount(ctx, createAccountRequest)
-
-		require.NotNil(t, createResponse)
 		require.NoError(t, err)
+		require.NotNil(t, createResponse)
 	})
 }
 
@@ -44,9 +43,8 @@ func (info *testHarness) TestGetAccount(t *testing.T) {
 		ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 		getResponse, err := info.client.GetAccount(ctx, getAccountRequest)
-
-		require.NotNil(t, getResponse)
 		require.NoError(t, err)
+		require.NotNil(t, getResponse)
 		require.Equal(t, getResponse.Account.Id, expectedResponse.Account.Id)
 	})
 }
@@ -58,9 +56,8 @@ func (info *testHarness) TestListAccounts(t *testing.T) {
 		ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 		listResponse, err := info.client.ListAccounts(ctx, &api.ListAccountsRequest{})
-
-		require.NotNil(t, listResponse)
 		require.NoError(t, err)
+		require.NotNil(t, listResponse)
 		require.NotEmpty(t, listResponse.Accounts)
 		require.Equal(t, listResponse.Accounts["test"].Id, "test")
 	})
@@ -73,12 +70,12 @@ func (info *testHarness) TestDisableAccount(t *testing.T) {
 		ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 		disableResponse, err := info.client.DisableAccount(ctx, &api.DisableAccountRequest{Id: "test"})
-		require.NotNil(t, disableResponse)
 		require.NoError(t, err)
+		require.NotNil(t, disableResponse)
 
 		getResponse, err := info.client.GetAccount(ctx, &api.GetAccountRequest{Id: "test"})
-		require.NotNil(t, disableResponse)
 		require.NoError(t, err)
+		require.NotNil(t, disableResponse)
 		require.Equal(t, getResponse.Account.State.String(), "DISABLED")
 	})
 }
@@ -90,8 +87,8 @@ func (info *testHarness) TestUpdateAccount(t *testing.T) {
 		ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 		getResponse, err := info.client.GetAccount(ctx, &api.GetAccountRequest{Id: "test"})
-		require.NotNil(t, getResponse)
 		require.NoError(t, err)
+		require.NotNil(t, getResponse)
 
 		updateAccountRequest := &api.UpdateAccountRequest{
 			Id:    "test",
@@ -100,12 +97,12 @@ func (info *testHarness) TestUpdateAccount(t *testing.T) {
 		}
 
 		updateResponse, err := info.client.UpdateAccount(ctx, updateAccountRequest)
-		require.NotNil(t, updateResponse)
 		require.NoError(t, err)
+		require.NotNil(t, updateResponse)
 
 		getResponse, err = info.client.GetAccount(ctx, &api.GetAccountRequest{Id: "test"})
-		require.NotNil(t, getResponse)
 		require.NoError(t, err)
+		require.NotNil(t, getResponse)
 		require.Equal(t, "ACTIVE", getResponse.Account.State.String())
 	})
 }

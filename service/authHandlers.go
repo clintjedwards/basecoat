@@ -8,6 +8,7 @@ import (
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/toolkit/password"
 	"github.com/clintjedwards/toolkit/tkerrors"
+	"go.uber.org/zap"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
@@ -49,7 +50,7 @@ func (bc *API) CreateAPIToken(ctx context.Context, request *api.CreateAPITokenRe
 		if errors.Is(err, tkerrors.ErrEntityNotFound) {
 			return &api.CreateAPITokenResponse{}, status.Error(codes.NotFound, "could not authenticate account")
 		}
-		bc.log.Errorw("could not authenticate account", "error", err, "account", request.User)
+		zap.S().Errorw("could not authenticate account", "error", err, "account", request.User)
 		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate account; internal error")
 	}
 
@@ -68,11 +69,11 @@ func (bc *API) CreateAPIToken(ctx context.Context, request *api.CreateAPITokenRe
 
 	tokenString, err := token.SignedString([]byte(bc.config.Backend.SecretKey))
 	if err != nil {
-		bc.log.Errorw("could not sign jwt token", "error", err)
+		zap.S().Errorw("could not sign jwt token", "error", err)
 		return &api.CreateAPITokenResponse{}, status.Error(codes.Internal, "could not authenticate account; internal error")
 	}
 
-	bc.log.Infow("api token created", "account", request.User)
+	zap.S().Infow("api token created", "account", request.User)
 	return &api.CreateAPITokenResponse{Key: tokenString}, nil
 }
 
@@ -98,10 +99,10 @@ func (bc *API) authenticate(ctx context.Context) (context.Context, error) {
 		if method == route {
 			admin := handleAdminRoutes(token, bc.config.Backend.AdminToken)
 			if admin {
-				bc.log.Infow("admin route accessed", "method", method)
+				zap.S().Infow("admin route accessed", "method", method)
 				return ctx, err
 			}
-			bc.log.Warnw("could not verify admin token", "method", method)
+			zap.S().Warnw("could not verify admin token", "method", method)
 			return ctx, grpc.Errorf(codes.Unauthenticated, "could not verify admin token")
 		}
 	}
@@ -115,34 +116,34 @@ func (bc *API) authenticate(ctx context.Context) (context.Context, error) {
 		return []byte(bc.config.Backend.SecretKey), nil
 	})
 	if err != nil {
-		bc.log.Errorw("could not decode jwt token", "error", err)
+		zap.S().Errorw("could not decode jwt token", "error", err)
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	if _, present := jwtToken.Claims.(jwt.MapClaims); !present {
-		bc.log.Error("could not verify jwt token")
+		zap.S().Error("could not verify jwt token")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	if !jwtToken.Valid {
-		bc.log.Error("could not verify jwt token; not valid")
+		zap.S().Error("could not verify jwt token; not valid")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	claims := jwtToken.Claims.(jwt.MapClaims)
 
 	if _, present := claims["account"]; !present {
-		bc.log.Error("misformatted jwt token; missing account")
+		zap.S().Error("misformatted jwt token; missing account")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 	if _, present := claims["expiry"]; !present {
-		bc.log.Error("misformatted jwt token; missing expiry")
+		zap.S().Error("misformatted jwt token; missing expiry")
 		return ctx, grpc.Errorf(codes.Unauthenticated, "could not decode token")
 	}
 
 	expiry := int64(claims["expiry"].(float64))
 	if time.Now().Unix() > expiry && expiry != 0 {
-		bc.log.Infow("token has expired",
+		zap.S().Infow("token has expired",
 			"user", claims["account"],
 			"current_time", time.Now().Unix(),
 			"expiry_time", expiry)

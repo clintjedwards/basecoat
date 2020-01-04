@@ -20,6 +20,6 @@ func main() {
 		PackageName: "frontend",
 	})
 	if err != nil {
-		log.Fatalln(err)
+		zap.S().Fatalln(err)
 	}
 }

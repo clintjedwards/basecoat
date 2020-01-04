@@ -2,7 +2,6 @@ package search
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/clintjedwards/basecoat/storage"
 	"github.com/clintjedwards/toolkit/random"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 var testInfo = struct {
@@ -24,15 +24,16 @@ var testInfo = struct {
 
 func setup() {
 
+	os.Setenv("LOGLEVEL", "error")
 	databasePath := fmt.Sprintf("/tmp/basecoat%s.db", random.GenerateRandString(4))
 
 	storage, err := storage.NewBoltDB(databasePath, 4)
 	if err != nil {
-		log.Fatal(err)
+		zap.S().Fatal(err)
 	}
 	searchIndex, err := InitSearch(storage)
 	if err != nil {
-		log.Fatal(err)
+		zap.S().Fatal(err)
 	}
 
 	testInfo.search = searchIndex
@@ -82,6 +83,7 @@ func TestMain(m *testing.M) {
 }
 
 func teardown() {
+	os.Unsetenv("LOGLEVEL")
 	os.Remove(testInfo.databasePath)
 }
 

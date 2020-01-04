@@ -64,6 +64,7 @@ run:
 	go build -ldflags $(GO_LDFLAGS) -o /tmp/${APP_NAME} && /tmp/${APP_NAME} server
 
 ## run-backend: build backend only and run server; useful for dev
+run-backend: export DEBUG=true
 run-backend:
 	protoc --proto_path=api --go_out=plugins=grpc:api api/*.proto
 	go mod tidy

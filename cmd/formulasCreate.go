@@ -3,12 +3,12 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -36,12 +36,12 @@ func runFormulasCreateCmd(cmd *cobra.Command, args []string) {
 
 	config, err := config.FromEnv()
 	if err != nil {
-		log.Fatalf("failed to read configuration: %v", err)
+		zap.S().Fatalf("failed to read configuration: %v", err)
 	}
 
 	creds, err := credentials.NewClientTLSFromFile(config.TLSCertPath, "")
 	if err != nil {
-		log.Fatalf("failed to get certificates: %v", err)
+		zap.S().Fatalf("failed to get certificates: %v", err)
 	}
 
 	var opts []grpc.DialOption
@@ -51,7 +51,7 @@ func runFormulasCreateCmd(cmd *cobra.Command, args []string) {
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]), opts...)
 	if err != nil {
-		log.Fatalf("could not connect to server: %v", err)
+		zap.S().Fatalf("could not connect to server: %v", err)
 	}
 	defer conn.Close()
 
@@ -67,7 +67,7 @@ func runFormulasCreateCmd(cmd *cobra.Command, args []string) {
 		Jobs:   jobs,
 	})
 	if err != nil {
-		log.Fatalf("could not create formula: %v", err)
+		zap.S().Fatalf("could not create formula: %v", err)
 	}
 }
 

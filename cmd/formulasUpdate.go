@@ -3,12 +3,12 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -34,14 +34,14 @@ func runFormulasUpdateCmd(cmd *cobra.Command, args []string) {
 
 	config, err := config.FromEnv()
 	if err != nil {
-		log.Fatalf("failed to read configuration")
+		zap.S().Fatalf("failed to read configuration")
 	}
 
 	hostPortTuple := strings.Split(config.URL, ":")
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]))
 	if err != nil {
-		log.Fatalf("could not connect to basecoat: %v", err)
+		zap.S().Fatalf("could not connect to basecoat: %v", err)
 	}
 	defer conn.Close()
 
@@ -58,7 +58,7 @@ func runFormulasUpdateCmd(cmd *cobra.Command, args []string) {
 		Jobs:   jobs,
 	})
 	if err != nil {
-		log.Fatalf("could not update formula: %v", err)
+		zap.S().Fatalf("could not update formula: %v", err)
 	}
 }
 

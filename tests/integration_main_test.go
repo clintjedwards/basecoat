@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/app"
 	"github.com/clintjedwards/toolkit/random"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -28,6 +28,7 @@ func (info *testHarness) setup() {
 	os.Setenv("TLS_KEY_PATH", "../localhost.key")
 	os.Setenv("DATABASE_PATH", databasePath)
 	os.Setenv("BACKEND_ADMIN_TOKEN", "admin")
+	os.Setenv("LOGLEVEL", "error")
 
 	go app.StartServices()
 	time.Sleep(time.Second)
@@ -36,14 +37,14 @@ func (info *testHarness) setup() {
 
 	creds, err := credentials.NewClientTLSFromFile("../localhost.crt", "")
 	if err != nil {
-		log.Fatalf("failed to get certificates: %v", err)
+		zap.S().Fatalf("failed to get certificates: %v", err)
 	}
 
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
 	if err != nil {
-		log.Fatalf("could not connect to basecoat: %v", err)
+		zap.S().Fatalf("could not connect to basecoat: %v", err)
 	}
 
 	basecoatClient := api.NewBasecoatClient(conn)
@@ -57,6 +58,7 @@ func (info *testHarness) cleanup() {
 	os.Unsetenv("TLS_KEY_PATH")
 	os.Unsetenv("DATABASE_PATH")
 	os.Unsetenv("BACKEND_ADMIN_TOKEN")
+	os.Unsetenv("LOGLEVEL")
 	os.Remove(info.databasePath)
 }
 

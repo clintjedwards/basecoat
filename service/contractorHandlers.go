@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/clintjedwards/toolkit/tkerrors"
+	"go.uber.org/zap"
 
 	"github.com/clintjedwards/basecoat/api"
 	"google.golang.org/grpc/codes"
@@ -68,7 +69,7 @@ func (bc *API) CreateContractor(ctx context.Context, request *api.CreateContract
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateContractorResponse{}, status.Error(codes.AlreadyExists, "could not save contractor; contractor already exists")
 		}
-		bc.log.Errorw("could not save contractor", "error", err)
+		zap.S().Errorw("could not save contractor", "error", err)
 		return &api.CreateContractorResponse{}, status.Error(codes.Internal, "could not save contractor")
 	}
 
@@ -79,7 +80,7 @@ func (bc *API) CreateContractor(ctx context.Context, request *api.CreateContract
 		go bc.search.UpdateJobIndex(account, job)
 	}
 
-	bc.log.Infow("contractor created", "contractor", newContractor)
+	zap.S().Infow("contractor created", "contractor", newContractor)
 	return &api.CreateContractorResponse{Contractor: &newContractor}, nil
 }
 
@@ -107,11 +108,11 @@ func (bc *API) UpdateContractor(ctx context.Context, request *api.UpdateContract
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateContractorResponse{}, status.Error(codes.NotFound, "could not update contractor; contractor key not found")
 		}
-		bc.log.Errorw("could not update contractor", "error", err)
+		zap.S().Errorw("could not update contractor", "error", err)
 		return &api.UpdateContractorResponse{}, status.Error(codes.Internal, "could not update contractor")
 	}
 
-	bc.log.Infow("contractor updated", "contractor", updatedContractor)
+	zap.S().Infow("contractor updated", "contractor", updatedContractor)
 	return &api.UpdateContractorResponse{Contractor: &updatedContractor}, nil
 }
 
@@ -132,10 +133,10 @@ func (bc *API) DeleteContractor(ctx context.Context, request *api.DeleteContract
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.DeleteContractorResponse{}, status.Error(codes.NotFound, "could not delete contractor; contractor key not found")
 		}
-		bc.log.Errorw("could not delete contractor", "error", err, "contractor_id", request.Id)
+		zap.S().Errorw("could not delete contractor", "error", err, "contractor_id", request.Id)
 		return &api.DeleteContractorResponse{}, status.Error(codes.Internal, "could not delete contractor")
 	}
 
-	bc.log.Infow("contractor deleted", "contractor_id", request.Id)
+	zap.S().Infow("contractor deleted", "contractor_id", request.Id)
 	return &api.DeleteContractorResponse{}, nil
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/storage"
-	"github.com/clintjedwards/toolkit/logger"
 	"go.uber.org/zap"
 )
 
@@ -22,7 +21,6 @@ const searchSyntax string = "*%s*"
 type Search struct {
 	formulaIndex map[string]bleve.Index
 	jobIndex     map[string]bleve.Index
-	log          *zap.SugaredLogger
 	store        storage.BoltDB
 }
 
@@ -38,7 +36,6 @@ func InitSearch(store storage.BoltDB) (*Search, error) {
 	return &Search{
 		formulaIndex: map[string]bleve.Index{},
 		jobIndex:     map[string]bleve.Index{},
-		log:          logger.Log(),
 		store:        store,
 	}, nil
 }
@@ -51,7 +48,7 @@ func (si *Search) BuildIndex(store storage.BoltDB) {
 
 	accounts, err := store.GetAllAccounts()
 	if err != nil {
-		si.log.Fatalw("failed to query database for accounts",
+		zap.S().Fatalw("failed to query database for accounts",
 			"error", err)
 	}
 
@@ -60,7 +57,7 @@ func (si *Search) BuildIndex(store storage.BoltDB) {
 	}
 
 	elapsed := time.Since(start)
-	si.log.Infow("compiled index", "time", elapsed)
+	zap.S().Infow("compiled index", "time", elapsed)
 }
 
 // UpdateFormulaIndex updates an already loaded formula index
@@ -71,7 +68,7 @@ func (si *Search) UpdateFormulaIndex(account string, formulaID string) {
 
 	formula, err := si.store.GetFormula(account, formulaID)
 	if err != nil {
-		si.log.Errorw("could not get formula from database",
+		zap.S().Errorw("could not get formula from database",
 			"account", account, "formulaID", formulaID)
 	}
 
@@ -88,7 +85,7 @@ func (si *Search) UpdateJobIndex(account string, jobID string) {
 
 	job, err := si.store.GetJob(account, jobID)
 	if err != nil {
-		si.log.Errorw("could not get job from database",
+		zap.S().Errorw("could not get job from database",
 			"account", account, "jobID", jobID)
 	}
 
@@ -96,7 +93,7 @@ func (si *Search) UpdateJobIndex(account string, jobID string) {
 	if job.ContractorId != "" {
 		contractor, err = si.store.GetContractor(account, job.ContractorId)
 		if err != nil {
-			si.log.Errorw("could not get contractor from database",
+			zap.S().Errorw("could not get contractor from database",
 				"account", account, "contractorID", job.ContractorId)
 		}
 	}
@@ -130,7 +127,7 @@ func createNewIndex() bleve.Index {
 	indexMapping := bleve.NewIndexMapping()
 	index, err := bleve.NewMemOnly(indexMapping)
 	if err != nil {
-		logger.Log().Errorw("failed to create search index", "error", err)
+		zap.S().Errorw("failed to create search index", "error", err)
 		return nil
 	}
 
@@ -151,7 +148,7 @@ func (si *Search) populateIndex(account string) {
 	// Index all formulas
 	formulas, err := si.store.GetAllFormulas(account)
 	if err != nil {
-		si.log.Errorw("failed to query database for formulas",
+		zap.S().Errorw("failed to query database for formulas",
 			"error", err,
 			"account", account)
 	}
@@ -163,7 +160,7 @@ func (si *Search) populateIndex(account string) {
 	// Index all jobs
 	jobs, err := si.store.GetAllJobs(account)
 	if err != nil {
-		si.log.Errorw("failed to query database for jobs",
+		zap.S().Errorw("failed to query database for jobs",
 			"error", err,
 			"account", account)
 	}
@@ -171,7 +168,7 @@ func (si *Search) populateIndex(account string) {
 	//Get all contractors to be added into job indexes
 	contractors, err := si.store.GetAllContractors(account)
 	if err != nil {
-		si.log.Errorw("failed to query database for contractors",
+		zap.S().Errorw("failed to query database for contractors",
 			"error", err,
 			"account", account)
 	}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/toolkit/tkerrors"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -47,11 +48,11 @@ func (bc *API) CreateAccount(ctx context.Context, request *api.CreateAccountRequ
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateAccountResponse{}, status.Error(codes.AlreadyExists, "could not save account; account already exists")
 		}
-		bc.log.Errorw("could not save account", "error", err)
+		zap.S().Errorw("could not save account", "error", err)
 		return &api.CreateAccountResponse{}, status.Error(codes.Internal, "could not save account")
 	}
 
-	bc.log.Infow("account created", "account", request.Id)
+	zap.S().Infow("account created", "account", request.Id)
 	return &api.CreateAccountResponse{}, nil
 }
 
@@ -82,11 +83,11 @@ func (bc *API) UpdateAccount(ctx context.Context, request *api.UpdateAccountRequ
 		if err == tkerrors.ErrEntityExists {
 			return &api.UpdateAccountResponse{}, status.Error(codes.AlreadyExists, "could not save account; account already exists")
 		}
-		bc.log.Errorw("could not save account", "error", err)
+		zap.S().Errorw("could not save account", "error", err)
 		return &api.UpdateAccountResponse{}, status.Error(codes.Internal, "could not save account")
 	}
 
-	bc.log.Infow("account updated", "account", request.Id)
+	zap.S().Infow("account updated", "account", request.Id)
 	return &api.UpdateAccountResponse{}, nil
 }
 
@@ -98,10 +99,10 @@ func (bc *API) DisableAccount(ctx context.Context, request *api.DisableAccountRe
 		if err == tkerrors.ErrEntityExists {
 			return &api.DisableAccountResponse{}, status.Error(codes.AlreadyExists, "could not save account; account already exists")
 		}
-		bc.log.Errorw("could not save account", "error", err)
+		zap.S().Errorw("could not save account", "error", err)
 		return &api.DisableAccountResponse{}, status.Error(codes.Internal, "could not save account")
 	}
 
-	bc.log.Infow("account disabled", "account", request.Id)
+	zap.S().Infow("account disabled", "account", request.Id)
 	return &api.DisableAccountResponse{}, nil
 }

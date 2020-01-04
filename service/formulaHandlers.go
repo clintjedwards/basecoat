@@ -7,6 +7,7 @@ import (
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/toolkit/tkerrors"
+	"go.uber.org/zap"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -111,7 +112,7 @@ func (bc *API) CreateFormula(ctx context.Context, request *api.CreateFormulaRequ
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateFormulaResponse{}, status.Error(codes.AlreadyExists, "could not save formula; formula already exists")
 		}
-		bc.log.Errorw("could not save formula", "error", err)
+		zap.S().Errorw("could not save formula", "error", err)
 		return &api.CreateFormulaResponse{}, status.Error(codes.Internal, "could not save formula")
 	}
 
@@ -125,7 +126,7 @@ func (bc *API) CreateFormula(ctx context.Context, request *api.CreateFormulaRequ
 
 	go bc.search.UpdateFormulaIndex(account, formulaID)
 
-	bc.log.Infow("formula created", "formula", *formula)
+	zap.S().Infow("formula created", "formula", *formula)
 	return &api.CreateFormulaResponse{Formula: formula}, nil
 }
 
@@ -163,13 +164,13 @@ func (bc *API) UpdateFormula(ctx context.Context, request *api.UpdateFormulaRequ
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateFormulaResponse{}, status.Error(codes.NotFound, "could not update formula; formula key not found")
 		}
-		bc.log.Errorw("could not update formula", "error", err)
+		zap.S().Errorw("could not update formula", "error", err)
 		return &api.UpdateFormulaResponse{}, status.Error(codes.Internal, "could not update formula")
 	}
 
 	go bc.search.UpdateFormulaIndex(account, updatedFormula.Id)
 
-	bc.log.Infow("formula updated", "formula", updatedFormula)
+	zap.S().Infow("formula updated", "formula", updatedFormula)
 	return &api.UpdateFormulaResponse{Formula: &updatedFormula}, nil
 }
 
@@ -190,12 +191,12 @@ func (bc *API) DeleteFormula(ctx context.Context, request *api.DeleteFormulaRequ
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.DeleteFormulaResponse{}, status.Error(codes.NotFound, "could not delete formula; formula key not found")
 		}
-		bc.log.Errorw("could not delete formula", "error", err)
+		zap.S().Errorw("could not delete formula", "error", err)
 		return &api.DeleteFormulaResponse{}, status.Error(codes.Internal, "could not delete formula")
 	}
 
 	go bc.search.DeleteFormulaIndex(account, request.Id)
 
-	bc.log.Infow("formula deleted", "id", request.Id)
+	zap.S().Infow("formula deleted", "id", request.Id)
 	return &api.DeleteFormulaResponse{}, nil
 }

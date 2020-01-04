@@ -3,7 +3,6 @@ package tests
 import (
 	"context"
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/clintjedwards/basecoat/api"
@@ -24,9 +23,7 @@ func (info *testHarness) TestCreateAPIToken(t *testing.T) {
 		opts = append(opts, grpc.WithTransportCredentials(creds))
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
-		if err != nil {
-			log.Fatalf("could not connect to basecoat: %v", err)
-		}
+		require.NoError(t, err)
 		defer conn.Close()
 
 		basecoatClient := api.NewBasecoatClient(conn)

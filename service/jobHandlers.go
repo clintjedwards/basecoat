@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/clintjedwards/toolkit/tkerrors"
+	"go.uber.org/zap"
 
 	"github.com/clintjedwards/basecoat/api"
 	"google.golang.org/grpc/codes"
@@ -95,7 +96,7 @@ func (bc *API) CreateJob(ctx context.Context, request *api.CreateJobRequest) (*a
 		if err == tkerrors.ErrEntityExists {
 			return &api.CreateJobResponse{}, status.Error(codes.AlreadyExists, "could not save job; job already exists")
 		}
-		bc.log.Errorw("could not save job", "error", err)
+		zap.S().Errorw("could not save job", "error", err)
 		return &api.CreateJobResponse{}, status.Error(codes.Internal, "could not save job")
 	}
 
@@ -103,7 +104,7 @@ func (bc *API) CreateJob(ctx context.Context, request *api.CreateJobRequest) (*a
 
 	go bc.search.UpdateJobIndex(account, newJob.Id)
 
-	bc.log.Infow("job created", "job", newJob)
+	zap.S().Infow("job created", "job", newJob)
 	return &api.CreateJobResponse{Job: &newJob}, nil
 }
 
@@ -141,13 +142,13 @@ func (bc *API) UpdateJob(ctx context.Context, request *api.UpdateJobRequest) (*a
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.UpdateJobResponse{}, status.Error(codes.NotFound, "could not update job; job key not found")
 		}
-		bc.log.Errorw("could not update job", "error", err)
+		zap.S().Errorw("could not update job", "error", err)
 		return &api.UpdateJobResponse{}, status.Error(codes.Internal, "could not update job")
 	}
 
 	go bc.search.UpdateJobIndex(account, updatedJob.Id)
 
-	bc.log.Infow("job updated", "job", updatedJob)
+	zap.S().Infow("job updated", "job", updatedJob)
 	return &api.UpdateJobResponse{Job: &updatedJob}, nil
 }
 
@@ -168,12 +169,12 @@ func (bc *API) DeleteJob(ctx context.Context, request *api.DeleteJobRequest) (*a
 		if err == tkerrors.ErrEntityNotFound {
 			return &api.DeleteJobResponse{}, status.Error(codes.NotFound, "could not delete job; job key not found")
 		}
-		bc.log.Errorw("could not delete job", "error", err, "job_id", request.Id)
+		zap.S().Errorw("could not delete job", "error", err, "job_id", request.Id)
 		return &api.DeleteJobResponse{}, status.Error(codes.Internal, "could not delete job")
 	}
 
 	go bc.search.DeleteJobIndex(account, request.Id)
 
-	bc.log.Infow("job deleted", "job_id", request.Id)
+	zap.S().Infow("job deleted", "job_id", request.Id)
 	return &api.DeleteJobResponse{}, nil
 }

@@ -2,12 +2,12 @@ package frontend
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/shurcooL/httpgzip"
+	"go.uber.org/zap"
 )
 
 //Frontend represents an instance of the frontend application
@@ -49,13 +49,13 @@ func (ui *Frontend) RegisterUIRoutes(router *mux.Router) {
 
 	file, err := assets.Open("index.html")
 	if err != nil {
-		log.Fatalf("could not find index.html file: %v", err)
+		zap.S().Fatalf("could not find index.html file: %v", err)
 	}
 	defer file.Close()
 
 	indexContent, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Fatalf("could not read index.html file: %v", err)
+		zap.S().Fatalf("could not read index.html file: %v", err)
 	}
 
 	router.PathPrefix("/").Handler(historyModeHandler(fileServerHandler, indexContent))

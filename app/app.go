@@ -1,7 +1,6 @@
 package app
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -11,7 +10,7 @@ import (
 	"github.com/clintjedwards/basecoat/frontend"
 	"github.com/clintjedwards/basecoat/metrics"
 	"github.com/clintjedwards/basecoat/service"
-	"github.com/clintjedwards/toolkit/logger"
+	"go.uber.org/zap"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -24,7 +23,7 @@ import (
 func StartServices() {
 	config, err := config.FromEnv()
 	if err != nil {
-		log.Fatal(err)
+		zap.S().Fatal(err)
 	}
 
 	api := service.NewBasecoatAPI(config)
@@ -45,7 +44,7 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 	if config.Frontend.Enable {
 		frontend := frontend.NewFrontend()
 		frontend.RegisterUIRoutes(router)
-		logger.Log().Infow("basecoat frontend enabled",
+		zap.S().Infow("basecoat frontend enabled",
 			"enabled", config.Frontend.Enable)
 	}
 
@@ -69,7 +68,7 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 		certmagic.Default.Agreed = true
 		certmagic.Default.Email = config.CertMagic.Email
 
-		log.Fatal(certmagic.HTTPS([]string{config.CertMagic.Domain}, modifiedHandler))
+		zap.S().Fatal(certmagic.HTTPS([]string{config.CertMagic.Domain}, modifiedHandler))
 	} else {
 
 		httpServer := http.Server{
@@ -79,7 +78,7 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 			ReadTimeout:  15 * time.Second,
 		}
 
-		logger.Log().Infow("starting basecoat grpc/http service", "url", config.URL)
-		log.Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
+		zap.S().Infow("starting basecoat grpc/http service", "url", config.URL)
+		zap.S().Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
 	}
 }

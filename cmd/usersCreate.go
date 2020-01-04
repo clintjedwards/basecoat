@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/clintjedwards/basecoat/api"
 	"github.com/clintjedwards/basecoat/config"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -30,17 +30,17 @@ func runUsersCreateCmd(cmd *cobra.Command, args []string) {
 	fmt.Printf("Password: ")
 	pass, err := gopass.GetPasswdMasked()
 	if err != nil {
-		log.Fatalf("failed retrieve password")
+		zap.S().Fatalf("failed retrieve password")
 	}
 
 	config, err := config.FromEnv()
 	if err != nil {
-		log.Fatalf("failed to read configuration: %v", err)
+		zap.S().Fatalf("failed to read configuration: %v", err)
 	}
 
 	creds, err := credentials.NewClientTLSFromFile(config.TLSCertPath, "")
 	if err != nil {
-		log.Fatalf("failed to get certificates: %v", err)
+		zap.S().Fatalf("failed to get certificates: %v", err)
 	}
 
 	var opts []grpc.DialOption
@@ -50,7 +50,7 @@ func runUsersCreateCmd(cmd *cobra.Command, args []string) {
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", hostPortTuple[0], hostPortTuple[1]), opts...)
 	if err != nil {
-		log.Fatalf("could not connect to server: %v", err)
+		zap.S().Fatalf("could not connect to server: %v", err)
 	}
 	defer conn.Close()
 
@@ -64,7 +64,7 @@ func runUsersCreateCmd(cmd *cobra.Command, args []string) {
 		Password: string(pass),
 	})
 	if err != nil {
-		log.Fatalf("could not create user: %v", err)
+		zap.S().Fatalf("could not create user: %v", err)
 	}
 }
 

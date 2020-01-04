@@ -8,7 +8,7 @@ require (
 	github.com/blevesearch/go-porterstemmer v1.0.2 // indirect
 	github.com/blevesearch/segment v0.0.0-20160915185041-762005e7a34f // indirect
 	github.com/boltdb/bolt v1.3.1
-	github.com/clintjedwards/toolkit v0.0.0-20191224020756-a93e6eeb46b9
+	github.com/clintjedwards/toolkit v1.0.1-0.20200104072428-db9416275a28
 	github.com/corpix/uarand v0.1.0 // indirect
 	github.com/couchbase/vellum v0.0.0-20190829182332-ef2e028c01fd // indirect
 	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
@@ -46,7 +46,6 @@ require (
 	github.com/tinylib/msgp v1.1.1 // indirect
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/zap v1.13.0
-	golang.org/x/crypto v0.0.0-20191219195013-becbf705a915 // indirect
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
 	golang.org/x/sys v0.0.0-20191220220014-0732a990476f // indirect
 	golang.org/x/tools v0.0.0-20191220234730-f13409bbebaf // indirect

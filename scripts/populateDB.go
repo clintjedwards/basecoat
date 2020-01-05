@@ -1,243 +1,224 @@
 package main
 
-// import (
-// 	"context"
-// 	"fmt"
-// 	"log"
-// 	"math/rand"
-// 	"os"
-// 	"strconv"
-// 	"time"
+import (
+	"math/rand"
+	"os"
+	"strconv"
+	"time"
 
-// 	"github.com/clintjedwards/basecoat/api"
-// 	"github.com/clintjedwards/basecoat/storage"
-// 	"github.com/clintjedwards/toolkit/password"
-// 	"github.com/clintjedwards/toolkit/tkerrors"
+	"github.com/clintjedwards/basecoat/api"
+	"github.com/clintjedwards/basecoat/config"
+	"github.com/clintjedwards/basecoat/storage"
+	"github.com/icrowley/fake"
+	"go.uber.org/zap"
+)
 
-// 	"github.com/icrowley/fake"
-// 	"google.golang.org/grpc"
-// 	"google.golang.org/grpc/credentials"
-// 	"google.golang.org/grpc/metadata"
-// )
+var info = struct {
+	account        string
+	storage        storage.BoltDB
+	contractorList []string
+	jobList        []string
+	formulaList    []string
+}{}
 
-// var jobIDs []string
+func init() {
+	os.Setenv("LOGLEVEL", "error")
+	config, err := config.FromEnv()
+	if err != nil {
+		zap.S().Fatal(err)
+	}
 
-// // dev only creds
-// const user string = "test"
-// const pass string = "test"
-// const certPath string = "./localhost.crt"
-// const key string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcnkiOjI1MjM1MzUyODAsInVzZXJuYW1lIjoidGVzdCJ9.sLsqUxM3MZ_DIKJyEvymAYN3uwFQH8gkufhgY7j9970"
+	storage, err := storage.NewBoltDB(config.Database.Path, config.Database.IDLength)
+	if err != nil {
+		zap.S().Fatal(err)
+	}
 
-// var opts []grpc.DialOption
+	info.storage = storage
+	info.storage.CreateAccount("test", "test")
+	info.account = "test"
+}
 
-// func init() {
-// 	creds, err := credentials.NewClientTLSFromFile(certPath, "")
-// 	if err != nil {
-// 		log.Fatalf("failed to get certificates: %v", err)
-// 	}
+func generateColor() string {
+	colorNames := []string{
+		"Alluring Light",
+		"Antigua Blue",
+		"Aroma",
+		"Baby Frog",
+		"Bazooka Pink",
+		"Biscay",
+		"Blue Beauty",
+		"Bluewash",
+		"Bright Cerulean",
+		"Bungalow Gold",
+		"Can Can",
+		"Cathay Spice",
+		"Cherub",
+		"City Loft",
+		"Community",
+		"Cradle Pink",
+		"Daddy-O",
+		"Deep Orange-coloured Brown",
+		"Dirty White",
+		"Dusky Citron",
+		"Elusive",
+		"Eyre",
+		"First Frost",
+		"Fozzie Bear",
+		"Gainsboro",
+		"Gluten",
+		"Grape Haze",
+		"Greige",
+		"Haute Red",
+		"Hoeth Blue",
+		"Ice Mist",
+		"Irresistible Beige",
+		"Kaitoke Green",
+		"Lahmian Medium",
+		"Liberal Lilac",
+		"Light Spring Burst",
+		"Lola",
+		"Maiden's Blush",
+		"Mayan Treasure",
+		"Midnight Blush",
+		"Monarch",
+		"Murdoch",
+		"Night Mode",
+		"Oil Yellow",
+		"Orion Blue",
+		"Parachute Silk",
+		"Pekin Chicken",
+		"Pincushion",
+		"Platonic Blue",
+		"Pragmatic",
+		"Purple Ragwort",
+		"Rattan Palm",
+		"Retro",
+		"Rose Taupe",
+		"Salina Springs",
+		"Scrofulous Brown",
+		"Shamanic Journey",
+		"Silver Sage",
+		"Snuggle Pie",
+		"Spiced Nectarine",
+		"Stone Harbour",
+		"Sunday Niqab",
+		"Tambua Bay",
+		"Thought",
+		"Transformer",
+		"Ultraviolet Cryner",
+		"Victorian Cottage",
+		"Wasabi Nori",
+		"White Mecca",
+		"Wisteria Yellow",
+		"Zelyony Green",
+		"Zhēn Zhū Bái Pearl",
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	randColor := rand.Intn(len(colorNames))
+	return colorNames[randColor]
+}
 
-// 	opts = append(opts, grpc.WithTransportCredentials(creds))
+func createContractors(num int) {
+	for i := 0; i < num; i++ {
+		newContractor := &api.Contractor{
+			Company: fake.Company(),
+			Contact: &api.Contact{
+				Name:  fake.FullName(),
+				Email: fake.EmailAddress(),
+				Phone: fake.Phone(),
+			},
+		}
 
-// 	hash, err := password.HashPassword([]byte(pass))
-// 	if err != nil {
-// 		log.Fatalf("failed to hash password: %v", err)
-// 	}
+		key, err := info.storage.AddContractor(info.account, newContractor)
+		if err != nil {
+			zap.S().Fatal(err)
+		}
 
-// 	storage, err := storage.InitStorage()
-// 	if err != nil {
-// 		log.Fatalf("could not connect to storage: %v", err)
-// 	}
+		info.contractorList = append(info.contractorList, key)
+	}
+}
 
-// 	err = storage.CreateUser(user, &api.User{
-// 		Name: user,
-// 		Hash: string(hash),
-// 	})
-// 	if err != nil {
-// 		if err == tkerrors.ErrEntityExists {
-// 			log.Printf("could not create user: %v\n", err)
-// 			return
-// 		}
-// 		log.Fatalf("could not create user: %v", err)
-// 	}
-// }
+func createJobs(num int) {
+	for i := 0; i < num; i++ {
+		rand.Seed(time.Now().UTC().UnixNano())
+		contractorid := info.contractorList[rand.Intn(len(info.contractorList)-1)]
 
-// func generateColor() string {
-// 	colorNames := []string{
-// 		"Alluring Light",
-// 		"Antigua Blue",
-// 		"Aroma",
-// 		"Baby Frog",
-// 		"Bazooka Pink",
-// 		"Biscay",
-// 		"Blue Beauty",
-// 		"Bluewash",
-// 		"Bright Cerulean",
-// 		"Bungalow Gold",
-// 		"Can Can",
-// 		"Cathay Spice",
-// 		"Cherub",
-// 		"City Loft",
-// 		"Community",
-// 		"Cradle Pink",
-// 		"Daddy-O",
-// 		"Deep Orange-coloured Brown",
-// 		"Dirty White",
-// 		"Dusky Citron",
-// 		"Elusive",
-// 		"Eyre",
-// 		"First Frost",
-// 		"Fozzie Bear",
-// 		"Gainsboro",
-// 		"Gluten",
-// 		"Grape Haze",
-// 		"Greige",
-// 		"Haute Red",
-// 		"Hoeth Blue",
-// 		"Ice Mist",
-// 		"Irresistible Beige",
-// 		"Kaitoke Green",
-// 		"Lahmian Medium",
-// 		"Liberal Lilac",
-// 		"Light Spring Burst",
-// 		"Lola",
-// 		"Maiden's Blush",
-// 		"Mayan Treasure",
-// 		"Midnight Blush",
-// 		"Monarch",
-// 		"Murdoch",
-// 		"Night Mode",
-// 		"Oil Yellow",
-// 		"Orion Blue",
-// 		"Parachute Silk",
-// 		"Pekin Chicken",
-// 		"Pincushion",
-// 		"Platonic Blue",
-// 		"Pragmatic",
-// 		"Purple Ragwort",
-// 		"Rattan Palm",
-// 		"Retro",
-// 		"Rose Taupe",
-// 		"Salina Springs",
-// 		"Scrofulous Brown",
-// 		"Shamanic Journey",
-// 		"Silver Sage",
-// 		"Snuggle Pie",
-// 		"Spiced Nectarine",
-// 		"Stone Harbour",
-// 		"Sunday Niqab",
-// 		"Tambua Bay",
-// 		"Thought",
-// 		"Transformer",
-// 		"Ultraviolet Cryner",
-// 		"Victorian Cottage",
-// 		"Wasabi Nori",
-// 		"White Mecca",
-// 		"Wisteria Yellow",
-// 		"Zelyony Green",
-// 		"Zhēn Zhū Bái Pearl",
-// 	}
-// 	rand.Seed(time.Now().UTC().UnixNano())
-// 	randColor := rand.Intn(len(colorNames))
-// 	return colorNames[randColor]
-// }
+		newJob := &api.Job{
+			Name: fake.Company(),
+			Address: &api.Address{
+				Street:  fake.StreetAddress(),
+				Street2: "APT " + string(rand.Intn(70)),
+				City:    fake.City(),
+				State:   fake.State(),
+				Zipcode: fake.Zip(),
+			},
+			Notes:        fake.WordsN(30),
+			ContractorId: contractorid,
+		}
 
-// func createJob() {
-// 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
-// 	if err != nil {
-// 		log.Fatalf("could not connect to basecoat: %v", err)
-// 	}
-// 	defer conn.Close()
+		key, err := info.storage.AddJob(info.account, newJob)
+		if err != nil {
+			zap.S().Fatal(err)
+		}
 
-// 	basecoatClient := api.NewBasecoatClient(conn)
+		info.jobList = append(info.jobList, key)
+	}
+}
 
-// 	createJobRequest := &api.CreateJobRequest{
-// 		Name:    fake.Company(),
-// 		Street:  fake.StreetAddress(),
-// 		Street2: "APT 5E",
-// 		City:    fake.City(),
-// 		State:   fake.State(),
-// 		Zipcode: fake.Zip(),
-// 		Notes:   fake.WordsN(20),
-// 		Contact: &api.Contact{
-// 			Name: fake.FullName(),
-// 			Info: fake.EmailAddress(),
-// 		},
-// 	}
+func createFormulas(num int) {
+	for i := 0; i < num; i++ {
+		rand.Seed(time.Now().UTC().UnixNano())
+		jobs := []string{}
 
-// 	md := metadata.Pairs("Authorization", "Bearer "+key)
-// 	ctx := metadata.NewOutgoingContext(context.Background(), md)
+		for j := 0; j < rand.Intn(3); j++ {
+			jobid := info.jobList[rand.Intn(len(info.jobList)-1)]
+			jobs = append(jobs, jobid)
+		}
 
-// 	response, err := basecoatClient.CreateJob(ctx, createJobRequest)
-// 	if err != nil {
-// 		log.Fatalf("could not create Job: %v", err)
-// 	}
+		newFormula := &api.Formula{
+			Name:   generateColor(),
+			Number: fake.DigitsN(2) + "-" + fake.DigitsN(4),
+			Notes:  fake.WordsN(30),
+			Jobs:   jobs,
+			Bases: []*api.Base{
+				{
+					Type:   fake.Company(),
+					Name:   generateColor(),
+					Amount: fake.DigitsN(2),
+				},
+			},
+			Colorants: []*api.Colorant{
+				{
+					Type:   fake.Company(),
+					Name:   generateColor(),
+					Amount: fake.DigitsN(2),
+				},
+				{
+					Type:   fake.Company(),
+					Name:   generateColor(),
+					Amount: fake.DigitsN(2),
+				},
+			},
+		}
 
-// 	jobIDs = append(jobIDs, response.Id)
-// }
+		key, err := info.storage.AddFormula(info.account, newFormula)
+		if err != nil {
+			zap.S().Fatal(err)
+		}
 
-// func createFormula() {
-// 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", "localhost", "8080"), opts...)
-// 	if err != nil {
-// 		log.Fatalf("could not connect to basecoat: %v", err)
-// 	}
-// 	defer conn.Close()
+		info.formulaList = append(info.formulaList, key)
+	}
+}
 
-// 	basecoatClient := api.NewBasecoatClient(conn)
+func main() {
+	if len(os.Args) < 4 {
+		zap.S().Fatal("Usage: go run populateDB.go <numContractors> <numJobs> <numFormulas>")
+	}
 
-// 	rand.Seed(time.Now().UTC().UnixNano())
-// 	randJob := rand.Intn(5)
-
-// 	createFormulaRequest := &api.CreateFormulaRequest{
-// 		Name:   generateColor(),
-// 		Number: fake.DigitsN(2) + "-" + fake.DigitsN(4),
-// 		Notes:  fake.WordsN(20),
-// 		Jobs:   []string{jobIDs[randJob]},
-// 		Bases: []*api.Base{
-// 			{
-// 				Type:   fake.Company(),
-// 				Name:   generateColor(),
-// 				Amount: fake.DigitsN(2),
-// 			},
-// 		},
-// 		Colorants: []*api.Colorant{
-// 			{
-// 				Type:   fake.Company(),
-// 				Name:   generateColor(),
-// 				Amount: fake.DigitsN(2),
-// 			},
-// 			{
-// 				Type:   fake.Company(),
-// 				Name:   generateColor(),
-// 				Amount: fake.DigitsN(2),
-// 			},
-// 		},
-// 	}
-
-// 	md := metadata.Pairs("Authorization", "Bearer "+key)
-// 	ctx := metadata.NewOutgoingContext(context.Background(), md)
-
-// 	_, err = basecoatClient.CreateFormula(ctx, createFormulaRequest)
-// 	if err != nil {
-// 		log.Fatalf("could not create formula: %v", err)
-// 	}
-// }
-
-// func populateDB(entries int) {
-// 	for i := 0; i < 5; i++ {
-// 		createJob()
-// 	}
-
-// 	for i := 0; i < entries; i++ {
-// 		createFormula()
-// 	}
-// }
-
-// func main() {
-// 	if len(os.Args) < 2 {
-// 		log.Fatal("not enough arguments")
-// 	}
-
-// 	entryString := os.Args[1]
-// 	entryNum, _ := strconv.Atoi(entryString)
-// 	populateDB(entryNum)
-// }
+	numContractors, _ := strconv.Atoi(os.Args[1])
+	createContractors(numContractors)
+	numJobs, _ := strconv.Atoi(os.Args[2])
+	createJobs(numJobs)
+	numFormulas, _ := strconv.Atoi(os.Args[1])
+	createFormulas(numFormulas)
+}

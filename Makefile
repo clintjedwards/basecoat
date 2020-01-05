@@ -74,3 +74,7 @@ run-backend:
 test:
 	go test -cover -v ./...
 
+## clean: clean up any auto generated assets
+clean:
+	rm /tmp/basecoat.db
+	rm api/*.pb.go

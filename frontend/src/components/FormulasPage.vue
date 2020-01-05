@@ -23,4 +23,10 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.data-table {
+  margin-top: 5em;
+  width: 77%;
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>

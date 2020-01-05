@@ -167,9 +167,11 @@ func (db *BoltDB) UpdateJob(account, key string, updatedJob *api.Job) error {
 
 		// handle contractor linking
 		if updatedJob.ContractorId != storedJob.ContractorId {
-			err := db.unlinkJobFromContractor(accountBucket, updatedJob.Id, storedJob.ContractorId)
-			if err != nil {
-				return err
+			if storedJob.ContractorId != "" {
+				err := db.unlinkJobFromContractor(accountBucket, updatedJob.Id, storedJob.ContractorId)
+				if err != nil {
+					return err
+				}
 			}
 
 			if updatedJob.ContractorId != "" {

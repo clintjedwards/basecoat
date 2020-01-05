@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -22,15 +24,16 @@ var info = struct {
 }{}
 
 func init() {
-	os.Setenv("LOGLEVEL", "error")
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	config, err := config.FromEnv()
 	if err != nil {
-		zap.S().Fatal(err)
+		log.Fatal(err)
 	}
 
 	storage, err := storage.NewBoltDB(config.Database.Path, config.Database.IDLength)
 	if err != nil {
-		zap.S().Fatal(err)
+		log.Fatal(err)
 	}
 
 	info.storage = storage
@@ -147,10 +150,15 @@ func createJobs(num int) {
 			Name: fake.Company(),
 			Address: &api.Address{
 				Street:  fake.StreetAddress(),
-				Street2: "APT " + string(rand.Intn(70)),
+				Street2: "APT " + fake.DigitsN(2),
 				City:    fake.City(),
 				State:   fake.State(),
 				Zipcode: fake.Zip(),
+			},
+			Contact: &api.Contact{
+				Name:  fake.FullName(),
+				Email: fake.EmailAddress(),
+				Phone: fake.Phone(),
 			},
 			Notes:        fake.WordsN(30),
 			ContractorId: contractorid,
@@ -212,7 +220,8 @@ func createFormulas(num int) {
 
 func main() {
 	if len(os.Args) < 4 {
-		zap.S().Fatal("Usage: go run populateDB.go <numContractors> <numJobs> <numFormulas>")
+		fmt.Println("Usage: go run populateDB.go <numContractors> <numJobs> <numFormulas>")
+		os.Exit(1)
 	}
 
 	numContractors, _ := strconv.Atoi(os.Args[1])

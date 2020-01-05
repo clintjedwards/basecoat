@@ -1,12 +1,14 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import CreateContractorModal from "./components/CreateContractorModal/CreateContractorModal.vue";
 import CreateFormulaModal from "./components/CreateFormulaModal.vue";
-import CreateJobModal from "./components/CreateJobModal.vue";
+import CreateJobModal from "./components/CreateJobModal/CreateJobModal.vue";
 import FormulasPage from "./components/FormulasPage.vue";
 import JobsPage from "./components/JobsPage.vue";
 import LoginModal from "./components/LoginModal.vue";
-import ManageFormulaModal from "./components/ManageFormulaModal.vue";
-import ManageJobModal from "./components/ManageJobModal.vue";
+import ManageContractorModal from "./components/ManageContractorModal/ManageContractorModal.vue";
+import ManageFormulaModal from "./components/ManageFormulaModal/ManageFormulaModal.vue";
+import ManageJobModal from "./components/ManageJobModal/ManageJobModal.vue";
 import NotFound from "./components/NotFound.vue";
 
 Vue.use(VueRouter);
@@ -44,6 +46,16 @@ const routes = [
         path: ":id",
         name: "manageJobModal",
         component: ManageJobModal
+      },
+      {
+        path: "contractors/create",
+        name: "contractorCreateModal",
+        component: CreateContractorModal
+      },
+      {
+        path: "contractors/:id",
+        name: "manageContractorModal",
+        component: ManageContractorModal
       }
     ]
   },

@@ -1,6 +1,12 @@
 
 <template>
-  <v-data-table :headers="headers" :items="formulaDataToList" hide-actions disable-filtering>
+  <v-data-table
+    :headers="headers"
+    :items="formulaDataList"
+    hide-actions
+    disable-filtering
+    class="elevation-5"
+  >
     <template v-slot:items="props">
       <tr style="cursor: pointer;" v-on:click="navigateToFormula(props.item.id)">
         <td class="text-capitalize">{{ props.item.name }}</td>
@@ -58,13 +64,25 @@ export default Vue.extend({
           text: "Created",
           value: "created"
         }
-      ]
+      ],
+      formulaDataList: [] as modifiedFormula[]
     };
   },
-  mounted() {
-    this.loadFormulaData();
+  created() {
+    this.formulaDataList = this.formulaDataToList();
+    this.$store.subscribe((mutation, state) => {
+      if (
+        mutation.type === "updateFormulaData" ||
+        mutation.type === "updateFormulaDataFilter"
+      ) {
+        this.formulaDataList = this.formulaDataToList();
+      }
+    });
   },
-  computed: {
+  methods: {
+    navigateToFormula: function(formulaID: string) {
+      this.$router.push("/formulas/" + formulaID);
+    },
     // This makes it so that the formula table is sortable.
     // the formula table sorts based on the data structure that
     // you pass it. So you have to pass it a data structure with
@@ -115,16 +133,6 @@ export default Vue.extend({
       }
 
       return modifiedFormulaList;
-    }
-  },
-  methods: {
-    navigateToFormula: function(formulaID: string) {
-      this.$router.push("/formulas/" + formulaID);
-    },
-    loadFormulaData: function() {
-      client.getFormulaData().then(formulas => {
-        this.$store.commit("updateFormulaData", formulas);
-      });
     }
   }
 });

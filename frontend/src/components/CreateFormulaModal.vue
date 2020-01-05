@@ -1,6 +1,6 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="showModal" max-width="600px" persistent>
+    <v-dialog v-model="showModal" max-width="600px">
       <v-form ref="createFormulaForm" lazy-validation>
         <v-card>
           <v-card-title>
@@ -144,6 +144,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Formula, Base, Colorant, Job } from "../basecoat_message_pb";
+import { SnackBarColor, SnackBar } from "../snackbar";
 import { CreateFormulaRequest } from "../basecoat_transport_pb";
 import BasecoatClientWrapper from "../basecoatClientWrapper";
 
@@ -190,10 +191,16 @@ export default Vue.extend({
       let jobDataList: modifiedJob[] = [];
       for (const [key, value] of Object.entries(jobDataMap)) {
         let job: modifiedJob;
+        let street: string = "";
+        let jobAddress = value.getAddress();
+        if (jobAddress != undefined) {
+          street = jobAddress.getStreet();
+        }
+
         job = {
           id: value.getId(),
           name: value.getName(),
-          street: value.getStreet()
+          street: street
         };
         jobDataList.push(job);
       }
@@ -266,13 +273,21 @@ export default Vue.extend({
                 this.$router.push({ name: "formulas" });
               })
               .catch(() => {
-                this.$store.commit("showSnackBar", "Could not load formulas.");
+                this.$store.commit("updateSnackBar", {
+                  text: "Could not load formulas",
+                  color: SnackBarColor.Error,
+                  display: true
+                } as SnackBar);
                 this.clearForm();
                 this.$router.push({ name: "formulas" });
               });
           })
           .catch(() => {
-            this.$store.commit("showSnackBar", "Could not create formula.");
+            this.$store.commit("updateSnackBar", {
+              text: "Could not create formula",
+              color: SnackBarColor.Error,
+              display: true
+            } as SnackBar);
           });
       }
     }

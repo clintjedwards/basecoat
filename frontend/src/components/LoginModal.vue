@@ -61,6 +61,7 @@
 <script lang="ts">
 import Vue from "vue";
 import BasecoatClientWrapper from "../basecoatClientWrapper";
+import { SnackBar, SnackBarColor } from "../snackbar";
 
 let client: BasecoatClientWrapper;
 client = new BasecoatClientWrapper();
@@ -112,7 +113,11 @@ export default Vue.extend({
           })
           .catch(error => {
             console.log(error);
-            this.$store.commit("showSnackBar", "Invalid Login Credentials");
+            this.$store.commit("updateSnackBar", {
+              text: "Invalid Login Credentials",
+              color: SnackBarColor.Error,
+              display: true
+            } as SnackBar);
             this.loading = false;
           });
       }

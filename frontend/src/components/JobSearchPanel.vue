@@ -1,25 +1,36 @@
 <template>
-  <div>
-    <span>
-      <v-badge color="#ff5252">
-        <template v-slot:badge>{{ Object.keys($store.state.jobData).length }}</template>
-        <span class="display-3 font-weight-light search-panel-text">Jobs</span>
-      </v-badge>
-    </span>
-    <span style="margin-left: 4em; width: 100em;">
-      <v-text-field
-        label="Search"
-        prepend-icon="search"
-        hint="Search for job data of any kind"
-        v-on:input="debounceInput($event)"
-      ></v-text-field>
-    </span>
-    <span style="margin-left: 4em;">
-      <v-btn color="secondary" v-on:click="showCreateJobModal()">
-        <v-icon>create</v-icon>Create Job
-      </v-btn>
-    </span>
-  </div>
+  <v-container style="width: 80%;">
+    <v-layout row justify-center>
+      <v-flex md2 class="text-xs-center">
+        <v-badge color="#ff5252">
+          <template v-slot:badge>{{ Object.keys($store.state.jobData).length }}</template>
+          <span class="display-3 font-weight-light search-panel-text">Jobs</span>
+        </v-badge>
+      </v-flex>
+      <v-flex md8>
+        <v-text-field
+          label="Search"
+          prepend-icon="search"
+          hint="Search for job data of any kind"
+          v-on:input="debounceInput($event)"
+        ></v-text-field>
+      </v-flex>
+      <v-flex md2 style="margin-left: 1em;">
+        <v-layout column>
+          <v-flex>
+            <v-btn color="secondary" v-on:click="showCreateJobModal()">
+              <v-icon>create</v-icon>Create Job
+            </v-btn>
+          </v-flex>
+          <v-flex>
+            <v-btn color="secondary" v-on:click="showCreateContractorModal()">
+              <v-icon>create</v-icon>Create Contractor
+            </v-btn>
+          </v-flex>
+        </v-layout>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -38,6 +49,9 @@ export default Vue.extend({
   methods: {
     showCreateJobModal: function() {
       this.$router.push({ name: "jobCreateModal" });
+    },
+    showCreateContractorModal: function() {
+      this.$router.push({ name: "contractorCreateModal" });
     },
     debounceInput: _.debounce(function(this: any, searchTerm) {
       if (!searchTerm) {

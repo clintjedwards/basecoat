@@ -6,16 +6,7 @@ html {
 /*Red #ff5252*/
 .search-panel {
   margin-top: 3em;
-  display: flex;
   align-items: center;
-  justify-content: space-evenly;
-}
-
-.data-table {
-  margin-top: 5em;
-  width: 92%;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .format-modal-add-buttons {
@@ -75,4 +66,9 @@ html {
     -webkit-transform: scale(1);
     transform: scale(1);
   }
+}
+
+/*allows the lists in dropdown boxes to auto size themselves*/
+.v-autocomplete__content .v-list__tile {
+  height: auto;
 }

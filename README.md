@@ -51,10 +51,6 @@ This tool will autogenerate certs for your and add them as trusted
 `go get -u github.com/FiloSottile/mkcert`
 `$(go env GOBIN)/mkcert`
 
-### Bring up database
-
-from the 'docker' directory: `docker-compose up`
-
 ### Start application
 
 `make run`
@@ -64,7 +60,7 @@ from the 'docker' directory: `docker-compose up`
 
 The only tests are integration tests that must be run against a live server. Before running the next command you must bring up a local version of the application
 
-`go test tests/integration_test.go -v -count 1`
+`go test -v ./tests`
 
 ## Authors
 

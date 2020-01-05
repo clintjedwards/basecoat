@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex, { MutationTree } from "vuex";
-import { Formula, Job } from "./basecoat_message_pb";
+import { Contractor, Formula, Job } from "./basecoat_message_pb";
+import { SnackBar, SnackBarColor } from "./snackbar";
 
 Vue.use(Vuex);
 
@@ -10,6 +11,10 @@ interface FormulaMap {
 
 interface JobMap {
   [key: string]: Job;
+}
+
+interface ContractorMap {
+  [key: string]: Contractor;
 }
 
 interface colorantType {
@@ -32,26 +37,37 @@ interface systemInfo {
 interface RootState {
   isInitialized: boolean;
   username: string;
-  snackBarText: string;
-  displaySnackBar: boolean;
+  snackBar: SnackBar;
   appInfo: systemInfo;
 
   // Formula Data
   formulaData: FormulaMap;
+  // filter lists contains the results from the search result
+  // this allows us to check against this list and render only
+  // results that match
   formulaDataFilter: string[];
   colorantTypes: colorantTypeMap;
 
   // Job Data
   jobData: JobMap;
+  // filter lists contains the results from the search result
+  // this allows us to check against this list and render only
+  // results that match
   jobDataFilter: string[];
+
+  // Contractor Data
+  contractorData: ContractorMap;
 }
 
 const state: RootState = {
   // set so we can wait to load the store before accessing some components that depend on it
   isInitialized: false,
   username: "Unknown",
-  snackBarText: "",
-  displaySnackBar: false,
+  snackBar: {
+    text: "",
+    display: false,
+    color: SnackBarColor.Error
+  },
   appInfo: {
     build_time: "",
     commit: "",
@@ -76,7 +92,10 @@ const state: RootState = {
 
   // Job Data
   jobData: {},
-  jobDataFilter: []
+  jobDataFilter: [],
+
+  // Contractor Data
+  contractorData: {}
 };
 
 const mutations: MutationTree<RootState> = {
@@ -103,9 +122,11 @@ const mutations: MutationTree<RootState> = {
   updateJobData(state, jobData: JobMap) {
     state.jobData = jobData;
   },
-  showSnackBar(state, text: string) {
-    state.snackBarText = text;
-    state.displaySnackBar = true;
+  updateContractorData(state, contractorData: ContractorMap) {
+    state.contractorData = contractorData;
+  },
+  updateSnackBar(state, snackBar: SnackBar) {
+    state.snackBar = snackBar;
   }
 };
 

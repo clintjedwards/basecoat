@@ -1,19 +1,32 @@
 import Cookies from "js-cookie";
 import { BasecoatClient } from "./BasecoatServiceClientPb";
-import { Base, Colorant, Contact, Formula, Job } from "./basecoat_message_pb";
+import {
+  Address,
+  Base,
+  Colorant,
+  Contact,
+  Contractor,
+  Formula,
+  Job
+} from "./basecoat_message_pb";
 import {
   CreateAPITokenRequest,
+  CreateContractorRequest,
   CreateFormulaRequest,
   CreateJobRequest,
+  DeleteContractorRequest,
   DeleteFormulaRequest,
   DeleteJobRequest,
+  GetContractorRequest,
   GetFormulaRequest,
   GetJobRequest,
   GetSystemInfoRequest,
+  ListContractorsRequest,
   ListFormulasRequest,
   ListJobsRequest,
   SearchFormulasRequest,
   SearchJobsRequest,
+  UpdateContractorRequest,
   UpdateFormulaRequest,
   UpdateJobRequest
 } from "./basecoat_transport_pb";
@@ -28,6 +41,10 @@ interface formulaMap {
 }
 interface jobMap {
   [key: string]: Job;
+}
+
+interface contractorMap {
+  [key: string]: Contractor;
 }
 
 interface systemInfo {
@@ -274,20 +291,29 @@ class BasecoatClientWrapper {
 
       let createJobRequest = new CreateJobRequest();
       createJobRequest.setName(jobData.name);
-      createJobRequest.setStreet(jobData.street);
-      createJobRequest.setStreet2(jobData.street2);
-      createJobRequest.setCity(jobData.city);
-      createJobRequest.setState(jobData.state);
-      createJobRequest.setZipcode(jobData.zipcode);
+
+      if (jobData.address != undefined) {
+        let address = new Address();
+        address.setStreet(jobData.address.street);
+        address.setStreet2(jobData.address.street2);
+        address.setCity(jobData.address.city);
+        address.setState(jobData.address.state);
+        address.setZipcode(jobData.address.zipcode);
+        createJobRequest.setAddress(address);
+      }
+
       createJobRequest.setNotes(jobData.notes);
       createJobRequest.setFormulasList(jobData.formulasList);
 
       if (jobData.contact != undefined) {
         let contact = new Contact();
         contact.setName(jobData.contact.name);
-        contact.setInfo(jobData.contact.info);
+        contact.setEmail(jobData.contact.email);
+        contact.setPhone(jobData.contact.phone);
         createJobRequest.setContact(contact);
       }
+
+      createJobRequest.setContractorId(jobData.contractorId);
 
       this.client.createJob(createJobRequest, metadata, function(
         err,
@@ -296,7 +322,7 @@ class BasecoatClientWrapper {
         if (err) {
           reject(err);
         }
-        resolve();
+        resolve(response.getJob()?.getId());
       });
     });
   }
@@ -362,20 +388,28 @@ class BasecoatClientWrapper {
       let updateJobRequest = new UpdateJobRequest();
       updateJobRequest.setId(jobData.id);
       updateJobRequest.setName(jobData.name);
-      updateJobRequest.setStreet(jobData.street);
-      updateJobRequest.setStreet2(jobData.street2);
-      updateJobRequest.setCity(jobData.city);
-      updateJobRequest.setState(jobData.state);
-      updateJobRequest.setZipcode(jobData.zipcode);
+      if (jobData.address != undefined) {
+        let address = new Address();
+        address.setStreet(jobData.address.street);
+        address.setStreet2(jobData.address.street2);
+        address.setCity(jobData.address.city);
+        address.setState(jobData.address.state);
+        address.setZipcode(jobData.address.zipcode);
+        updateJobRequest.setAddress(address);
+      }
+
       updateJobRequest.setNotes(jobData.notes);
       updateJobRequest.setFormulasList(jobData.formulasList);
 
       if (jobData.contact != undefined) {
         let contact = new Contact();
         contact.setName(jobData.contact.name);
-        contact.setInfo(jobData.contact.info);
+        contact.setEmail(jobData.contact.email);
+        contact.setPhone(jobData.contact.phone);
         updateJobRequest.setContact(contact);
       }
+
+      updateJobRequest.setContractorId(jobData.contractorId);
 
       this.client.updateJob(updateJobRequest, metadata, function(
         err,
@@ -422,6 +456,145 @@ class BasecoatClientWrapper {
       }
 
       this.client.deleteJob(deleteJobRequest, metadata, function(
+        err,
+        response
+      ) {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      });
+    });
+  }
+
+  //getContractor retrieves a single contractor by ID
+  getContractor(contractorID: string): Promise<Contractor | undefined> {
+    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
+    let getContractorRequest = new GetContractorRequest();
+    getContractorRequest.setId(contractorID);
+
+    return new Promise((resolve, reject) => {
+      this.client.getContractor(getContractorRequest, metadata, function(
+        err,
+        response
+      ) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(response.getContractor());
+      });
+    });
+  }
+
+  //getContractorData retrieves all contractors from the backend
+  getContractorData(): Promise<contractorMap | undefined> {
+    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
+    let listContractorsRequest = new ListContractorsRequest();
+
+    return new Promise((resolve, reject) => {
+      if (!this.isUserLoggedIn()) {
+        reject(undefined);
+      }
+      this.client.listContractors(listContractorsRequest, metadata, function(
+        err,
+        response
+      ) {
+        if (err) {
+          reject(err);
+        }
+
+        let contractors: contractorMap = {};
+        response.getContractorsMap().forEach(function(value, key) {
+          contractors[key] = value;
+        });
+
+        resolve(contractors);
+      });
+    });
+  }
+
+  //submitCreateContractorForm submits a new contractor to the backend
+  submitCreateContractorForm(
+    contractorData: CreateContractorRequest.AsObject
+  ): Promise<string> {
+    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
+    return new Promise((resolve, reject) => {
+      if (!this.isUserLoggedIn()) {
+        reject();
+      }
+
+      let createContractorRequest = new CreateContractorRequest();
+      createContractorRequest.setCompany(contractorData.company);
+
+      if (contractorData.contact != undefined) {
+        let contact = new Contact();
+        contact.setName(contractorData.contact.name);
+        contact.setEmail(contractorData.contact.email);
+        contact.setPhone(contractorData.contact.phone);
+        createContractorRequest.setContact(contact);
+      }
+
+      createContractorRequest.setJobsList(contractorData.jobsList);
+
+      this.client.createContractor(createContractorRequest, metadata, function(
+        err,
+        response
+      ) {
+        if (err) {
+          reject(err);
+        }
+        resolve(response.getContractor()?.getId());
+      });
+    });
+  }
+
+  submitManageContractorForm(
+    contractorData: UpdateContractorRequest.AsObject
+  ): Promise<string> {
+    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
+    return new Promise((resolve, reject) => {
+      if (!this.isUserLoggedIn()) {
+        reject();
+      }
+
+      let updateContractorRequest = new UpdateContractorRequest();
+      updateContractorRequest.setId(contractorData.id);
+      updateContractorRequest.setCompany(contractorData.company);
+
+      if (contractorData.contact != undefined) {
+        let contact = new Contact();
+        contact.setName(contractorData.contact.name);
+        contact.setEmail(contractorData.contact.email);
+        contact.setPhone(contractorData.contact.phone);
+        updateContractorRequest.setContact(contact);
+      }
+
+      updateContractorRequest.setJobsList(contractorData.jobsList);
+
+      this.client.updateContractor(updateContractorRequest, metadata, function(
+        err,
+        response
+      ) {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      });
+    });
+  }
+
+  deleteContractor(contractorID: string): Promise<string> {
+    let metadata = { Authorization: "Bearer " + Cookies.get("token") };
+    let deleteContractorRequest = new DeleteContractorRequest();
+    deleteContractorRequest.setId(contractorID);
+
+    return new Promise((resolve, reject) => {
+      if (!this.isUserLoggedIn()) {
+        reject();
+      }
+
+      this.client.deleteContractor(deleteContractorRequest, metadata, function(
         err,
         response
       ) {

@@ -23,4 +23,8 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.data-table {
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>

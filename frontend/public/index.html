@@ -52,14 +52,14 @@
 
         <!-- Notifications-->
         <v-snackbar
-          v-model="$store.state.displaySnackBar"
-          color="error"
+          v-model="$store.state.snackBar.display"
+          :color="$store.state.snackBar.color"
           :timeout="3000"
           auto-height
           top
         >
-          {{ $store.state.snackBarText }}
-          <v-btn dark flat @click="$store.state.displaySnackBar = false">
+          {{ $store.state.snackBar.text }}
+          <v-btn dark flat @click="$store.state.snackBar.display = false">
             Close
           </v-btn>
         </v-snackbar>

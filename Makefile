@@ -11,7 +11,10 @@ VERSION = ${SEMVER}_${EPOCH_TIME}_${GIT_COMMIT}
 
 ## backup: backup production database using gcp
 backup:
-	gcloud datastore export gs://clintjedwardsbackups/basecoat-${EPOCH_TIME}
+	ssh -t romeo@basecoat.clintjedwards.com 'sudo service basecoat stop'
+	scp romeo@basecoat.clintjedwards.com:/data/basecoat/basecoat.db .
+	gsutil cp basecoat.db gs://clintjedwardsbackups/basecoat/basecoat-${EPOCH_TIME}.db
+	ssh -t romeo@basecoat.clintjedwards.com 'sudo service basecoat start'
 
 ## build-prod: run tests and compile full app in production mode
 build-prod:

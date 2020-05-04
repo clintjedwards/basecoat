@@ -44,13 +44,6 @@ This requires installing vue js and a bunch of other packages that the frontend 
 
 - install npm packages: `cd frontend; npm install`
 
-### Generate certificates
-
-This tool will autogenerate certs for your and add them as trusted
-
-`go get -u github.com/FiloSottile/mkcert`
-`$(go env GOBIN)/mkcert`
-
 ### Start application
 
 `make run`
@@ -58,7 +51,7 @@ This tool will autogenerate certs for your and add them as trusted
 
 ## How to run tests
 
-The only tests are integration tests that must be run against a live server. Before running the next command you must bring up a local version of the application
+The only tests are integration tests that must be run against a live server. The testing command will bring up the testing server for you.
 
 `go test -v ./tests`
 

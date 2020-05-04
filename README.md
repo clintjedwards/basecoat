@@ -20,6 +20,14 @@ Basecoat is a CRUD formula indexing tool meant to record formulas for certain co
 - /tests: Testing code which runs against a live local server to verify api functionality is correct
 - /utils: Utility folder which encompasses functions that really don't belong anywhere else
 
+## Interacting with the API
+
+Basecoat uses gRPC and serves requests through a gRPC-proxy. This means that it can receive http _and_ grpc requests. You can find the API endpoints in the [proto files](./api). The admin routes require a pre-negotiated password.
+
+You can send requests using a utility like grpcurl:
+
+`grpcurl -H "Authorization: Bearer lolwut" -d {} basecoat.clintjedwards.com:443 api.Basecoat/ListAccounts`
+
 ## How to run locally
 
 This takes a few steps

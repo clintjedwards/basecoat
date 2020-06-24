@@ -47,7 +47,7 @@
                 </v-flex>
                 <v-flex xs2 sm3>
                   <v-text-field
-                    label="Amount"
+                    label="Size"
                     v-model="base.amount"
                     append-outer-icon="delete"
                     v-on:click:append-outer="removeBaseField(index)"

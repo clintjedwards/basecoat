@@ -7,7 +7,7 @@ import {
   Contact,
   Contractor,
   Formula,
-  Job
+  Job,
 } from "./basecoat_message_pb";
 import {
   CreateAPITokenRequest,
@@ -28,7 +28,7 @@ import {
   SearchJobsRequest,
   UpdateContractorRequest,
   UpdateFormulaRequest,
-  UpdateJobRequest
+  UpdateJobRequest,
 } from "./basecoat_transport_pb";
 
 interface LoginInfo {
@@ -88,7 +88,7 @@ class BasecoatClientWrapper {
         }
         Cookies.set("username", loginInfo.username, {
           expires: 120,
-          secure: true
+          secure: true,
         });
         Cookies.set("token", response.getKey(), { expires: 120, secure: true });
         resolve();
@@ -624,7 +624,7 @@ class BasecoatClientWrapper {
           commit: response.getCommit(),
           debug_enabled: response.getDebugEnabled(),
           frontend_enabled: response.getFrontendEnabled(),
-          semver: response.getSemver()
+          semver: response.getSemver(),
         };
         resolve(systemInfo);
       });

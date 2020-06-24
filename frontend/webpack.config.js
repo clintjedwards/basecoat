@@ -8,42 +8,42 @@ module.exports = {
   context: path.resolve(__dirname, "frontend"),
   output: {
     filename: "main.js",
-    path: path.resolve(__dirname, "public/javascript")
+    path: path.resolve(__dirname, "public/javascript"),
   },
   module: {
     rules: [
       {
         test: /\.vue$/,
-        loader: "vue-loader"
+        loader: "vue-loader",
       },
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
         exclude: /node_modules/,
         options: {
-          appendTsSuffixTo: [/\.vue$/]
-        }
+          appendTsSuffixTo: [/\.vue$/],
+        },
       },
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader"
+        loader: "babel-loader",
       },
       {
         test: /\.css$/,
-        use: ["vue-style-loader", "css-loader"]
-      }
-    ]
+        use: ["vue-style-loader", "css-loader"],
+      },
+    ],
   },
   resolve: {
     extensions: [".ts", ".js", ".vue", ".json"],
     alias: {
-      vue$: "vue/dist/vue.esm.js"
-    }
+      vue$: "vue/dist/vue.esm.js",
+    },
   },
   plugins: [
     new VueLoaderPlugin(),
     // Ignore all locale files of moment.js
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
-  ]
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+  ],
 };

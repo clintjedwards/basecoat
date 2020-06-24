@@ -1,6 +1,6 @@
 export enum SnackBarColor {
   Error = "error",
-  Success = "success"
+  Success = "success",
 }
 
 export interface SnackBar {

@@ -38,7 +38,7 @@ router.beforeEach((to, from, next) => {
   var contractorsPromise = client.getContractorData();
 
   Promise.all([formulaPromise, jobsPromise, contractorsPromise]).then(
-    values => {
+    (values) => {
       store.commit("updateFormulaData", values[0]);
       store.commit("updateJobData", values[1]);
       store.commit("updateContractorData", values[2]);
@@ -55,27 +55,27 @@ const app = new Vue({
   router,
   components: {
     PageFooter,
-    PageHeader
+    PageHeader,
   },
   mounted() {
-    client.getSystemInfo().then(systemInfo => {
+    client.getSystemInfo().then((systemInfo) => {
       if (systemInfo) {
         store.commit("updateAppInfo", systemInfo);
       }
     });
 
     setInterval(() => {
-      client.getFormulaData().then(formulas => {
+      client.getFormulaData().then((formulas) => {
         store.commit("updateFormulaData", formulas);
       });
-      client.getJobData().then(jobs => {
+      client.getJobData().then((jobs) => {
         store.commit("updateJobData", jobs);
       });
-      client.getContractorData().then(contractors => {
+      client.getContractorData().then((contractors) => {
         store.commit("updateContractorData", contractors);
       });
     }, 180000); //3mins
 
     store.commit("updateUsername", Cookies.get("username"));
-  }
+  },
 });

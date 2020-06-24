@@ -23,14 +23,14 @@ const routes = [
       {
         path: "create",
         name: "createFormulaModal",
-        component: CreateFormulaModal
+        component: CreateFormulaModal,
       },
       {
         path: ":id",
         name: "manageFormulaModal",
-        component: ManageFormulaModal
-      }
-    ]
+        component: ManageFormulaModal,
+      },
+    ],
   },
   {
     path: "/jobs",
@@ -40,36 +40,36 @@ const routes = [
       {
         path: "create",
         name: "jobCreateModal",
-        component: CreateJobModal
+        component: CreateJobModal,
       },
       {
         path: ":id",
         name: "manageJobModal",
-        component: ManageJobModal
+        component: ManageJobModal,
       },
       {
         path: "contractors/create",
         name: "contractorCreateModal",
-        component: CreateContractorModal
+        component: CreateContractorModal,
       },
       {
         path: "contractors/:id",
         name: "manageContractorModal",
-        component: ManageContractorModal
-      }
-    ]
+        component: ManageContractorModal,
+      },
+    ],
   },
   {
     path: "/login",
     name: "login",
-    component: LoginModal
+    component: LoginModal,
   },
-  { path: "*", component: NotFound }
+  { path: "*", component: NotFound },
 ];
 
 const router = new VueRouter({
   routes,
-  mode: "history"
+  mode: "history",
 });
 
 export default router;

@@ -66,14 +66,14 @@ const state: RootState = {
   snackBar: {
     text: "",
     display: false,
-    color: SnackBarColor.Error
+    color: SnackBarColor.Error,
   },
   appInfo: {
     build_time: "",
     commit: "",
     debug_enabled: true,
     frontend_enabled: false,
-    semver: ""
+    semver: "",
   },
 
   // Formula Data
@@ -82,12 +82,12 @@ const state: RootState = {
   colorantTypes: {
     "Benjamin Moore": {
       imageURL: "/images/benjamin-moore.png",
-      userMessage: "Use Benjamin Moore Colorant Only"
+      userMessage: "Use Benjamin Moore Colorant Only",
     },
     "PPG Pittsburgh Paints": {
       imageURL: "/images/ppg.png",
-      userMessage: "Use PPG Colorant Only"
-    }
+      userMessage: "Use PPG Colorant Only",
+    },
   },
 
   // Job Data
@@ -95,7 +95,7 @@ const state: RootState = {
   jobDataFilter: [],
 
   // Contractor Data
-  contractorData: {}
+  contractorData: {},
 };
 
 const mutations: MutationTree<RootState> = {
@@ -127,12 +127,12 @@ const mutations: MutationTree<RootState> = {
   },
   updateSnackBar(state, snackBar: SnackBar) {
     state.snackBar = snackBar;
-  }
+  },
 };
 
 const store = new Vuex.Store<RootState>({
   state,
-  mutations
+  mutations,
 });
 
 export default store;

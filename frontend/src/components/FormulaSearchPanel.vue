@@ -58,7 +58,7 @@ export default Vue.extend({
         this.$store.commit("updateFormulaDataFilter", []);
         return;
       });
-    }, 625)
+    }, 325)
   }
 });
 </script>

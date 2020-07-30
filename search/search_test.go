@@ -17,7 +17,8 @@ var testInfo = struct {
 	databasePath string
 	storage      storage.BoltDB
 	contractorID string
-	formulaID    string
+	formula1ID   string
+	formula2ID   string
 	job1ID       string
 	job2ID       string
 }{}
@@ -49,8 +50,11 @@ func populateDB() error {
 	contractorID, err := testInfo.storage.AddContractor("test", &api.Contractor{
 		Company: "testcontractor",
 	})
-	formulaID, err := testInfo.storage.AddFormula("test", &api.Formula{
+	formula1ID, err := testInfo.storage.AddFormula("test", &api.Formula{
 		Name: "testformula",
+	})
+	formula2ID, err := testInfo.storage.AddFormula("test", &api.Formula{
+		Name: "test-name",
 	})
 	job1ID, err := testInfo.storage.AddJob("test", &api.Job{
 		Name:         "testjob1",
@@ -64,7 +68,8 @@ func populateDB() error {
 	}
 
 	testInfo.contractorID = contractorID
-	testInfo.formulaID = formulaID
+	testInfo.formula1ID = formula1ID
+	testInfo.formula2ID = formula2ID
 	testInfo.job1ID = job1ID
 	testInfo.job2ID = job2ID
 
@@ -91,7 +96,23 @@ func TestSearchFormulas(t *testing.T) {
 	results, err := testInfo.search.SearchFormulas("test", "formula")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
-	require.Contains(t, results, testInfo.formulaID)
+	require.Contains(t, results, testInfo.formula1ID)
+}
+
+func TestSearchFormulasPartialDashed(t *testing.T) {
+	results, err := testInfo.search.SearchFormulas("test", "name")
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.Contains(t, results, testInfo.formula2ID)
+	require.NotContains(t, results, testInfo.formula1ID)
+}
+
+func TestSearchFormulasQueryDashed(t *testing.T) {
+	results, err := testInfo.search.SearchFormulas("test", `test-name`)
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.Contains(t, results, testInfo.formula2ID)
+	require.NotContains(t, results, testInfo.formula1ID)
 }
 
 func TestSearchJobs(t *testing.T) {
@@ -112,12 +133,12 @@ func TestUpdateFormulaIndex(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 
-	err = testInfo.storage.UpdateFormula("test", testInfo.formulaID, &api.Formula{
-		Id:   testInfo.formulaID,
+	err = testInfo.storage.UpdateFormula("test", testInfo.formula1ID, &api.Formula{
+		Id:   testInfo.formula1ID,
 		Name: "testupdate",
 	})
 
-	testInfo.search.UpdateFormulaIndex("test", testInfo.formulaID)
+	testInfo.search.UpdateFormulaIndex("test", testInfo.formula1ID)
 
 	results, err = testInfo.search.SearchFormulas("test", "formula")
 	require.NoError(t, err)
@@ -126,7 +147,7 @@ func TestUpdateFormulaIndex(t *testing.T) {
 	results, err = testInfo.search.SearchFormulas("test", "update")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
-	require.Contains(t, results, testInfo.formulaID)
+	require.Contains(t, results, testInfo.formula1ID)
 }
 
 func TestUpdateJobIndex(t *testing.T) {
@@ -156,9 +177,9 @@ func TestDeleteFormulaIndex(t *testing.T) {
 	results, err := testInfo.search.SearchFormulas("test", "update")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
-	require.Contains(t, results, testInfo.formulaID)
+	require.Contains(t, results, testInfo.formula1ID)
 
-	testInfo.search.DeleteFormulaIndex("test", testInfo.formulaID)
+	testInfo.search.DeleteFormulaIndex("test", testInfo.formula1ID)
 
 	results, err = testInfo.search.SearchFormulas("test", "update")
 	require.NoError(t, err)
@@ -178,4 +199,25 @@ func TestDeleteJobIndex(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, results)
 
+}
+
+func TestSanitizeQueryString(t *testing.T) {
+	tests := map[string]struct {
+		query string
+		want  string
+	}{
+		"simple term (no change)":       {"helloworld", `helloworld`},
+		"compound phrase (no change)":   {"hello world", `hello world`},
+		"dashed phrase":                 {"hello-world", `hello world`},
+		"multiple changes of same char": {"hello-world-its-me", `hello world its me`},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := sanitizeQuery(tc.query)
+			if got != tc.want {
+				t.Errorf("want %q, got %s", tc.want, got)
+			}
+		})
+	}
 }

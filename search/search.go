@@ -27,8 +27,8 @@ type Search struct {
 // extendedJob extends a typical job to include the contractor
 // so that we can index both at the same time
 type compositeJob struct {
-	Job        api.Job
-	Contractor api.Contractor
+	Job        *api.Job
+	Contractor *api.Contractor
 }
 
 // InitSearch creates a search index object which can then be queried for search results
@@ -99,8 +99,8 @@ func (si *Search) UpdateJobIndex(account string, jobID string) {
 	}
 
 	compJob := &compositeJob{
-		Job:        *job,
-		Contractor: *contractor,
+		Job:        job,
+		Contractor: contractor,
 	}
 
 	index := si.jobIndex[account]
@@ -182,8 +182,8 @@ func (si *Search) populateIndex(account string) {
 		}
 
 		si.jobIndex[account].Index(job.Id, compositeJob{
-			Job:        *job,
-			Contractor: *contractor,
+			Job:        job,
+			Contractor: contractor,
 		})
 	}
 
@@ -229,6 +229,7 @@ func (si *Search) SearchJobs(account, searchPhrase string) ([]string, error) {
 // will it be present in the results
 func queryIndex(index bleve.Index, searchPhrase string) ([]string, error) {
 	queryBuilder := bleve.NewBooleanQuery()
+	searchPhrase = sanitizeQuery(searchPhrase)
 
 	for _, term := range strings.Split(searchPhrase, " ") {
 		query := bleve.NewWildcardQuery(fmt.Sprintf(searchSyntax, term))
@@ -247,4 +248,52 @@ func queryIndex(index bleve.Index, searchPhrase string) ([]string, error) {
 	}
 
 	return matchingIDs, nil
+}
+
+//TODO(clintjedwards): Make this better by using better logic for replacing.
+// it should be possible to remove the second set used for tracking "done" replacements.
+// sanitizeQuery removes bleve syntax special chars. This prevents users from shooting themselves
+// in the foot when, for example, searching for something like "hello-world" which according to
+// bleve syntax should exclude all results including the word "world".
+func sanitizeQuery(query string) string {
+
+	reserved := map[rune]struct{}{
+		'+': {},
+		'-': {},
+		'=': {},
+		'&': {},
+		'|': {},
+		'>': {},
+		'<': {},
+		'!': {},
+		'(': {},
+		')': {},
+		'{': {},
+		'}': {},
+		'[': {},
+		']': {},
+		'^': {},
+		'"': {},
+		'~': {},
+		'*': {},
+		'?': {},
+		':': {},
+		'/': {},
+	}
+
+	escaped := map[rune]struct{}{}
+
+	for _, char := range query {
+		if _, ok := reserved[char]; !ok {
+			continue
+		}
+		if _, ok := escaped[char]; ok {
+			continue
+		}
+
+		query = strings.Replace(query, string(char), " ", -1)
+		escaped[char] = struct{}{}
+	}
+
+	return query
 }

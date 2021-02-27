@@ -32,6 +32,10 @@ require (
 	github.com/improbable-eng/grpc-web v0.12.0
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
+<<<<<<< HEAD
+=======
+	github.com/mholt/certmagic v0.9.0
+>>>>>>> parent of 3343fb2 (Removing cert magic)
 	github.com/prometheus/client_golang v1.3.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
 	github.com/rs/cors v1.7.0 // indirect

@@ -14,7 +14,6 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -55,19 +54,11 @@ func NewBasecoatAPI(config *config.Config) *API {
 // CreateGRPCServer creates a grpc server with all the proper settings; TLS enabled
 func CreateGRPCServer(basecoatAPI *API) *grpc.Server {
 
-	creds, err := credentials.NewServerTLSFromFile(basecoatAPI.config.TLSCertPath, basecoatAPI.config.TLSKeyPath)
-	if err != nil {
-		zap.S().Fatalw("failed to get certificates", "error", err)
-	}
-
-	serverOption := grpc.Creds(creds)
-
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_auth.UnaryServerInterceptor(basecoatAPI.authenticate),
 			grpc_prometheus.UnaryServerInterceptor,
 		)),
-		serverOption,
 	)
 
 	grpc_prometheus.EnableHandlingTimeHistogram()

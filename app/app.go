@@ -15,7 +15,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	"github.com/mholt/certmagic"
 	"google.golang.org/grpc"
 )
 
@@ -63,22 +62,13 @@ func initCombinedService(config *config.Config, server *grpc.Server) {
 		modifiedHandler = combinedHandler
 	}
 
-	// certmagic allows us to auto renew tls certs. Useful in production not so useful in dev
-	if config.CertMagic.Enable {
-		certmagic.Default.Agreed = true
-		certmagic.Default.Email = config.CertMagic.Email
-
-		zap.S().Fatal(certmagic.HTTPS([]string{config.CertMagic.Domain}, modifiedHandler))
-	} else {
-
-		httpServer := http.Server{
-			Addr:         config.URL,
-			Handler:      modifiedHandler,
-			WriteTimeout: 15 * time.Second,
-			ReadTimeout:  15 * time.Second,
-		}
-
-		zap.S().Infow("starting basecoat grpc/http service", "url", config.URL)
-		zap.S().Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
+	httpServer := http.Server{
+		Addr:         config.URL,
+		Handler:      modifiedHandler,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
+
+	zap.S().Infow("starting basecoat grpc/http service", "url", config.URL)
+	zap.S().Fatal(httpServer.ListenAndServeTLS(config.TLSCertPath, config.TLSKeyPath))
 }

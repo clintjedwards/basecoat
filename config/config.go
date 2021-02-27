@@ -14,23 +14,14 @@ type DatabaseConfig struct {
 type Config struct {
 	Debug       bool   `envconfig:"debug" default:"false"`
 	LogLevel    string `envconfig:"loglevel" default:"info"`
-	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"` // does not apply if certmagic is enabled
-	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`  // does not apply if certmagic is enabled
-	URL         string `envconfig:"url" default:"localhost:8080"`            // does not apply if certmagic is enabled
-	CertMagic   *CertMagicConfig
+	TLSCertPath string `envconfig:"tls_cert_path" default:"./localhost.crt"`
+	TLSKeyPath  string `envconfig:"tls_key_path" default:"./localhost.key"`
+	URL         string `envconfig:"url" default:"localhost:8080"`
 	Frontend    *FrontendConfig
 	Backend     *BackendConfig
 	Database    *DatabaseConfig
 	CommandLine *CommandLineConfig
 	Metrics     *MetricsConfig
-}
-
-// CertMagicConfig allows the automation of generating tls certificates
-type CertMagicConfig struct {
-	// this enables cert magic to perform https cert renewal and redirection for the application
-	Enable bool   `envconfig:"certmagic_enable" default:"false"`
-	Email  string `envconfig:"certmagic_email"`
-	Domain string `envconfig:"certmagic_domain" default:"basecoat.clintjedwards.com"`
 }
 
 // FrontendConfig represents configuration for frontend basecoat

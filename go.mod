@@ -32,11 +32,12 @@ require (
 	github.com/improbable-eng/grpc-web v0.12.0
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mholt/certmagic v0.9.0 // indirect
 	github.com/prometheus/client_golang v1.3.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
 	github.com/rs/cors v1.7.0 // indirect
+	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/httpgzip v0.0.0-20190720172056-320755c1c1b0
+	github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
@@ -51,7 +52,7 @@ require (
 	golang.org/x/tools v0.0.0-20191220234730-f13409bbebaf // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/grpc v1.27.0
-	google.golang.org/protobuf v1.25.0 // indirect
+	google.golang.org/protobuf v1.25.0
 )
 
 go 1.13

@@ -66,3 +66,5 @@ The only tests are integration tests that must be run against a live server. The
 ## Authors
 
 - **Clint Edwards** - [Github](https://github.com/clintjedwards)
+
+This software is provided as-is. It's a hobby project, done in my free time, and I don't get paid for doing it.

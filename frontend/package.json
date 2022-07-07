@@ -29,7 +29,7 @@
     "https-proxy-agent": "^3.0.1",
     "js-cookie": "^2.2.1",
     "lodash": "^4.17.19",
-    "moment": "2.23.0",
+    "moment": "2.29.4",
     "npm": "^6.14.6",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",

@@ -1,0 +1,248 @@
+syntax = "proto3";
+
+package proto;
+
+import "basecoat_message.proto";
+
+option go_package = "github.com/clintjedwards/basecoat/proto";
+
+message CreateAPITokenRequest {
+  string account = 1;
+  string password = 2;
+  // duration of API key in seconds
+  int64 duration = 3;
+}
+
+message CreateAPITokenResponse { string key = 1; }
+
+// Account transport messages
+message GetAccountRequest { string id = 1; }
+message GetAccountResponse { Account account = 1; }
+message ListAccountsRequest {}
+message ListAccountsResponse { repeated Account accounts = 1; }
+message CreateAccountRequest {
+  string name = 1;
+  string password = 2;
+}
+message CreateAccountResponse { Account account = 1; }
+message UpdateAccountRequest {
+  string id = 1;
+  string name = 2;
+  string password = 3;
+}
+message UpdateAccountResponse {}
+message ToggleAccountStateRequest { string id = 1; }
+message ToggleAccountStateResponse { AccountState state = 1; }
+
+message GetSystemInfoRequest {}
+message GetSystemInfoResponse {
+  string commit = 1;
+  bool frontend_enabled = 2;
+  string semver = 3;
+}
+
+// Formula transport messages
+message GetFormulaRequest { string id = 1; }
+message GetFormulaResponse { FormulaMetadata formula = 1; }
+
+message ListFormulasRequest {
+  // offset is a pagination parameter that defines where to start when counting
+  // the list of objects to return.
+  int64 offset = 1;
+
+  // limit is a pagination parameter that defines how many objects to return
+  // per result.
+  int64 limit = 2;
+
+  string filter = 3; // Allows you to fuzzy search through formulas.
+}
+
+message ListFormulasResponse { repeated FormulaMetadata formulas = 1; }
+
+message CreateFormulaRequest {
+  string name = 1;
+  string number = 2;
+  string notes = 3;
+}
+message CreateFormulaResponse { FormulaMetadata formula = 1; }
+
+message UpdateFormulaRequest {
+  string id = 1;
+  string name = 2;
+  string number = 3;
+  string notes = 4;
+}
+message UpdateFormulaResponse { FormulaMetadata formula = 1; }
+
+message DeleteFormulaRequest { string id = 1; }
+message DeleteFormulaResponse {}
+
+// Base transport messages
+message GetBaseRequest { string id = 1; }
+message GetBaseResponse { BaseMetadata base = 1; }
+
+message ListBasesRequest {}
+
+message ListBasesResponse { repeated BaseMetadata bases = 1; }
+
+message CreateBaseRequest {
+  string label = 1;
+  string manufacturer = 2;
+}
+message CreateBaseResponse { BaseMetadata base = 1; }
+
+message UpdateBaseRequest {
+  string id = 1;
+  string label = 2;
+  string manufacturer = 3;
+}
+message UpdateBaseResponse { BaseMetadata base = 1; }
+
+message AssociateBaseWithFormulaRequest {
+  string formula = 1;
+  string base = 2;
+  string amount = 3;
+}
+message AssociateBaseWithFormulaResponse {}
+
+message DisassociateBaseFromFormulaRequest {
+  string formula = 1;
+  string base = 2;
+}
+message DisassociateBaseFromFormulaResponse {}
+
+message DeleteBaseRequest { string id = 1; }
+message DeleteBaseResponse {}
+
+// Colorant transport messages
+message GetColorantRequest { string id = 1; }
+message GetColorantResponse { ColorantMetadata colorant = 1; }
+
+message ListColorantsRequest {}
+
+message ListColorantsResponse { repeated ColorantMetadata colorants = 1; }
+
+message CreateColorantRequest {
+  string label = 1;
+  string manufacturer = 2;
+}
+message CreateColorantResponse { ColorantMetadata colorant = 1; }
+
+message UpdateColorantRequest {
+  string id = 1;
+  string label = 2;
+  string manufacturer = 3;
+}
+message UpdateColorantResponse { ColorantMetadata colorant = 1; }
+
+message AssociateColorantWithFormulaRequest {
+  string formula = 1;
+  string colorant = 2;
+  string amount = 3;
+}
+
+message AssociateColorantWithFormulaResponse {}
+message DisassociateColorantFromFormulaRequest {
+  string formula = 1;
+  string colorant = 2;
+}
+
+message DisassociateColorantFromFormulaResponse {}
+
+message DeleteColorantRequest { string id = 1; }
+message DeleteColorantResponse {}
+
+message GetJobRequest { string id = 1; }
+message GetJobResponse { Job job = 1; }
+
+message ListJobsRequest {
+  // offset is a pagination parameter that defines where to start when counting
+  // the list of objects to return.
+  int64 offset = 1;
+
+  // limit is a pagination parameter that defines how many objects to return
+  // per result.
+  int64 limit = 2;
+
+  string filter = 3; // Allows you to fuzzy search
+}
+message ListJobsResponse { repeated Job jobs = 1; }
+
+message CreateJobRequest {
+  string name = 1;
+  Address address = 2;
+  string notes = 3;
+  string contractor_id = 4;
+  optional string contact_id = 5;
+}
+message CreateJobResponse { Job job = 1; }
+
+message UpdateJobRequest {
+  string id = 1;
+  optional string name = 2;
+  optional Address address = 3;
+  optional string notes = 4;
+  optional string contact_id = 5;
+}
+message UpdateJobResponse { Job job = 1; }
+
+message DeleteJobRequest { string id = 1; }
+message DeleteJobResponse {}
+
+message GetContractorRequest { string id = 1; }
+message GetContractorResponse { Contractor contractor = 1; }
+
+message ListContractorsRequest {}
+message ListContractorsResponse { repeated Contractor contractors = 1; }
+
+message CreateContractorRequest {
+  string company = 1;
+  optional string contact = 2;
+}
+message CreateContractorResponse { Contractor contractor = 1; }
+
+message UpdateContractorRequest {
+  string id = 1;
+  optional string company = 2;
+  optional string contact = 3;
+}
+message UpdateContractorResponse { Contractor contractor = 1; }
+
+message DeleteContractorRequest { string id = 1; }
+message DeleteContractorResponse {}
+
+message GetContactRequest { string id = 1; }
+message GetContactResponse { Contact contact = 1; }
+
+message ListContactsRequest {}
+message ListContactsResponse { repeated Contact contacts = 1; }
+
+message CreateContactRequest {
+  string name = 1;
+  string email = 2;
+  string phone = 3;
+}
+message CreateContactResponse { Contact contact = 1; }
+
+message UpdateContactRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string email = 3;
+  optional string phone = 4;
+}
+message UpdateContactResponse { Contact contact = 1; }
+
+message DeleteContactRequest { string id = 1; }
+message DeleteContactResponse {}
+
+message AssociateFormulaWithJobRequest {
+  string job = 1;
+  string formula = 2;
+}
+
+message AssociateFormulaWithJobResponse {}
+message DisassociateFormulaFromJobRequest {
+  string job = 1;
+  string formula = 2;
+}
+message DisassociateFormulaFromJobResponse {}

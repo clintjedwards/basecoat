@@ -14,15 +14,5 @@ dist/*
 -dist/.gitkeep
 main.js
 
-#protobuf
-*.pb.go
-*_pb.d.ts
-*_pb.js
-*Pb.ts
-
-#localhost cert files
-*.crt
-*.key
-
-#ignore frontend static import
-frontend/assets.go
+# Remove the documentation assets
+documentation/book/html/*

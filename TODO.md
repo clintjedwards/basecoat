@@ -1,0 +1,2 @@
+- Take another look at how to store cookies/auth with frontend.
+- We should also have a field for manufactorers in the DB.

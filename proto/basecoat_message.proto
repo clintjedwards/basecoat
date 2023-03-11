@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/clintjedwards/basecoat/proto";
+
+// Account represents a user account
+enum AccountState {
+  UNKNOWN = 0;
+  ACTIVE = 1;
+  DISABLED = 2;
+}
+
+message Account {
+  string id = 1;
+  string name = 2;
+  AccountState state = 3;
+  int64 created = 4;
+  int64 modified = 5;
+}
+
+message Formula {
+  FormulaMetadata metadata = 1;
+  repeated FormulaBase bases = 2;
+  repeated FormulaColorant colorants = 3;
+  repeated string jobs = 4;
+}
+
+message FormulaMetadata {
+  // Which account this formula belongs to.
+  string account = 1;
+  // Unique ID for formula
+  string id = 2;
+  // Formula color name
+  string name = 3;
+  // Used to identify formulas in other systems
+  string number = 4;
+  string notes = 5;
+  // Time created in epoch
+  int64 created = 6;
+  // Time modified in epoch
+  int64 modified = 7;
+}
+
+message FormulaColorant {
+  string formula = 1;
+  string colorant = 2;
+  string amount = 3;
+}
+
+message ColorantMetadata {
+  string account = 1;
+  string id = 2;
+  string label = 3;
+  string manufacturer = 4;
+  int64 created = 5;
+}
+
+message FormulaBase {
+  string formula = 1;
+  string base = 2;
+  string amount = 3;
+}
+
+message BaseMetadata {
+  string account = 1;
+  string id = 2;
+  string label = 3;
+  string manufacturer = 4;
+  int64 created = 5;
+}
+
+// Jobs are places where a formula might have been sent
+message Job {
+  string account = 1;
+  string contractor = 2;
+  string id = 3;
+  string name = 4;
+  Address address = 5;
+  string notes = 6;
+  optional string contact = 7;
+  int64 created = 8;
+  int64 modified = 9;
+}
+
+// Contractor is information about the company who requested
+// work for the job site
+message Contractor {
+  string account = 1;
+  string id = 2;
+  string company = 3;
+  optional string contact = 4;
+  int64 created = 5;
+  int64 modified = 6;
+}
+
+message Contact {
+  string account = 1;
+  string id = 2;
+  string name = 3;
+  string email = 4;
+  string phone = 5;
+  int64 created = 6;
+  int64 modified = 7;
+}
+
+message Address {
+  string street = 1;
+  string street2 = 2;
+  string city = 3;
+  string state = 4;
+  string zipcode = 5;
+}

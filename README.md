@@ -43,7 +43,7 @@ This project uses grpc and grpc-web which use generated functions from a protobu
 You'll need:
 
 - protoc: `https://github.com/golang/protobuf`
-- go's proto plugin: `go get github.com/golang/protobuf/protoc-gen-go`
+- go's proto plugin: `go install github.com/golang/protobuf/protoc-gen-go@latest`
 - grpc-web proto plugin: `https://github.com/grpc/grpc-web/releases`
 
 ### Building the frontend

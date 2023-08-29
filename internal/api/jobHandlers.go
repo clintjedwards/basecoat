@@ -48,7 +48,7 @@ func (api *API) ListJobs(ctx context.Context, request *proto.ListJobsRequest) (*
 	searchResults := []string{}
 
 	if request.Filter != "" {
-		results, err := api.search.SearchFormulas(account, request.Filter)
+		results, err := api.search.SearchJobs(account, request.Filter)
 		if err != nil {
 			log.Error().Err(err).Msg("a search error occurred")
 		}

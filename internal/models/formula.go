@@ -10,9 +10,19 @@ import (
 
 // A formula is a combination of paint bases and colorants to make a specific color for a particular customer.
 type Formula struct {
-	Metadata  FormulaMetadata   `json:"metadata"`
-	Bases     []FormulaBase     `json:"bases"`
-	Colorants []FormulaColorant `json:"colorants"`
+	Metadata  FormulaMetadata `json:"metadata"`
+	Bases     []string        `json:"bases"`
+	Colorants []string        `json:"colorants"`
+	Jobs      []string        `json:"jobs"`
+}
+
+func (f *Formula) ToProto() *proto.Formula {
+	return &proto.Formula{
+		Metadata:  f.Metadata.ToProto(),
+		Bases:     f.Bases,
+		Colorants: f.Colorants,
+		Jobs:      f.Jobs,
+	}
 }
 
 // A formula is a combination of paint bases and colorants to make a specific color for a particular customer.

@@ -21,8 +21,8 @@ message Account {
 
 message Formula {
   FormulaMetadata metadata = 1;
-  repeated FormulaBase bases = 2;
-  repeated FormulaColorant colorants = 3;
+  repeated string bases = 2;
+  repeated string colorants = 3;
   repeated string jobs = 4;
 }
 
@@ -48,6 +48,11 @@ message FormulaColorant {
   string amount = 3;
 }
 
+message Colorant {
+    ColorantMetadata metadata = 1;
+    repeated string formula_ids = 2;
+  }
+
 message ColorantMetadata {
   string account = 1;
   string id = 2;
@@ -61,6 +66,11 @@ message FormulaBase {
   string base = 2;
   string amount = 3;
 }
+
+message Base {
+    BaseMetadata metadata = 1;
+    repeated string formula_ids = 2;
+  }
 
 message BaseMetadata {
   string account = 1;

@@ -3,7 +3,6 @@ package api
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
@@ -25,7 +24,6 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
@@ -242,33 +240,4 @@ func (api *API) createGRPCServer() (*grpc.Server, error) {
 	proto.RegisterBasecoatServer(grpcServer, api)
 
 	return grpcServer, nil
-}
-
-// grpcDial establishes a connection with the request URL via GRPC.
-func grpcDial(url string) (*grpc.ClientConn, error) {
-	host, port, ok := strings.Cut(url, ":")
-	if !ok {
-		return nil, fmt.Errorf("could not parse url %q; format should be <host>:<port>", url)
-	}
-
-	var opt []grpc.DialOption
-	var tlsConf *tls.Config
-
-	// If we're testing in development bypass the cert checks.
-	if host == "localhost" || host == "127.0.0.1" {
-		tlsConf = &tls.Config{
-			InsecureSkipVerify: true,
-		}
-		opt = append(opt, grpc.WithTransportCredentials(credentials.NewTLS(tlsConf)))
-	}
-
-	opt = append(opt, grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3),
-		grpc_retry.WithBackoff(grpc_retry.BackoffExponential(time.Millisecond*100)))))
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", host, port), opt...)
-	if err != nil {
-		return nil, fmt.Errorf("could not connect to server: %w", err)
-	}
-
-	return conn, nil
 }

@@ -6,7 +6,9 @@ import (
 	"github.com/clintjedwards/basecoat/internal/models"
 	"github.com/clintjedwards/basecoat/internal/storage"
 	"github.com/clintjedwards/basecoat/proto"
+	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -22,16 +24,39 @@ func (api *API) GetColorant(ctx context.Context, request *proto.GetColorantReque
 		return &proto.GetColorantResponse{}, status.Error(codes.FailedPrecondition, "id required")
 	}
 
-	colorantRaw, err := api.db.GetColorant(api.db, account, request.Id)
+	colorant := models.Colorant{}
+
+	err := storage.InsideTx(api.db.DB, func(tx *sqlx.Tx) error {
+		colorantRaw, err := api.db.GetColorant(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		colorantMetadata := models.ColorantMetadata{}
+		colorantMetadata.FromStorage(&colorantRaw)
+		colorant.Metadata = colorantMetadata
+
+		formulaColorants, err := api.db.ListColorantFormulas(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		formulaSet := map[string]struct{}{}
+
+		for _, formulaColorant := range formulaColorants {
+			formulaSet[formulaColorant.Formula] = struct{}{}
+		}
+
+		colorant.FormulaIDs = maps.Keys(formulaSet)
+
+		return nil
+	})
 	if err != nil {
 		if err == storage.ErrEntityNotFound {
 			return &proto.GetColorantResponse{}, status.Error(codes.NotFound, "colorant requested not found")
 		}
-		return &proto.GetColorantResponse{}, status.Error(codes.Internal, "failed to retrieve colorant from datacolorant")
+		return &proto.GetColorantResponse{}, status.Error(codes.Internal, "failed to retrieve colorant from database")
 	}
-
-	colorant := models.ColorantMetadata{}
-	colorant.FromStorage(&colorantRaw)
 
 	return &proto.GetColorantResponse{Colorant: colorant.ToProto()}, nil
 }
@@ -45,7 +70,7 @@ func (api *API) ListColorants(ctx context.Context, _ *proto.ListColorantsRequest
 
 	colorantsRaw, err := api.db.ListColorants(api.db, account, 0, 0)
 	if err != nil {
-		return &proto.ListColorantsResponse{}, status.Error(codes.Internal, "failed to retrieve colorants from datacolorant")
+		return &proto.ListColorantsResponse{}, status.Error(codes.Internal, "failed to retrieve colorants from database")
 	}
 
 	protoColorants := []*proto.ColorantMetadata{}

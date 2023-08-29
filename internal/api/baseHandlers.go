@@ -6,7 +6,9 @@ import (
 	"github.com/clintjedwards/basecoat/internal/models"
 	"github.com/clintjedwards/basecoat/internal/storage"
 	"github.com/clintjedwards/basecoat/proto"
+	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -22,16 +24,39 @@ func (api *API) GetBase(ctx context.Context, request *proto.GetBaseRequest) (*pr
 		return &proto.GetBaseResponse{}, status.Error(codes.FailedPrecondition, "id required")
 	}
 
-	baseRaw, err := api.db.GetBase(api.db, account, request.Id)
+	base := models.Base{}
+
+	err := storage.InsideTx(api.db.DB, func(tx *sqlx.Tx) error {
+		baseRaw, err := api.db.GetBase(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		baseMetadata := models.BaseMetadata{}
+		baseMetadata.FromStorage(&baseRaw)
+		base.Metadata = baseMetadata
+
+		formulaBases, err := api.db.ListBaseFormulas(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		formulaSet := map[string]struct{}{}
+
+		for _, formulaBase := range formulaBases {
+			formulaSet[formulaBase.Formula] = struct{}{}
+		}
+
+		base.FormulaIDs = maps.Keys(formulaSet)
+
+		return nil
+	})
 	if err != nil {
 		if err == storage.ErrEntityNotFound {
 			return &proto.GetBaseResponse{}, status.Error(codes.NotFound, "base requested not found")
 		}
 		return &proto.GetBaseResponse{}, status.Error(codes.Internal, "failed to retrieve base from database")
 	}
-
-	base := models.BaseMetadata{}
-	base.FromStorage(&baseRaw)
 
 	return &proto.GetBaseResponse{Base: base.ToProto()}, nil
 }

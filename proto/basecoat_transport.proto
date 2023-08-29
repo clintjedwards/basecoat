@@ -43,7 +43,7 @@ message GetSystemInfoResponse {
 
 // Formula transport messages
 message GetFormulaRequest { string id = 1; }
-message GetFormulaResponse { FormulaMetadata formula = 1; }
+message GetFormulaResponse { Formula formula = 1; }
 
 message ListFormulasRequest {
   // offset is a pagination parameter that defines where to start when counting
@@ -79,7 +79,7 @@ message DeleteFormulaResponse {}
 
 // Base transport messages
 message GetBaseRequest { string id = 1; }
-message GetBaseResponse { BaseMetadata base = 1; }
+message GetBaseResponse { Base base = 1; }
 
 message ListBasesRequest {}
 
@@ -116,7 +116,7 @@ message DeleteBaseResponse {}
 
 // Colorant transport messages
 message GetColorantRequest { string id = 1; }
-message GetColorantResponse { ColorantMetadata colorant = 1; }
+message GetColorantResponse { Colorant colorant = 1; }
 
 message ListColorantsRequest {}
 

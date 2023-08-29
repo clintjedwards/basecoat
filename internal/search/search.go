@@ -25,10 +25,10 @@ type Search struct {
 
 // extendedJob extends a typical job to include the contractor
 // so that we can index both at the same time
-// type compositeJob struct {
-// 	Job        *api.Job
-// 	Contractor *api.Contractor
-// }
+type compositeJob struct {
+	Job        storage.Job
+	Contractor storage.Contractor
+}
 
 // InitSearch creates a search index object which can then be queried for search results
 func InitSearch(store storage.DB) (*Search, error) {
@@ -77,35 +77,35 @@ func (si *Search) UpdateFormulaIndex(account string, formulaID string) {
 }
 
 // UpdateJobIndex updates an already loaded job index
-// func (si *Search) UpdateJobIndex(account string, jobID string) {
-// 	if _, ok := si.jobIndex[account]; !ok {
-// 		si.jobIndex[account] = createNewIndex()
-// 	}
+func (si *Search) UpdateJobIndex(account string, jobID string) {
+	if _, ok := si.jobIndex[account]; !ok {
+		si.jobIndex[account] = createNewIndex()
+	}
 
-// 	job, err := si.store.GetJob(account, jobID)
-// 	if err != nil {
-// 		zap.S().Errorw("could not get job from database",
-// 			"account", account, "jobID", jobID)
-// 	}
+	job, err := si.store.GetJob(si.store.DB, account, jobID)
+	if err != nil {
+		log.Error().Err(err).Str("account", account).Str("job", jobID).Msg("could not get job from database")
+	}
 
-// 	contractor := &api.Contractor{}
-// 	if job.ContractorId != "" {
-// 		contractor, err = si.store.GetContractor(account, job.ContractorId)
-// 		if err != nil {
-// 			zap.S().Errorw("could not get contractor from database",
-// 				"account", account, "contractorID", job.ContractorId)
-// 		}
-// 	}
+	contractor := storage.Contractor{}
+	if job.Contractor != "" {
+		contractor, err = si.store.GetContractor(si.store.DB, account, job.Contractor)
+		if err != nil {
+			log.Error().Err(err).Str("account", account).Str("job", jobID).Msg("could not get contractor from database")
+		}
+	}
 
-// 	compJob := &compositeJob{
-// 		Job:        job,
-// 		Contractor: contractor,
-// 	}
+	compJob := &compositeJob{
+		Job:        job,
+		Contractor: contractor,
+	}
 
-// 	index := si.jobIndex[account]
-// 	index.Index(job.Id, compJob)
-// 	return
-// }
+	index := si.jobIndex[account]
+	err = index.Index(job.ID, compJob)
+	if err != nil {
+		log.Error().Err(err).Str("account", account).Str("job", jobID).Msg("failed to index job")
+	}
+}
 
 // DeleteFormulaIndex updates an already loaded formula index
 func (si *Search) DeleteFormulaIndex(account string, formulaID string) {
@@ -162,34 +162,25 @@ func (si *Search) populateIndex(account string) {
 	}
 
 	// Index all jobs
-	// jobs, err := si.store.GetAllJobs(account)
-	// if err != nil {
-	// 	zap.S().Errorw("failed to query database for jobs",
-	// 		"error", err,
-	// 		"account", account)
-	// }
+	jobs, err := si.store.ListJobs(si.store.DB, account, 0, 0)
+	if err != nil {
+		log.Error().Err(err).Str("account", account).Msg("failed to query database for jobs")
+	}
 
-	// Get all contractors to be added into job indexes
-	// contractors, err := si.store.GetAllContractors(account)
-	// if err != nil {
-	// 	zap.S().Errorw("failed to query database for contractors",
-	// 		"error", err,
-	// 		"account", account)
-	// }
+	for _, job := range jobs {
+		contractor, err := si.store.GetContractor(si.store.DB, account, job.Contractor)
+		if err != nil {
+			log.Error().Err(err).Str("account", account).Msg("failed to query database for contractor")
+		}
 
-	// for _, job := range jobs {
-	// 	si.jobIndex[account].Index(job.Id, &job)
-
-	// 	contractor := &api.Contractor{}
-	// 	if contra, ok := contractors[job.ContractorId]; ok {
-	// 		contractor = contra
-	// 	}
-
-	// 	si.jobIndex[account].Index(job.Id, compositeJob{
-	// 		Job:        job,
-	// 		Contractor: contractor,
-	// 	})
-	// }
+		err = si.jobIndex[account].Index(job.ID, compositeJob{
+			Job:        job,
+			Contractor: contractor,
+		})
+		if err != nil {
+			log.Error().Err(err).Str("account", account).Str("job", job.ID).Msg("failed to index job")
+		}
+	}
 }
 
 // SearchFormulas searches the index for matching terms and then returns formulas which might match

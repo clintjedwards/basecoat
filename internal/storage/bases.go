@@ -71,6 +71,19 @@ func (db *DB) GetBase(conn Queryable, account, id string) (Base, error) {
 	return base, nil
 }
 
+func (db *DB) ListBaseFormulas(conn Queryable, account, base string) ([]FormulaBase, error) {
+	query, args := qb.Select("account", "formula", "base", "amount").From("formula_bases").
+		Where(qb.Eq{"account": account, "base": base}).MustSql()
+
+	formulaBases := []FormulaBase{}
+	err := conn.Select(&formulaBases, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("database error occurred: %v; %w", err, ErrInternal)
+	}
+
+	return formulaBases, nil
+}
+
 func (db *DB) UpdateBase(conn Queryable, account, id string, fields UpdatableBaseFields) error {
 	query := qb.Update("bases")
 

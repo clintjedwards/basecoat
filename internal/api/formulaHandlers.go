@@ -7,7 +7,9 @@ import (
 	"github.com/clintjedwards/basecoat/internal/models"
 	"github.com/clintjedwards/basecoat/internal/storage"
 	"github.com/clintjedwards/basecoat/proto"
+	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,16 +26,70 @@ func (api *API) GetFormula(ctx context.Context, request *proto.GetFormulaRequest
 		return &proto.GetFormulaResponse{}, status.Error(codes.FailedPrecondition, "id required")
 	}
 
-	formulaRaw, err := api.db.GetFormula(api.db, account, request.Id)
+	formula := models.Formula{}
+
+	err := storage.InsideTx(api.db.DB, func(tx *sqlx.Tx) error {
+		// Metadata
+		formulaRaw, err := api.db.GetFormula(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		formulaMetadata := models.FormulaMetadata{}
+		formulaMetadata.FromStorage(&formulaRaw)
+
+		formula.Metadata = formulaMetadata
+
+		// Bases
+		baseSet := map[string]struct{}{}
+
+		formulaBases, err := api.db.ListFormulaBases(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		for _, formulaBase := range formulaBases {
+			baseSet[formulaBase.Base] = struct{}{}
+		}
+
+		formula.Bases = maps.Keys(baseSet)
+
+		// Colorants
+		colorantSet := map[string]struct{}{}
+
+		formulaColorants, err := api.db.ListFormulaColorants(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		for _, formulaColorant := range formulaColorants {
+			colorantSet[formulaColorant.Colorant] = struct{}{}
+		}
+
+		formula.Colorants = maps.Keys(colorantSet)
+
+		// Jobs
+		jobSet := map[string]struct{}{}
+
+		formulaJobs, err := api.db.ListJobFormulas(tx, account, request.Id)
+		if err != nil {
+			return err
+		}
+
+		for _, formulaJob := range formulaJobs {
+			jobSet[formulaJob.Job] = struct{}{}
+		}
+
+		formula.Jobs = maps.Keys(jobSet)
+
+		return nil
+	})
 	if err != nil {
 		if err == storage.ErrEntityNotFound {
 			return &proto.GetFormulaResponse{}, status.Error(codes.NotFound, "formula requested not found")
 		}
 		return &proto.GetFormulaResponse{}, status.Error(codes.Internal, "failed to retrieve formula from database")
 	}
-
-	formula := models.FormulaMetadata{}
-	formula.FromStorage(&formulaRaw)
 
 	return &proto.GetFormulaResponse{Formula: formula.ToProto()}, nil
 }

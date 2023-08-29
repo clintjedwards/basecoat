@@ -49,18 +49,24 @@ func setup() {
 
 func populateDB() {
 	err := testInfo.storage.InsertAccount(testInfo.storage.DB, &storage.Account{
-		ID:   "test",
-		Name: "test",
+		ID:   "test_account",
+		Name: "test_account",
 	})
 	if err != nil {
 		panic(err)
 	}
-	// contractorID, err := testInfo.storage.AddContractor("test", &api.Contractor{
-	// 	Company: "testcontractor",
-	// })
+
+	err = testInfo.storage.InsertContractor(testInfo.storage.DB, &storage.Contractor{
+		Account: "test_account",
+		ID:      "test_contractor",
+		Company: "test_contractor",
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	err = testInfo.storage.InsertFormula(testInfo.storage.DB, &storage.Formula{
-		Account: "test",
+		Account: "test_account",
 		ID:      "formula_1",
 		Name:    "testunique",
 	})
@@ -68,33 +74,35 @@ func populateDB() {
 		panic(err)
 	}
 	err = testInfo.storage.InsertFormula(testInfo.storage.DB, &storage.Formula{
-		Account: "test",
+		Account: "test_account",
 		ID:      "formula_2",
 		Name:    "test-name",
 	})
 	if err != nil {
 		panic(err)
 	}
-	// job1ID, err := testInfo.storage.AddJob("test", &api.Job{
-	// 	Name:         "testjob1",
-	// 	ContractorId: contractorID,
-	// })
-	// job2ID, err := testInfo.storage.AddJob("test", &api.Job{
-	// 	Name: "testjob2",
-	// })
-	// if err != nil {
-	// 	return err
-	// }
 
-	// testInfo.contractorID = contractorID
+	err = testInfo.storage.InsertJob(testInfo.storage.DB, &storage.Job{
+		Account:    "test_account",
+		ID:         "test_job1",
+		Name:       "testjob1",
+		Contractor: "test_contractor",
+	})
+	if err != nil {
+		panic(err)
+	}
+	err = testInfo.storage.InsertJob(testInfo.storage.DB, &storage.Job{
+		Account:    "test_account",
+		ID:         "test_job2",
+		Name:       "testjob2",
+		Contractor: "test_contractor",
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	testInfo.formula1ID = "formula_1"
 	testInfo.formula2ID = "formula_2"
-	// testInfo.job1ID = job1ID
-	// testInfo.job2ID = job2ID
-}
-
-func resetIndex() {
-	testInfo.search.BuildIndex(testInfo.storage)
 }
 
 func TestMain(m *testing.M) {
@@ -109,14 +117,14 @@ func teardown() {
 }
 
 func TestSearchFormulas(t *testing.T) {
-	results, err := testInfo.search.SearchFormulas("test", "formula")
+	results, err := testInfo.search.SearchFormulas("test_account", "formula")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 	require.Contains(t, results, testInfo.formula1ID)
 }
 
 func TestSearchFormulasPartialDashed(t *testing.T) {
-	results, err := testInfo.search.SearchFormulas("test", "name")
+	results, err := testInfo.search.SearchFormulas("test_account", "name")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 	require.Contains(t, results, testInfo.formula2ID)
@@ -124,96 +132,90 @@ func TestSearchFormulasPartialDashed(t *testing.T) {
 }
 
 func TestSearchFormulasQueryDashed(t *testing.T) {
-	results, err := testInfo.search.SearchFormulas("test", `test-name`)
+	results, err := testInfo.search.SearchFormulas("test_account", `test-name`)
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 	require.Contains(t, results, testInfo.formula2ID)
 	require.NotContains(t, results, testInfo.formula1ID)
 }
 
-// func TestSearchJobs(t *testing.T) {
-// 	results, err := testInfo.search.SearchJobs("test", "job")
-// 	require.NoError(t, err)
-// 	require.NotEmpty(t, results)
-// 	require.Contains(t, results, testInfo.job1ID)
-// 	require.Contains(t, results, testInfo.job2ID)
-
-// 	results, err = testInfo.search.SearchJobs("test", "contract")
-// 	require.NoError(t, err)
-// 	require.NotEmpty(t, results)
-// 	require.Contains(t, results, testInfo.job1ID)
-// }
+func TestSearchJobs(t *testing.T) {
+	results, err := testInfo.search.SearchJobs("test_account", "job")
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.Contains(t, results, "test_job1")
+	require.Contains(t, results, "test_job2")
+}
 
 func TestUpdateFormulaIndex(t *testing.T) {
-	results, err := testInfo.search.SearchFormulas("test", "formula")
+	results, err := testInfo.search.SearchFormulas("test_account", "formula")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 
-	err = testInfo.storage.UpdateFormula(testInfo.storage.DB, "test", testInfo.formula1ID, storage.UpdatableFormulaFields{
+	err = testInfo.storage.UpdateFormula(testInfo.storage.DB, "test_account", testInfo.formula1ID, storage.UpdatableFormulaFields{
 		Name: ptr("testupdate"),
 	})
 	require.NoError(t, err)
 
-	testInfo.search.UpdateFormulaIndex("test", testInfo.formula1ID)
+	testInfo.search.UpdateFormulaIndex("test_account", testInfo.formula1ID)
 
-	results, err = testInfo.search.SearchFormulas("test", "unique")
+	results, err = testInfo.search.SearchFormulas("test_account", "unique")
 	require.NoError(t, err)
 	require.Empty(t, results)
 
-	results, err = testInfo.search.SearchFormulas("test", "update")
+	results, err = testInfo.search.SearchFormulas("test_account", "update")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 	require.Contains(t, results, testInfo.formula1ID)
 }
 
-// func TestUpdateJobIndex(t *testing.T) {
-// 	results, err := testInfo.search.SearchJobs("test", "job")
-// 	require.NoError(t, err)
-// 	require.Len(t, results, 2)
+func TestUpdateJobIndex(t *testing.T) {
+	results, err := testInfo.search.SearchJobs("test_account", "job")
+	require.NoError(t, err)
+	require.Len(t, results, 2)
 
-// 	err = testInfo.storage.UpdateJob("test", testInfo.job1ID, &api.Job{
-// 		Id:   testInfo.job1ID,
-// 		Name: "testdifferent",
-// 	})
-// 	require.NoError(t, err)
+	err = testInfo.storage.UpdateJob(testInfo.storage.DB, "test_account", "test_job1", storage.UpdatableJobFields{
+		Name: ptr("testdifferent"),
+	})
+	require.NoError(t, err)
 
-// 	testInfo.search.UpdateJobIndex("test", testInfo.job1ID)
+	testInfo.search.UpdateJobIndex("test_account", "test_job1")
 
-// 	results, err = testInfo.search.SearchJobs("test", "job")
-// 	require.NoError(t, err)
-// 	require.Len(t, results, 1)
+	results, err = testInfo.search.SearchJobs("test_account", "job")
+	require.NoError(t, err)
+	require.Len(t, results, 2)
 
-// 	results, err = testInfo.search.SearchJobs("test", "diff")
-// 	require.NoError(t, err)
-// 	require.NotEmpty(t, results)
-// 	require.Contains(t, results, testInfo.job1ID)
-// }
+	results, err = testInfo.search.SearchJobs("test_account", "diff")
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.Contains(t, results, "test_job1")
+}
 
 func TestDeleteFormulaIndex(t *testing.T) {
-	results, err := testInfo.search.SearchFormulas("test", "update")
+	results, err := testInfo.search.SearchFormulas("test_account", "update")
 	require.NoError(t, err)
 	require.NotEmpty(t, results)
 	require.Contains(t, results, testInfo.formula1ID)
 
-	testInfo.search.DeleteFormulaIndex("test", testInfo.formula1ID)
+	testInfo.search.DeleteFormulaIndex("test_account", testInfo.formula1ID)
 
-	results, err = testInfo.search.SearchFormulas("test", "update")
+	results, err = testInfo.search.SearchFormulas("test_account", "update")
 	require.NoError(t, err)
 	require.Empty(t, results)
 }
 
-// func TestDeleteJobIndex(t *testing.T) {
-// 	results, err := testInfo.search.SearchJobs("test", "diff")
-// 	require.NoError(t, err)
-// 	require.NotEmpty(t, results)
-// 	require.Contains(t, results, testInfo.job1ID)
+func TestDeleteJobIndex(t *testing.T) {
+	results, err := testInfo.search.SearchJobs("test_account", "diff")
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.Contains(t, results, "test_job1")
 
-// 	testInfo.search.DeleteJobIndex("test", testInfo.job1ID)
+	testInfo.search.DeleteJobIndex("test_account", "test_job1")
 
-// 	results, err = testInfo.search.SearchJobs("test", "diff")
-// 	require.NoError(t, err)
-// 	require.Empty(t, results)
-// }
+	results, err = testInfo.search.SearchJobs("test_account", "diff")
+	require.NoError(t, err)
+	require.Empty(t, results)
+}
 
 func TestSanitizeQueryString(t *testing.T) {
 	tests := map[string]struct {

@@ -8,6 +8,18 @@ import (
 	"github.com/lithammer/shortuuid/v4"
 )
 
+type Base struct {
+	Metadata   BaseMetadata `json:"metadata"`
+	FormulaIDs []string     `json:"formula_ids"`
+}
+
+func (c *Base) ToProto() *proto.Base {
+	return &proto.Base{
+		Metadata:   c.Metadata.ToProto(),
+		FormulaIds: c.FormulaIDs,
+	}
+}
+
 // A base is the starting paint mix before significant color is added.
 type BaseMetadata struct {
 	Account      string `json:"account"`      // Account ID this base belongs to.

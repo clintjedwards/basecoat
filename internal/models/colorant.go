@@ -8,6 +8,18 @@ import (
 	"github.com/lithammer/shortuuid/v4"
 )
 
+type Colorant struct {
+	Metadata   ColorantMetadata `json:"metadata"`
+	FormulaIDs []string         `json:"formula_ids"`
+}
+
+func (c *Colorant) ToProto() *proto.Colorant {
+	return &proto.Colorant{
+		Metadata:   c.Metadata.ToProto(),
+		FormulaIds: c.FormulaIDs,
+	}
+}
+
 // A colorant is a pigment added to a base to create an specific overall color.
 type ColorantMetadata struct {
 	Account      string `json:"account"`      // Account ID this colorant belongs to.

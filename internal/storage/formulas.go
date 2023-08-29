@@ -118,6 +118,19 @@ func (db *DB) DeleteFormulaBase(conn Queryable, account, formula, base string) e
 	return nil
 }
 
+func (db *DB) ListFormulaJobs(conn Queryable, account, formula string) ([]FormulaJob, error) {
+	query, args := qb.Select("account", "job", "formula").From("formula_jobs").
+		Where(qb.Eq{"account": account, "formula": formula}).MustSql()
+
+	jobFormulas := []FormulaJob{}
+	err := conn.Select(&jobFormulas, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("data error occurred: %v; %w", err, ErrInternal)
+	}
+
+	return jobFormulas, nil
+}
+
 func (db *DB) GetFormula(conn Queryable, account, id string) (Formula, error) {
 	query, args := qb.Select("account", "id", "name", "number", "notes", "created", "modified").From("formulas").
 		Where(qb.Eq{"account": account, "id": id}).MustSql()

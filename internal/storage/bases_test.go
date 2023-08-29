@@ -25,6 +25,16 @@ func TestCRUDBases(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	formula := Formula{
+		Account: account.ID,
+		ID:      "test_formula",
+	}
+
+	err = db.InsertFormula(db, &formula)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	base := Base{
 		Account:      account.ID,
 		ID:           "test_base",
@@ -57,6 +67,31 @@ func TestCRUDBases(t *testing.T) {
 	}
 
 	if diff := cmp.Diff(base, fetchedBase); diff != "" {
+		t.Errorf("unexpected map values (-want +got):\n%s", diff)
+	}
+
+	formulaBase := FormulaBase{
+		Account: "test_account",
+		Formula: "test_formula",
+		Base:    "test_base",
+		Amount:  "5",
+	}
+
+	err = db.AssociateBaseWithFormula(db, &formulaBase)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	formulaBases, err := db.ListBaseFormulas(db, "test_account", "test_base")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(formulaBases) != 1 {
+		t.Errorf("expected 1 element in list found %d", len(formulaBases))
+	}
+
+	if diff := cmp.Diff(formulaBase, formulaBases[0]); diff != "" {
 		t.Errorf("unexpected map values (-want +got):\n%s", diff)
 	}
 

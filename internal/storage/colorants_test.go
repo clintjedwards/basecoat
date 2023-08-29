@@ -25,6 +25,16 @@ func TestCRUDColorants(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	formula := Formula{
+		Account: account.ID,
+		ID:      "test_formula",
+	}
+
+	err = db.InsertFormula(db, &formula)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	colorant := Colorant{
 		Account:      account.ID,
 		ID:           "test_colorant",
@@ -57,6 +67,31 @@ func TestCRUDColorants(t *testing.T) {
 	}
 
 	if diff := cmp.Diff(colorant, fetchedColorant); diff != "" {
+		t.Errorf("unexpected map values (-want +got):\n%s", diff)
+	}
+
+	formulaColorant := FormulaColorant{
+		Account:  "test_account",
+		Formula:  "test_formula",
+		Colorant: "test_colorant",
+		Amount:   "5",
+	}
+
+	err = db.AssociateColorantWithFormula(db, &formulaColorant)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	formulaColorants, err := db.ListColorantFormulas(db, "test_account", "test_colorant")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(formulaColorants) != 1 {
+		t.Errorf("expected 1 element in list found %d", len(formulaColorants))
+	}
+
+	if diff := cmp.Diff(formulaColorant, formulaColorants[0]); diff != "" {
 		t.Errorf("unexpected map values (-want +got):\n%s", diff)
 	}
 

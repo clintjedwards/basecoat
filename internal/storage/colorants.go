@@ -135,6 +135,19 @@ func (db *DB) ListFormulaColorants(conn Queryable, account, formula string) ([]F
 	return formulaColorants, nil
 }
 
+func (db *DB) ListColorantFormulas(conn Queryable, account, colorant string) ([]FormulaColorant, error) {
+	query, args := qb.Select("account", "formula", "colorant", "amount").From("formula_colorants").
+		Where(qb.Eq{"account": account, "colorant": colorant}).MustSql()
+
+	formulaColorants := []FormulaColorant{}
+	err := conn.Select(&formulaColorants, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("database error occurred: %v; %w", err, ErrInternal)
+	}
+
+	return formulaColorants, nil
+}
+
 func (db *DB) DeleteFormulaColorant(conn Queryable, account, formula, colorant string) error {
 	_, err := qb.Delete("formula_colorants").Where(qb.Eq{"account": account, "formula": formula, "colorant": colorant}).RunWith(conn).Exec()
 	if err != nil {

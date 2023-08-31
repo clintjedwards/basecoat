@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/clintjedwards/basecoat/internal/config"
+	"github.com/clintjedwards/basecoat/internal/frontend"
 	"github.com/clintjedwards/basecoat/internal/metrics"
 	"github.com/clintjedwards/basecoat/internal/models"
 	"github.com/clintjedwards/basecoat/internal/search"
@@ -176,6 +177,12 @@ func wrapGRPCServer(config *config.API, grpcServer *grpc.Server) *http.Server {
 	wrappedGrpc := grpcweb.WrapServer(grpcServer)
 
 	router := mux.NewRouter()
+
+	if config.Frontend.Enable {
+		frontend := frontend.New()
+		frontend.RegisterUIRoutes(router)
+		log.Info().Msg("frontend enabled")
+	}
 
 	// Define GRPC/HTTP request detection middleware
 	GRPCandHTTPHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {

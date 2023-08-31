@@ -20,8 +20,8 @@ var embeddedAssets embed.FS
 // Frontend represents an instance of the frontend application
 type Frontend struct{}
 
-// NewFrontend initializes a new UI application
-func NewFrontend() *Frontend {
+// New initializes a new UI application
+func New() *Frontend {
 	return &Frontend{}
 }
 
@@ -33,9 +33,7 @@ func (ui *Frontend) RegisterUIRoutes(router *mux.Router) {
 		log.Fatal().Err(err).Msg("could not get embedded filesystem")
 	}
 
-	_ = httpgzip.FileServer(http.FS(fsys), httpgzip.FileServerOptions{IndexHTML: true})
+	handler := httpgzip.FileServer(http.FS(fsys), httpgzip.FileServerOptions{IndexHTML: true})
 
-	// TODO()
-
-	// router.PathPrefix("/");
+	router.PathPrefix("/").Handler(handler)
 }

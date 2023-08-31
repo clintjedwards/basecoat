@@ -46,18 +46,26 @@ build: check-path-included check-semver-included build-protos build-sdk
 > go build -ldflags $(GO_LDFLAGS) -o $(OUTPUT)
 .PHONY: build
 
-## run: build application and run server
-run:
-> export BASECOAT_LOG_LEVEL=debug
-> go build -race -ldflags $(GO_LDFLAGS) -o /tmp/${APP_NAME}
-> /tmp/${APP_NAME} service start --dev-mode
-.PHONY: run
-
 ## build-protos: build protobufs
 build-protos:
 > protoc --proto_path=proto --go_out=proto --go_opt=paths=source_relative \
 	 --go-grpc_out=proto --go-grpc_opt=paths=source_relative proto/*.proto
 .PHONY: build-protos
+
+## run: build application and run server
+run:
+> @$(MAKE) -j run-tailwind run-api
+.PHONY: run
+
+run-tailwind:
+> cd internal/frontend
+> tailwindcss -i ./src/main.css -o ./public/css/main.css --watch >/dev/null 2>&1
+
+run-api:
+> export BASECOAT_LOG_LEVEL=debug
+> go build -race -ldflags $(GO_LDFLAGS) -o /tmp/${APP_NAME}
+> /tmp/${APP_NAME} service start --dev-mode
+.PHONY: run-api
 
 ## help: prints this help message
 help:
